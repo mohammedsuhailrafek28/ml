@@ -1,0 +1,12 @@
+{
+  "selected_model": "random_forest",
+  "metrics": {
+    "accuracy": 0.8852459016393442,
+    "precision": 0.8181818181818182,
+    "recall": 0.9642857142857143,
+    "f1": 0.8852459016393442,
+    "roc_auc": 0.9523809523809523,
+    "model": "random_forest",
+    "cv_mean": 0.7949931981533254
+  }
+}

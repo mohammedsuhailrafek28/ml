@@ -1,0 +1,13 @@
+{
+  "selected_model": "random_forest",
+  "metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "model": "random_forest",
+    "cv_mean": 0.992530864197531,
+    "cv_std": 0.009984746787948532
+  }
+}

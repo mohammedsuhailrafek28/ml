@@ -1,0 +1,3 @@
+import Link from 'next/link';
+export function generateStaticParams(){return ['liver','heart','diabetes','kidney','parkinsons'].map(disease=>({disease}))}
+export default async function Intro({params}:{params:Promise<{disease:string}>}){const p=await params; return <main className="page"><p className="eyebrow">ASSESSMENT INTRODUCTION</p><h1>{p.disease==='parkinsons'?"Parkinson's":p.disease} assessment</h1><div className="card"><p>This module uses a persisted Scikit-learn pipeline and public research data. Enter verified measurements in the next step.</p><p><strong>Educational use only:</strong> output is not a medical diagnosis.</p><Link className="button" href={`/assessments/${p.disease}/review`}>Begin entering measurements</Link></div></main>}

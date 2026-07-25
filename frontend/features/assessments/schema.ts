@@ -1,0 +1,2 @@
+import {z} from 'zod'; import {DiseaseAssessmentConfig} from './types';
+export function schemaFor(c:DiseaseAssessmentConfig){const shape:Record<string,z.ZodTypeAny>={}; for(const f of c.features){let s:z.ZodTypeAny=f.dataType==='integer'?z.number().int():z.number(); if(f.minimum!==undefined)s=s.refine((v:number)=>v>=f.minimum!,`Must be at least ${f.minimum}`); shape[f.key]=f.nullable?s.nullable():s} return z.object(shape)}

@@ -1,0 +1,2 @@
+import './globals.css'; import Link from 'next/link';
+export default function Layout({children}:{children:React.ReactNode}){return <html lang="en"><body><header><Link href="/" className="brand">Medical AI Suite</Link><nav><Link href="/assessments">Assessments</Link><Link href="/methodology">Methodology</Link><Link href="/limitations">Limitations</Link></nav></header>{children}<footer>Educational use only — not a medical diagnosis.</footer></body></html>}

@@ -1,0 +1,1 @@
+export default function Limitations(){return <main className="page"><h1>Limitations and ethics</h1><div className="card"><p>Datasets are small and may not generalize. Outputs are educational and not clinically validated. Consult qualified healthcare professionals.</p></div></main>}

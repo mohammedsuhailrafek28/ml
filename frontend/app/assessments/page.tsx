@@ -1,0 +1,2 @@
+import Link from 'next/link';
+const ds=['liver','heart','diabetes','kidney','parkinsons']; export default function Assessments(){return <main className="page"><p className="eyebrow">ASSESSMENTS</p><h1>Choose a disease module</h1><section className="grid">{ds.map(d=><article className="card" key={d}><h2>{d==='parkinsons'?"Parkinson's":d[0].toUpperCase()+d.slice(1)}</h2><p>Review the dataset, model and measurements before starting.</p><Link className="button" href={`/assessments/${d}`}>Start</Link></article>)}</section></main>}
