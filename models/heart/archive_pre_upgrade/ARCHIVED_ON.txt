@@ -1,0 +1,2 @@
+Heart artifacts archived on 2026-08-27T07:43:30Z before the leakage-safe upgrade (src/training/train_heart.py).
+Old selected model: random_forest, selected on the test set by (f1, recall). Recoverable copy only.

@@ -1,0 +1,84 @@
+{
+  "method": "permutation_importance",
+  "scoring": "roc_auc",
+  "n_repeats": 10,
+  "evaluated_on": "untouched subject-disjoint holdout",
+  "note": "Importance = mean drop in holdout ROC-AUC when the feature is shuffled. Association, not a physiological cause.",
+  "features": [
+    {
+      "feature": "D2",
+      "importance_mean": 0.03790322580645168,
+      "importance_std": 0.01583285411035185
+    },
+    {
+      "feature": "MDVP:APQ",
+      "importance_mean": 0.028763440860215116,
+      "importance_std": 0.020614967279610562
+    },
+    {
+      "feature": "MDVP:Shimmer(dB)",
+      "importance_mean": 0.023655913978494682,
+      "importance_std": 0.013158320699484334
+    },
+    {
+      "feature": "spread1",
+      "importance_mean": 0.018548387096774234,
+      "importance_std": 0.028913786553104365
+    },
+    {
+      "feature": "PPE",
+      "importance_mean": 0.016397849462365666,
+      "importance_std": 0.034118611671472156
+    },
+    {
+      "feature": "MDVP:Fhi(Hz)",
+      "importance_mean": 0.00994623655913982,
+      "importance_std": 0.010483870967741945
+    },
+    {
+      "feature": "HNR",
+      "importance_mean": 0.007526881720430168,
+      "importance_std": 0.009602457580371877
+    },
+    {
+      "feature": "DFA",
+      "importance_mean": 0.004569892473118331,
+      "importance_std": 0.014227009271397022
+    },
+    {
+      "feature": "NHR",
+      "importance_mean": -0.001344086021505353,
+      "importance_std": 0.007531680497915014
+    },
+    {
+      "feature": "MDVP:Jitter(%)",
+      "importance_mean": -0.002419354838709664,
+      "importance_std": 0.005163809868897448
+    },
+    {
+      "feature": "MDVP:Jitter(Abs)",
+      "importance_mean": -0.0029569892473118144,
+      "importance_std": 0.008538914072187404
+    },
+    {
+      "feature": "MDVP:Flo(Hz)",
+      "importance_mean": -0.009677419354838623,
+      "importance_std": 0.0071325264308718436
+    },
+    {
+      "feature": "spread2",
+      "importance_mean": -0.03978494623655911,
+      "importance_std": 0.022484434049813404
+    },
+    {
+      "feature": "MDVP:Fo(Hz)",
+      "importance_mean": -0.0432795698924731,
+      "importance_std": 0.011496454182980188
+    },
+    {
+      "feature": "RPDE",
+      "importance_mean": -0.07553763440860209,
+      "importance_std": 0.01894922962212592
+    }
+  ]
+}

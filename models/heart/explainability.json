@@ -1,0 +1,74 @@
+{
+  "method": "permutation_importance",
+  "scoring": "roc_auc",
+  "n_repeats": 10,
+  "evaluated_on": "untouched holdout test set",
+  "note": "Importance = mean drop in holdout ROC-AUC when the feature is shuffled. Not a causal claim.",
+  "features": [
+    {
+      "feature": "cp",
+      "importance_mean": 0.029545454545454597,
+      "importance_std": 0.009310504854546806
+    },
+    {
+      "feature": "ca",
+      "importance_mean": 0.02608225108225113,
+      "importance_std": 0.010531253989085764
+    },
+    {
+      "feature": "oldpeak",
+      "importance_mean": 0.023484848484848563,
+      "importance_std": 0.0064035983517260146
+    },
+    {
+      "feature": "thal",
+      "importance_mean": 0.009199134199134285,
+      "importance_std": 0.008316449979843332
+    },
+    {
+      "feature": "exang",
+      "importance_mean": 0.00919913419913424,
+      "importance_std": 0.009083820159196258
+    },
+    {
+      "feature": "sex",
+      "importance_mean": 0.004112554112554179,
+      "importance_std": 0.00854635801835481
+    },
+    {
+      "feature": "thalach",
+      "importance_mean": 0.0027056277056277667,
+      "importance_std": 0.010143758747732783
+    },
+    {
+      "feature": "slope",
+      "importance_mean": 0.001515151515151547,
+      "importance_std": 0.0066573837659003035
+    },
+    {
+      "feature": "fbs",
+      "importance_mean": 0.00043290043290046266,
+      "importance_std": 0.0007178841537565876
+    },
+    {
+      "feature": "chol",
+      "importance_mean": -0.00010822510822504628,
+      "importance_std": 0.0028817157912758217
+    },
+    {
+      "feature": "restecg",
+      "importance_mean": -0.00010822510822507957,
+      "importance_std": 0.0027142719056243393
+    },
+    {
+      "feature": "trestbps",
+      "importance_mean": -0.002272727272727204,
+      "importance_std": 0.006187788899966588
+    },
+    {
+      "feature": "age",
+      "importance_mean": -0.0027056277056276556,
+      "importance_std": 0.002177988289772514
+    }
+  ]
+}

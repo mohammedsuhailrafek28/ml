@@ -1,13 +1,247 @@
 {
-  "selected_model": "svm",
-  "metrics": {
-    "accuracy": 0.7272727272727273,
-    "precision": 0.5909090909090909,
-    "recall": 0.7222222222222222,
-    "f1": 0.65,
+  "selected_model": "logistic_regression",
+  "selection": {
+    "rule": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+    "cv_leader": "logistic_regression",
+    "cv_leader_roc_auc": 0.8449944629014396,
+    "tie_band_members": [
+      "logistic_regression",
+      "random_forest",
+      "svm"
+    ],
+    "selected": "logistic_regression"
+  },
+  "feature_engineering": {
+    "min_gain_required": 0.005,
+    "probes": {
+      "logistic_regression": {
+        "base_cv_roc_auc": 0.8433637873754153,
+        "engineered_cv_roc_auc": 0.8416680509413068,
+        "gain": -0.0016957364341084746
+      },
+      "gradient_boosting": {
+        "base_cv_roc_auc": 0.820563399778516,
+        "engineered_cv_roc_auc": 0.813077242524917,
+        "gain": -0.007486157253599024
+      }
+    },
+    "mean_gain": -0.004590946843853749,
+    "adopted": false,
+    "decision": "Engineered interaction terms REJECTED: mean DEV CV ROC-AUC change -0.0046 (< 0.005 required)."
+  },
+  "operating_threshold": 0.5,
+  "threshold_rule": "Fixed at 0.5 (not tuned on Pima; see threshold_grid_dev_oof).",
+  "cv_dev": {
+    "scoring": "roc_auc",
+    "roc_auc_mean": 0.8449944629014396,
+    "roc_auc_std": 0.013034589339469911,
+    "dev_oof_f1_at_0.5": 0.6829268292682927
+  },
+  "holdout": {
+    "threshold": 0.5,
+    "accuracy": 0.7077922077922078,
+    "precision": 0.5714285714285714,
+    "recall": 0.6666666666666666,
+    "specificity": 0.73,
+    "f1": 0.6153846153846154,
+    "roc_auc": 0.8103703703703704,
+    "confusion_matrix": {
+      "tn": 73,
+      "fp": 27,
+      "fn": 18,
+      "tp": 36
+    }
+  },
+  "previous_model_original_holdout": {
+    "threshold": 0.5,
+    "accuracy": 0.7467532467532467,
+    "precision": 0.6595744680851063,
+    "recall": 0.5740740740740741,
+    "specificity": 0.84,
+    "f1": 0.6138613861386139,
     "roc_auc": 0.8138888888888889,
-    "model": "svm",
-    "cv_mean": 0.6687058039999216,
-    "cv_std": 0.04479988248156444
-  }
+    "confusion_matrix": {
+      "tn": 84,
+      "fp": 16,
+      "fn": 23,
+      "tp": 31
+    },
+    "note": "Old SVM on its own original stratified holdout; the model was also selected on this same split by (f1, recall) and there was no separate validation set, so these numbers are optimistic."
+  },
+  "threshold_grid_dev_oof": [
+    {
+      "threshold": 0.05,
+      "precision": 0.3543046357615894,
+      "recall": 1.0,
+      "specificity": 0.025,
+      "f1": 0.5232273838630807,
+      "youden_j": 0.02499999999999991
+    },
+    {
+      "threshold": 0.1,
+      "precision": 0.38010657193605685,
+      "recall": 1.0,
+      "specificity": 0.1275,
+      "f1": 0.5508365508365508,
+      "youden_j": 0.12749999999999995
+    },
+    {
+      "threshold": 0.15,
+      "precision": 0.4143968871595331,
+      "recall": 0.9953271028037384,
+      "specificity": 0.2475,
+      "f1": 0.5851648351648352,
+      "youden_j": 0.24282710280373832
+    },
+    {
+      "threshold": 0.2,
+      "precision": 0.45376344086021503,
+      "recall": 0.985981308411215,
+      "specificity": 0.365,
+      "f1": 0.6215022091310751,
+      "youden_j": 0.350981308411215
+    },
+    {
+      "threshold": 0.25,
+      "precision": 0.48931116389548696,
+      "recall": 0.9626168224299065,
+      "specificity": 0.4625,
+      "f1": 0.6488188976377953,
+      "youden_j": 0.42511682242990645
+    },
+    {
+      "threshold": 0.3,
+      "precision": 0.5,
+      "recall": 0.9112149532710281,
+      "specificity": 0.5125,
+      "f1": 0.6456953642384106,
+      "youden_j": 0.42371495327102804
+    },
+    {
+      "threshold": 0.35,
+      "precision": 0.5431034482758621,
+      "recall": 0.883177570093458,
+      "specificity": 0.6025,
+      "f1": 0.6725978647686833,
+      "youden_j": 0.48567757009345813
+    },
+    {
+      "threshold": 0.4,
+      "precision": 0.5641025641025641,
+      "recall": 0.822429906542056,
+      "specificity": 0.66,
+      "f1": 0.6692015209125475,
+      "youden_j": 0.4824299065420561
+    },
+    {
+      "threshold": 0.45,
+      "precision": 0.5985915492957746,
+      "recall": 0.794392523364486,
+      "specificity": 0.715,
+      "f1": 0.6827309236947792,
+      "youden_j": 0.509392523364486
+    },
+    {
+      "threshold": 0.5,
+      "precision": 0.6497890295358649,
+      "recall": 0.719626168224299,
+      "specificity": 0.7925,
+      "f1": 0.6829268292682927,
+      "youden_j": 0.512126168224299
+    },
+    {
+      "threshold": 0.55,
+      "precision": 0.680952380952381,
+      "recall": 0.6682242990654206,
+      "specificity": 0.8325,
+      "f1": 0.6745283018867925,
+      "youden_j": 0.5007242990654206
+    },
+    {
+      "threshold": 0.6,
+      "precision": 0.7243243243243244,
+      "recall": 0.6261682242990654,
+      "specificity": 0.8725,
+      "f1": 0.6716791979949874,
+      "youden_j": 0.49866822429906543
+    },
+    {
+      "threshold": 0.65,
+      "precision": 0.7407407407407407,
+      "recall": 0.5607476635514018,
+      "specificity": 0.895,
+      "f1": 0.6382978723404256,
+      "youden_j": 0.45574766355140195
+    },
+    {
+      "threshold": 0.7,
+      "precision": 0.7671232876712328,
+      "recall": 0.5233644859813084,
+      "specificity": 0.915,
+      "f1": 0.6222222222222222,
+      "youden_j": 0.4383644859813085
+    },
+    {
+      "threshold": 0.75,
+      "precision": 0.7874015748031497,
+      "recall": 0.4672897196261682,
+      "specificity": 0.9325,
+      "f1": 0.5865102639296188,
+      "youden_j": 0.39978971962616816
+    },
+    {
+      "threshold": 0.8,
+      "precision": 0.845360824742268,
+      "recall": 0.38317757009345793,
+      "specificity": 0.9625,
+      "f1": 0.5273311897106109,
+      "youden_j": 0.345677570093458
+    },
+    {
+      "threshold": 0.85,
+      "precision": 0.8450704225352113,
+      "recall": 0.2803738317757009,
+      "specificity": 0.9725,
+      "f1": 0.42105263157894735,
+      "youden_j": 0.2528738317757009
+    },
+    {
+      "threshold": 0.9,
+      "precision": 0.8958333333333334,
+      "recall": 0.20093457943925233,
+      "specificity": 0.9875,
+      "f1": 0.3282442748091603,
+      "youden_j": 0.18843457943925235
+    },
+    {
+      "threshold": 0.95,
+      "precision": 0.7142857142857143,
+      "recall": 0.04672897196261682,
+      "specificity": 0.99,
+      "f1": 0.08771929824561403,
+      "youden_j": 0.03672897196261671
+    }
+  ],
+  "metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.7077922077922078,
+    "precision": 0.5714285714285714,
+    "recall": 0.6666666666666666,
+    "specificity": 0.73,
+    "f1": 0.6153846153846154,
+    "roc_auc": 0.8103703703703704,
+    "confusion_matrix": {
+      "tn": 73,
+      "fp": 27,
+      "fn": 18,
+      "tp": 36
+    },
+    "model": "logistic_regression",
+    "cv_mean": 0.8449944629014396
+  },
+  "accuracy": 0.7077922077922078,
+  "precision": 0.5714285714285714,
+  "recall": 0.6666666666666666,
+  "f1": 0.6153846153846154,
+  "roc_auc": 0.8103703703703704
 }

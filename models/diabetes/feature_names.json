@@ -1,10 +1,10 @@
 [
-  "pregnancies",
-  "glucose",
-  "blood_pressure",
-  "skin_thickness",
-  "insulin",
-  "bmi",
-  "diabetes_pedigree",
-  "age"
+  "numeric__pregnancies",
+  "numeric__glucose",
+  "numeric__blood_pressure",
+  "numeric__skin_thickness",
+  "numeric__insulin",
+  "numeric__bmi",
+  "numeric__diabetes_pedigree",
+  "numeric__age"
 ]

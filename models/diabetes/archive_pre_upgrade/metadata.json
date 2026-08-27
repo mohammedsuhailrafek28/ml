@@ -1,0 +1,21 @@
+{
+  "dataset": "Pima Indians Diabetes Database",
+  "source": "UCI/OpenML mirror",
+  "shape": [
+    768,
+    9
+  ],
+  "target": "Outcome: 1 diabetes, 0 no diabetes",
+  "zero_placeholder_columns": [
+    "glucose",
+    "blood_pressure",
+    "skin_thickness",
+    "insulin",
+    "bmi"
+  ],
+  "selected_model": "svm",
+  "random_seed": 42,
+  "training_timestamp": "2026-07-24",
+  "sklearn_version": "1.9.0",
+  "threshold": 0.5
+}

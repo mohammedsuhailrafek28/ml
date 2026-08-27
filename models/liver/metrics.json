@@ -1,12 +1,229 @@
 {
-  "selected_model": "random_forest",
-  "metrics": {
+  "selected_model": "logistic_regression",
+  "selection": {
+    "rule": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+    "cv_leader": "random_forest",
+    "cv_leader_roc_auc": 0.7260727591496823,
+    "tie_band_members": [
+      "random_forest",
+      "logistic_regression",
+      "gaussian_nb"
+    ],
+    "selected": "logistic_regression"
+  },
+  "operating_threshold": 0.5,
+  "threshold_rule": "Fixed at 0.5 (not tuned on ILPD; see threshold_grid_dev_oof).",
+  "cv_dev": {
+    "scoring": "roc_auc",
+    "roc_auc_mean": 0.7184264738110893,
+    "roc_auc_std": 0.03248398341929603,
+    "dev_oof_f1_at_0.5": 0.8207934336525308
+  },
+  "holdout": {
+    "threshold": 0.5,
+    "accuracy": 0.7105263157894737,
+    "precision": 0.7448979591836735,
+    "recall": 0.9012345679012346,
+    "specificity": 0.24242424242424243,
+    "f1": 0.8156424581005587,
+    "roc_auc": 0.8035914702581369,
+    "confusion_matrix": {
+      "tn": 8,
+      "fp": 25,
+      "fn": 8,
+      "tp": 73
+    }
+  },
+  "previous_model_original_holdout": {
+    "threshold": 0.5,
     "accuracy": 0.7435897435897436,
-    "precision": 0.797752808988764,
-    "recall": 0.8554216867469879,
-    "f1": 0.8255813953488372,
+    "precision": 0.7912087912087912,
+    "recall": 0.8674698795180723,
+    "specificity": 0.4411764705882353,
+    "f1": 0.8275862068965517,
     "roc_auc": 0.7696669029057406,
-    "model": "random_forest",
-    "cv_mean": 0.7695260330488786
-  }
+    "confusion_matrix": {
+      "tn": 15,
+      "fp": 19,
+      "fn": 11,
+      "tp": 72
+    },
+    "note": "Old Random Forest on its own original non-deduplicated stratified holdout (no separate validation set; model was also selected on this same split, so these numbers are optimistic)."
+  },
+  "threshold_grid_dev_oof": [
+    {
+      "threshold": 0.05,
+      "precision": 0.7127192982456141,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.8322663252240717,
+      "youden_j": 0.0
+    },
+    {
+      "threshold": 0.1,
+      "precision": 0.7127192982456141,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.8322663252240717,
+      "youden_j": 0.0
+    },
+    {
+      "threshold": 0.15,
+      "precision": 0.7127192982456141,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.8322663252240717,
+      "youden_j": 0.0
+    },
+    {
+      "threshold": 0.2,
+      "precision": 0.7127192982456141,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.8322663252240717,
+      "youden_j": 0.0
+    },
+    {
+      "threshold": 0.25,
+      "precision": 0.7127192982456141,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.8322663252240717,
+      "youden_j": 0.0
+    },
+    {
+      "threshold": 0.3,
+      "precision": 0.7127192982456141,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.8322663252240717,
+      "youden_j": 0.0
+    },
+    {
+      "threshold": 0.35,
+      "precision": 0.7120879120879121,
+      "recall": 0.9969230769230769,
+      "specificity": 0.0,
+      "f1": 0.8307692307692308,
+      "youden_j": -0.003076923076923088
+    },
+    {
+      "threshold": 0.4,
+      "precision": 0.7155555555555555,
+      "recall": 0.9907692307692307,
+      "specificity": 0.022900763358778626,
+      "f1": 0.8309677419354838,
+      "youden_j": 0.0136699941280094
+    },
+    {
+      "threshold": 0.45,
+      "precision": 0.7268518518518519,
+      "recall": 0.9661538461538461,
+      "specificity": 0.09923664122137404,
+      "f1": 0.8295904887714664,
+      "youden_j": 0.06539048737522024
+    },
+    {
+      "threshold": 0.5,
+      "precision": 0.7389162561576355,
+      "recall": 0.9230769230769231,
+      "specificity": 0.19083969465648856,
+      "f1": 0.8207934336525308,
+      "youden_j": 0.11391661773341166
+    },
+    {
+      "threshold": 0.55,
+      "precision": 0.7533512064343163,
+      "recall": 0.8646153846153846,
+      "specificity": 0.29770992366412213,
+      "f1": 0.8051575931232091,
+      "youden_j": 0.16232530827950664
+    },
+    {
+      "threshold": 0.6,
+      "precision": 0.778125,
+      "recall": 0.7661538461538462,
+      "specificity": 0.4580152671755725,
+      "f1": 0.772093023255814,
+      "youden_j": 0.22416911332941858
+    },
+    {
+      "threshold": 0.65,
+      "precision": 0.8,
+      "recall": 0.6646153846153846,
+      "specificity": 0.5877862595419847,
+      "f1": 0.7260504201680672,
+      "youden_j": 0.2524016441573693
+    },
+    {
+      "threshold": 0.7,
+      "precision": 0.852017937219731,
+      "recall": 0.5846153846153846,
+      "specificity": 0.7480916030534351,
+      "f1": 0.6934306569343066,
+      "youden_j": 0.3327069876688198
+    },
+    {
+      "threshold": 0.75,
+      "precision": 0.875,
+      "recall": 0.47384615384615386,
+      "specificity": 0.8320610687022901,
+      "f1": 0.6147704590818364,
+      "youden_j": 0.30590722254844405
+    },
+    {
+      "threshold": 0.8,
+      "precision": 0.9300699300699301,
+      "recall": 0.40923076923076923,
+      "specificity": 0.9236641221374046,
+      "f1": 0.5683760683760684,
+      "youden_j": 0.33289489136817374
+    },
+    {
+      "threshold": 0.85,
+      "precision": 0.9512195121951219,
+      "recall": 0.36,
+      "specificity": 0.9541984732824428,
+      "f1": 0.5223214285714286,
+      "youden_j": 0.31419847328244277
+    },
+    {
+      "threshold": 0.9,
+      "precision": 0.9666666666666667,
+      "recall": 0.2676923076923077,
+      "specificity": 0.9770992366412213,
+      "f1": 0.41927710843373495,
+      "youden_j": 0.24479154433352912
+    },
+    {
+      "threshold": 0.95,
+      "precision": 0.9682539682539683,
+      "recall": 0.18769230769230769,
+      "specificity": 0.9847328244274809,
+      "f1": 0.31443298969072164,
+      "youden_j": 0.1724251321197885
+    }
+  ],
+  "metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.7105263157894737,
+    "precision": 0.7448979591836735,
+    "recall": 0.9012345679012346,
+    "specificity": 0.24242424242424243,
+    "f1": 0.8156424581005587,
+    "roc_auc": 0.8035914702581369,
+    "confusion_matrix": {
+      "tn": 8,
+      "fp": 25,
+      "fn": 8,
+      "tp": 73
+    },
+    "model": "logistic_regression",
+    "cv_mean": 0.7184264738110893
+  },
+  "accuracy": 0.7105263157894737,
+  "precision": 0.7448979591836735,
+  "recall": 0.9012345679012346,
+  "f1": 0.8156424581005587,
+  "roc_auc": 0.8035914702581369
 }

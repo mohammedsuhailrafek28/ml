@@ -1,17 +1,242 @@
 {
-  "dataset_source": "UCI Cleveland Heart Disease",
+  "model_id": "heart",
+  "disease": "Heart disease",
   "dataset": "heart.csv",
+  "dataset_source": "UCI Machine Learning Repository - Heart Disease (Cleveland database)",
+  "dataset_url": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+  "dataset_license": "CC BY 4.0 (Janosi, Steinbrunn, Pfisterer, Detrano, 1989)",
+  "dataset_sha256": "a3861552839432a5881cd306532a49712898771c2daa8f2153e897001478107c",
+  "rows_raw": 303,
+  "rows_used": 303,
   "shape": [
     303,
     14
   ],
+  "features": [
+    "age",
+    "sex",
+    "cp",
+    "trestbps",
+    "chol",
+    "fbs",
+    "restecg",
+    "thalach",
+    "exang",
+    "oldpeak",
+    "slope",
+    "ca",
+    "thal"
+  ],
+  "categorical_features": [
+    "sex",
+    "cp",
+    "fbs",
+    "restecg",
+    "exang",
+    "slope",
+    "ca",
+    "thal"
+  ],
+  "numeric_features": [
+    "age",
+    "trestbps",
+    "chol",
+    "thalach",
+    "oldpeak"
+  ],
+  "categorical_values": {
+    "sex": [
+      "0",
+      "1"
+    ],
+    "cp": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "fbs": [
+      "0",
+      "1"
+    ],
+    "restecg": [
+      "0",
+      "1",
+      "2"
+    ],
+    "exang": [
+      "0",
+      "1"
+    ],
+    "slope": [
+      "1",
+      "2",
+      "3"
+    ],
+    "ca": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "thal": [
+      "3",
+      "6",
+      "7"
+    ]
+  },
+  "target": "target",
   "target_mapping": {
     "0": 0,
     "1-4": 1
   },
-  "selected_model": "random_forest",
+  "positive_class": "presence of heart disease (Cleveland num >= 1, >50% vessel narrowing)",
+  "class_balance_used": {
+    "positive": 139,
+    "negative": 164
+  },
+  "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
   "random_seed": 42,
-  "training_timestamp": "2026-07-24",
+  "cleaning": {
+    "rows_raw": 303,
+    "rows_dropped_missing_target": 0,
+    "exact_duplicate_rows_removed": 0,
+    "rows_used": 303,
+    "missing_value_representation": "'?' in the raw Cleveland file, read as NaN.",
+    "missing_by_feature": {
+      "ca": 4,
+      "thal": 2
+    },
+    "missing_value_handling": "Numeric features imputed with the training-fold median; categorical features (incl. ca, thal) imputed with the training-fold mode. All imputation is fitted inside the pipeline on training folds only.",
+    "duplicate_policy": "Exact duplicate rows removed before splitting so identical records cannot span train and test (Cleveland has no patient id; 0 found).",
+    "categorical_normalisation": "sex/cp/fbs/restecg/exang/slope/ca/thal normalised to canonical string tokens (see src/preprocessing/heart_schema.py) so training and inference feed the one-hot encoder the identical representation."
+  },
+  "preprocessing": "Categorical codes normalised to canonical string tokens, then ColumnTransformer: numeric -> SimpleImputer(median) + StandardScaler; categorical -> SimpleImputer(most_frequent) + OneHotEncoder(handle_unknown='ignore'). Fitted inside the pipeline on training folds only.",
+  "imbalance_handling": "Cleveland binary target is near-balanced. class_weight (None vs 'balanced') is a tuned hyper-parameter chosen by CV per family. Operating threshold left at 0.5; a dev-only precision/recall/Youden sweep is published but not used for tuning. No synthetic oversampling.",
+  "algorithms_evaluated": [
+    "logistic_regression",
+    "random_forest",
+    "svm",
+    "knn",
+    "gaussian_nb",
+    "gradient_boosting",
+    "decision_tree"
+  ],
+  "hyperparameter_search": "GridSearchCV over StratifiedKFold(5, shuffle, seed) per family, scoring=roc_auc.",
+  "model_selection": {
+    "rule": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+    "cv_leader": "logistic_regression",
+    "cv_leader_roc_auc": 0.9027904462687071,
+    "tie_band_members": [
+      "logistic_regression",
+      "random_forest"
+    ],
+    "selected": "logistic_regression"
+  },
+  "selected_algorithm": "logistic_regression",
+  "selected_model": "logistic_regression",
+  "selected_params": {
+    "model__C": 0.1,
+    "model__class_weight": "balanced"
+  },
+  "operating_threshold": 0.5,
+  "cv_metrics": {
+    "scoring": "roc_auc",
+    "roc_auc_mean": 0.9027904462687071,
+    "roc_auc_std": 0.016869568101549073,
+    "dev_oof_f1_at_0.5": 0.8144796380090498
+  },
+  "holdout_metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.8852459016393442,
+    "precision": 0.8387096774193549,
+    "recall": 0.9285714285714286,
+    "specificity": 0.8484848484848485,
+    "f1": 0.8813559322033898,
+    "roc_auc": 0.9653679653679654,
+    "confusion_matrix": {
+      "tn": 28,
+      "fp": 5,
+      "fn": 2,
+      "tp": 26
+    }
+  },
+  "permutation_importance_holdout": [
+    {
+      "feature": "cp",
+      "importance_mean": 0.029545454545454597,
+      "importance_std": 0.009310504854546806
+    },
+    {
+      "feature": "ca",
+      "importance_mean": 0.02608225108225113,
+      "importance_std": 0.010531253989085764
+    },
+    {
+      "feature": "oldpeak",
+      "importance_mean": 0.023484848484848563,
+      "importance_std": 0.0064035983517260146
+    },
+    {
+      "feature": "thal",
+      "importance_mean": 0.009199134199134285,
+      "importance_std": 0.008316449979843332
+    },
+    {
+      "feature": "exang",
+      "importance_mean": 0.00919913419913424,
+      "importance_std": 0.009083820159196258
+    },
+    {
+      "feature": "sex",
+      "importance_mean": 0.004112554112554179,
+      "importance_std": 0.00854635801835481
+    },
+    {
+      "feature": "thalach",
+      "importance_mean": 0.0027056277056277667,
+      "importance_std": 0.010143758747732783
+    },
+    {
+      "feature": "slope",
+      "importance_mean": 0.001515151515151547,
+      "importance_std": 0.0066573837659003035
+    },
+    {
+      "feature": "fbs",
+      "importance_mean": 0.00043290043290046266,
+      "importance_std": 0.0007178841537565876
+    },
+    {
+      "feature": "chol",
+      "importance_mean": -0.00010822510822504628,
+      "importance_std": 0.0028817157912758217
+    },
+    {
+      "feature": "restecg",
+      "importance_mean": -0.00010822510822507957,
+      "importance_std": 0.0027142719056243393
+    },
+    {
+      "feature": "trestbps",
+      "importance_mean": -0.002272727272727204,
+      "importance_std": 0.006187788899966588
+    },
+    {
+      "feature": "age",
+      "importance_mean": -0.0027056277056276556,
+      "importance_std": 0.002177988289772514
+    }
+  ],
+  "training_timestamp": "2026-08-27T07:51:59.587113+00:00",
+  "training_date": "2026-08-27",
+  "artifact_path": "models/heart/heart_pipeline.joblib",
   "sklearn_version": "1.9.0",
-  "threshold": 0.5
+  "threshold": 0.5,
+  "limitations": [
+    "The Cleveland database is 303 patients from one 1980s referral population; it under-represents women and is not a general-population screen.",
+    "The label marks >50% angiographic vessel narrowing, not a clinical diagnosis, symptom burden, or outcome.",
+    "Permutation importance describes model behaviour on this sample, not physiological causation."
+  ],
+  "disclaimer": "Educational and research use only. This estimates a risk pattern learned from a public dataset and is not a medical diagnosis."
 }

@@ -1,21 +1,202 @@
 {
-  "dataset": "Pima Indians Diabetes Database",
-  "source": "UCI/OpenML mirror",
+  "model_id": "diabetes",
+  "disease": "Diabetes",
+  "dataset": "diabetes.csv",
+  "dataset_source": "Pima Indians Diabetes Database (National Institute of Diabetes and Digestive and Kidney Diseases)",
+  "dataset_url": "https://www.openml.org/d/37",
+  "dataset_license": "Public domain (originally UCI; NIDDK)",
+  "dataset_sha256": "eec45131b0ddb713183755ceadfccf08d42f5e1b60b48f4c706b7f9be9f44594",
+  "rows_raw": 768,
+  "rows_used": 768,
   "shape": [
     768,
     9
   ],
-  "target": "Outcome: 1 diabetes, 0 no diabetes",
-  "zero_placeholder_columns": [
+  "features": [
+    "pregnancies",
+    "glucose",
+    "blood_pressure",
+    "skin_thickness",
+    "insulin",
+    "bmi",
+    "diabetes_pedigree",
+    "age"
+  ],
+  "engineered_features": [],
+  "numeric_features": [
+    "pregnancies",
+    "glucose",
+    "blood_pressure",
+    "skin_thickness",
+    "insulin",
+    "bmi",
+    "diabetes_pedigree",
+    "age"
+  ],
+  "categorical_features": [],
+  "target": "target",
+  "target_mapping": {
+    "1": "diabetes within 5 years",
+    "0": "no diabetes"
+  },
+  "positive_class": "diabetes onset within 5 years (Pima Outcome == 1)",
+  "class_balance_used": {
+    "positive": 268,
+    "negative": 500
+  },
+  "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+  "random_seed": 42,
+  "cleaning": {
+    "rows_raw": 768,
+    "rows_dropped_missing_target": 0,
+    "exact_duplicate_rows_removed": 0,
+    "rows_used": 768,
+    "zero_as_missing_columns": [
+      "glucose",
+      "blood_pressure",
+      "skin_thickness",
+      "insulin",
+      "bmi"
+    ],
+    "zero_as_missing_counts": {
+      "glucose": 5,
+      "blood_pressure": 35,
+      "skin_thickness": 227,
+      "insulin": 374,
+      "bmi": 11
+    },
+    "zero_as_missing_rationale": "A glucose / diastolic BP / triceps skin fold / serum insulin / BMI of exactly 0 is physiologically impossible in a living adult and is the Pima dataset's missing-value placeholder. pregnancies == 0 (nulliparous) and age are genuine values and are left untouched.",
+    "missing_value_handling": "ZeroToNaN runs first *inside* the pipeline, then SimpleImputer(median) fills the NaNs using training-fold medians only. Nothing is imputed from validation or holdout rows.",
+    "duplicate_policy": "Exact duplicate rows removed before splitting (Pima has no patient id; 0 found)."
+  },
+  "zero_as_missing_columns": [
     "glucose",
     "blood_pressure",
     "skin_thickness",
     "insulin",
     "bmi"
   ],
-  "selected_model": "svm",
-  "random_seed": 42,
-  "training_timestamp": "2026-07-24",
+  "missing_value_policy": "ZeroToNaN runs first *inside* the pipeline, then SimpleImputer(median) fills the NaNs using training-fold medians only. Nothing is imputed from validation or holdout rows.",
+  "preprocessing": "Pipeline: ZeroToNaN(glucose, blood_pressure, skin_thickness, insulin, bmi) -> ColumnTransformer(numeric -> SimpleImputer(median) + StandardScaler) -> estimator. All learned statistics are fit on training folds only.",
+  "imbalance_handling": "Pima is ~35% positive. class_weight (None vs 'balanced') is a tuned hyper-parameter chosen by CV per family. Operating threshold left at 0.5; a dev-only precision/recall/Youden sweep is published but not used for tuning. No SMOTE (see model metrics feature_engineering / notes).",
+  "feature_engineering": {
+    "min_gain_required": 0.005,
+    "probes": {
+      "logistic_regression": {
+        "base_cv_roc_auc": 0.8433637873754153,
+        "engineered_cv_roc_auc": 0.8416680509413068,
+        "gain": -0.0016957364341084746
+      },
+      "gradient_boosting": {
+        "base_cv_roc_auc": 0.820563399778516,
+        "engineered_cv_roc_auc": 0.813077242524917,
+        "gain": -0.007486157253599024
+      }
+    },
+    "mean_gain": -0.004590946843853749,
+    "adopted": false,
+    "decision": "Engineered interaction terms REJECTED: mean DEV CV ROC-AUC change -0.0046 (< 0.005 required)."
+  },
+  "algorithms_evaluated": [
+    "logistic_regression",
+    "random_forest",
+    "svm",
+    "knn",
+    "gaussian_nb",
+    "gradient_boosting",
+    "decision_tree"
+  ],
+  "hyperparameter_search": "GridSearchCV over StratifiedKFold(5, shuffle, seed) per family, scoring=roc_auc.",
+  "model_selection": {
+    "rule": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+    "cv_leader": "logistic_regression",
+    "cv_leader_roc_auc": 0.8449944629014396,
+    "tie_band_members": [
+      "logistic_regression",
+      "random_forest",
+      "svm"
+    ],
+    "selected": "logistic_regression"
+  },
+  "selected_algorithm": "logistic_regression",
+  "selected_model": "logistic_regression",
+  "selected_params": {
+    "model__C": 0.1,
+    "model__class_weight": "balanced"
+  },
+  "operating_threshold": 0.5,
+  "cv_metrics": {
+    "scoring": "roc_auc",
+    "roc_auc_mean": 0.8449944629014396,
+    "roc_auc_std": 0.013034589339469911,
+    "dev_oof_f1_at_0.5": 0.6829268292682927
+  },
+  "holdout_metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.7077922077922078,
+    "precision": 0.5714285714285714,
+    "recall": 0.6666666666666666,
+    "specificity": 0.73,
+    "f1": 0.6153846153846154,
+    "roc_auc": 0.8103703703703704,
+    "confusion_matrix": {
+      "tn": 73,
+      "fp": 27,
+      "fn": 18,
+      "tp": 36
+    }
+  },
+  "permutation_importance_holdout": [
+    {
+      "feature": "glucose",
+      "importance_mean": 0.14409259259259263,
+      "importance_std": 0.032137868513524535
+    },
+    {
+      "feature": "bmi",
+      "importance_mean": 0.02705555555555561,
+      "importance_std": 0.016766869563278317
+    },
+    {
+      "feature": "pregnancies",
+      "importance_mean": 0.022907407407407477,
+      "importance_std": 0.008230247168216248
+    },
+    {
+      "feature": "diabetes_pedigree",
+      "importance_mean": 0.011537037037037057,
+      "importance_std": 0.0038597230829545168
+    },
+    {
+      "feature": "age",
+      "importance_mean": 0.004685185185185214,
+      "importance_std": 0.002905755605321962
+    },
+    {
+      "feature": "insulin",
+      "importance_mean": 0.0008888888888889168,
+      "importance_std": 0.0006074525728465568
+    },
+    {
+      "feature": "skin_thickness",
+      "importance_mean": 0.00025925925925928127,
+      "importance_std": 0.0015977521933424512
+    },
+    {
+      "feature": "blood_pressure",
+      "importance_mean": 0.00020370370370371705,
+      "importance_std": 0.0006054734342322828
+    }
+  ],
+  "training_timestamp": "2026-08-27T08:16:06.956574+00:00",
+  "training_date": "2026-08-27",
+  "artifact_path": "models/diabetes/diabetes_pipeline.joblib",
   "sklearn_version": "1.9.0",
-  "threshold": 0.5
+  "threshold": 0.5,
+  "limitations": [
+    "All subjects are Pima women aged 21+ near Phoenix, Arizona; the model is not a general-population screen and will not transfer to men, children, or other ancestries.",
+    "Roughly half the insulin and a third of the skin-fold values were missing (encoded as 0) and are median-imputed; predictions for such records lean on the remaining features.",
+    "Permutation importance describes model behaviour on this sample, not physiological causation."
+  ],
+  "disclaimer": "Educational and research use only. This estimates a risk pattern learned from a public dataset and is not a medical diagnosis."
 }

@@ -1,8 +1,13 @@
 # Final results summary
 
    Disease  Dataset Rows  Input Features    Selected Model  Accuracy  Precision   Recall       F1  ROC-AUC  CV F1 Mean  CV F1 Std              Evaluation Method       Leakage Controls             Main Limitation
-     liver           583              11     random_forest  0.743590   0.797753 0.855422 0.825581 0.769667    0.769526        NaN Stratified holdout + 5-fold CV Pipeline preprocessing  Public dataset limitations
-     heart           303              28     random_forest  0.885246   0.818182 0.964286 0.885246 0.952381    0.794993        NaN Stratified holdout + 5-fold CV Pipeline preprocessing  Public dataset limitations
-  diabetes           768               8               svm  0.727273   0.590909 0.722222 0.650000 0.813889    0.668706   0.044800 Stratified holdout + 5-fold CV Pipeline preprocessing  Public dataset limitations
-    kidney           400              38     random_forest  1.000000   1.000000 1.000000 1.000000 1.000000    0.992531   0.009985 Stratified holdout + 5-fold CV Pipeline preprocessing  Public dataset limitations
-parkinsons           195              22 gradient_boosting  0.744186   0.738095 1.000000 0.849315 0.723118    0.892036   0.060016 GroupShuffleSplit + GroupKFold       Subject grouping Small grouped voice dataset
+     liver           570              11 logistic_regression  0.710526   0.744898 0.901235 0.815642 0.803591    0.718426     0.03248 Dedup + dev/holdout; model chosen by 5-fold CV ROC-AUC on dev only  Dedup + no test-set model selection  Small single-region dataset; low specificity
+     (liver CV column is CV ROC-AUC mean, not CV F1, since the liver trainer selects on ROC-AUC.)
+     heart           303              28 logistic_regression  0.885246   0.838710 0.928571 0.881356 0.965368    0.902790     0.01687 Dedup-guarded + dev/holdout; model chosen by 5-fold CV ROC-AUC on dev only  ca/thal token normalisation + no test-set model selection  Single 1980s referral cohort (303 rows)
+     (heart CV column is CV ROC-AUC mean/std, not CV F1, since the heart trainer selects on ROC-AUC.)
+  diabetes           768               8 logistic_regression  0.707792   0.571429 0.666667 0.615385 0.810370    0.844994   0.013035 Zero-as-missing in-pipeline + dev/holdout; model chosen by 5-fold CV ROC-AUC on dev only  ZeroToNaN inside pipeline + no test-set model selection  Pima women 21+ only; ~half of insulin missing
+     (diabetes CV column is CV ROC-AUC mean/std, not CV F1, since the diabetes trainer selects on ROC-AUC.)
+    kidney           400              18 logistic_regression  0.987500   1.000000 0.980000 0.989899 0.999333    1.000000   0.000000 id-proxy dropped + 14-feat select + dev/holdout; model chosen by 5-fold CV ROC-AUC on dev only  No test-set selection; multi-seed DEV ROC-AUC 0.9999+-0.0001  Near-separable curated 400-row dataset; not clinical-grade
+     (kidney CV column is CV ROC-AUC mean/std; holdout has 1 false negative of 80. The ~1.0 is genuine separability of a small curated dataset, not perfect CKD detection - see models/kidney/metadata.json perfect_score_investigation.)
+parkinsons           195              15 logistic_regression  0.604651   0.684211 0.838710 0.753623 0.586022    0.879778   0.121040 Subject-disjoint GroupShuffleSplit + StratifiedGroupKFold; model chosen by group-CV ROC-AUC on dev only  groups=subject everywhere; no test-set selection  32 subjects only; ~7-subject holdout; naive row-split inflates ROC-AUC by ~0.35
+     (parkinsons CV column is group-CV ROC-AUC mean/std; multi-seed group-CV mean ~0.78. The ~7-subject holdout ROC-AUC 0.586 is too small to be reliable - see models/parkinsons/metadata.json.)

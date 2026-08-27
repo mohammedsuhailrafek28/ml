@@ -1,0 +1,49 @@
+{
+  "method": "permutation_importance",
+  "scoring": "roc_auc",
+  "n_repeats": 10,
+  "evaluated_on": "untouched holdout test set",
+  "note": "Importance = mean drop in holdout ROC-AUC when the raw feature is shuffled. Not a causal claim.",
+  "features": [
+    {
+      "feature": "glucose",
+      "importance_mean": 0.14409259259259263,
+      "importance_std": 0.032137868513524535
+    },
+    {
+      "feature": "bmi",
+      "importance_mean": 0.02705555555555561,
+      "importance_std": 0.016766869563278317
+    },
+    {
+      "feature": "pregnancies",
+      "importance_mean": 0.022907407407407477,
+      "importance_std": 0.008230247168216248
+    },
+    {
+      "feature": "diabetes_pedigree",
+      "importance_mean": 0.011537037037037057,
+      "importance_std": 0.0038597230829545168
+    },
+    {
+      "feature": "age",
+      "importance_mean": 0.004685185185185214,
+      "importance_std": 0.002905755605321962
+    },
+    {
+      "feature": "insulin",
+      "importance_mean": 0.0008888888888889168,
+      "importance_std": 0.0006074525728465568
+    },
+    {
+      "feature": "skin_thickness",
+      "importance_mean": 0.00025925925925928127,
+      "importance_std": 0.0015977521933424512
+    },
+    {
+      "feature": "blood_pressure",
+      "importance_mean": 0.00020370370370371705,
+      "importance_std": 0.0006054734342322828
+    }
+  ]
+}

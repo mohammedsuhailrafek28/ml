@@ -1,0 +1,3 @@
+Parkinsons artifacts archived on 2026-08-27T11:48:34Z before the leakage-safe upgrade (src/training/train_parkinsons.py).
+Old selected model: gradient_boosting, selected on the group holdout by (f1, recall) -> degenerate high-recall (recall 1.0, ROC-AUC 0.723).
+Old metadata.json wrongly claimed "no group split implemented" though train_all.py did use GroupShuffleSplit+GroupKFold. Recoverable copy only.

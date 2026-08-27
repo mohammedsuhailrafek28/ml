@@ -1,0 +1,17 @@
+{
+  "dataset": "UCI Chronic Kidney Disease",
+  "source": "https://archive.ics.uci.edu/dataset/336/chronic",
+  "shape": [
+    400,
+    26
+  ],
+  "target_mapping": {
+    "ckd": 1,
+    "notckd": 0
+  },
+  "selected_model": "random_forest",
+  "random_seed": 42,
+  "training_timestamp": "2026-07-24",
+  "sklearn_version": "1.9.0",
+  "threshold": 0.5
+}

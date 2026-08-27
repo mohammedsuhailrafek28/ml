@@ -1,0 +1,13 @@
+[
+  "numeric__Age",
+  "numeric__TB",
+  "numeric__DB",
+  "numeric__Alkphos",
+  "numeric__Sgpt",
+  "numeric__Sgot",
+  "numeric__TP",
+  "numeric__ALB",
+  "numeric__A/G Ratio",
+  "categorical__Gender_Female",
+  "categorical__Gender_Male"
+]
