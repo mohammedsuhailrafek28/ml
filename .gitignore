@@ -1,0 +1,49 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# ---- Environment ----
+.env
+.env.*
+!.env.example
+
+# ---- Node / Next.js (frontend) ----
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/*.tsbuildinfo
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# ---- Generated at runtime (NOT source-controlled) ----
+# Per-viewer / per-run report output written by the API report endpoint.
+reports/generated/
+medical_ai_*.pdf
+
+# ---- Local dataset download scratch (raw CSVs ARE tracked) ----
+datasets/raw/*_download
+datasets/raw/*.zip
+datasets/raw/*.rar
+datasets/raw/*.arff
+
+# NOTE: committed on purpose (demo + reproducibility):
+#   models/*/            persisted pipelines, metadata, metrics, comparison CSVs
+#   models/*/archive_pre_upgrade/   recoverable previous models
+#   reports/figures/, reports/model_results/, reports/generated_reports/*_sample_report.pdf
+#   datasets/raw/*.csv, datasets/processed/*.csv

@@ -1,0 +1,21 @@
+# Let git handle text line endings per-platform (no forced renormalisation).
+* text=auto
+
+# Shell scripts and YAML must stay LF for CI on Linux runners.
+*.sh   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# Binary artifacts: never diffed, never line-ending converted.
+*.joblib   binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.pdf      binary
+*.ico      binary
+*.rar      binary
+*.zip      binary
+*.arff     binary
+
+# Generated but small + human-reviewable: keep normal text diffs
+# (models/**/metrics.json, models/**/metadata.json, reports/model_results/*.csv).
