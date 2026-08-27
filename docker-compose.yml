@@ -1,0 +1,27 @@
+# Local full-stack run:  docker compose up --build
+# Copy .env.example -> .env first and set ALLOWED_ORIGINS / API_KEY as needed.
+services:
+  api:
+    build: .
+    image: medical-ai-api
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      API_KEY: ${API_KEY:-}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+      MAX_REQUEST_BYTES: ${MAX_REQUEST_BYTES:-65536}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    image: medical-ai-web
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped

@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (lint + tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+      - name: Ruff (pyflakes error subset)
+        run: ruff check --select E9,F63,F7,F82,F401,F811 src tests
+      - name: Import / startup smoke
+        run: python -c "from src.api.main import app; from src.api.health import readiness; p,s=readiness(); print('readiness', s); assert s in (200,503)"
+      - name: Pytest
+        run: pytest -q
+
+  frontend:
+    name: Frontend (typecheck + build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+
+  smoke:
+    name: Integration smoke (API up + one prediction)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Start API
+        run: |
+          python -m uvicorn src.api.main:app --host 127.0.0.1 --port 8000 --log-level warning &
+          echo $! > /tmp/api.pid
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/api/v1/health && break || sleep 1
+          done
+      - name: Health + readiness
+        run: |
+          curl -sf http://127.0.0.1:8000/api/v1/health | tee /dev/stderr | grep -q '"status": *"alive"'
+          curl -sf http://127.0.0.1:8000/api/v1/ready  | tee /dev/stderr | grep -q '"status": *"ready"'
+      - name: One prediction per disease
+        run: |
+          set -e
+          post() { curl -sf -X POST "http://127.0.0.1:8000/api/v1/predictions/$1" -H 'Content-Type: application/json' -d "$2" | grep -q '"prediction"'; }
+          post liver   '{"measurements":{"Age":45,"Gender":"Male","TB":1.0,"DB":0.3,"Alkphos":190,"Sgpt":25,"Sgot":30,"TP":6.8,"ALB":3.3,"A/G Ratio":0.9}}'
+          post heart   '{"measurements":{"age":63,"sex":"1","cp":"1","trestbps":145,"chol":233,"fbs":"1","restecg":"2","thalach":150,"exang":"0","oldpeak":2.3,"slope":"3","ca":"0","thal":"6"}}'
+          post diabetes '{"measurements":{"pregnancies":6,"glucose":148,"blood_pressure":72,"skin_thickness":35,"insulin":0,"bmi":33.6,"diabetes_pedigree":0.627,"age":50}}'
+          post kidney  '{"measurements":{"age":48,"bp":80,"sg":1.02,"al":1,"bgr":121,"bu":36,"sc":1.2,"hemo":15.4,"pcv":44,"rc":5.2,"htn":"yes","dm":"yes","appet":"good","ane":"no"}}'
+          post parkinsons '{"measurements":{"MDVP:Fo(Hz)":119.99,"MDVP:Fhi(Hz)":157.30,"MDVP:Flo(Hz)":74.99,"MDVP:Jitter(%)":0.00784,"MDVP:Jitter(Abs)":0.00007,"MDVP:Shimmer(dB)":0.426,"MDVP:APQ":0.02971,"NHR":0.02211,"HNR":21.033,"RPDE":0.414783,"DFA":0.815285,"spread1":-4.813031,"spread2":0.266482,"D2":2.301442,"PPE":0.284654}}'
+      - name: One report
+        run: curl -sf -o /tmp/r.pdf -X POST http://127.0.0.1:8000/api/v1/reports/liver -H 'Content-Type: application/json' -d '{"measurements":{"Age":45,"Gender":"Male","TB":1.0,"DB":0.3,"Alkphos":190,"Sgpt":25,"Sgot":30,"TP":6.8,"ALB":3.3,"A/G Ratio":0.9}}' && head -c4 /tmp/r.pdf | grep -q PDF
+      - name: Stop API
+        if: always()
+        run: kill "$(cat /tmp/api.pid)" || true

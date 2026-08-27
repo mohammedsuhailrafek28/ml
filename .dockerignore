@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.ruff_cache
+notebooks
+presentation_assets
+reports
+datasets
+tests
+frontend
+app.py
+scripts
+*.md
+!README.md
