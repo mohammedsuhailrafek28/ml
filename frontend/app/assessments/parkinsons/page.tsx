@@ -78,15 +78,15 @@ export default function ParkinsonsAssessment(){
     if(r.ok){const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='parkinsons-assessment-report.pdf';a.click();}
   }
 
-  if(stage==='intro')return <main className="page"><p className="eyebrow">PARKINSON'S ASSESSMENT</p><h1>Explore a Parkinson's-associated voice pattern</h1><div className="card">
-    <p>This educational module uses the UCI <strong>Parkinson's voice dataset</strong> (195 sustained-vowel recordings from 32 people, 2008) and a persisted scikit-learn <strong>logistic regression</strong> pipeline. Because the dataset has ~6 recordings per person, training, tuning and evaluation are all <strong>subject-aware</strong> — the same person never appears in both training and test data.</p>
+  if(stage==='intro')return <main className="page"><p className="eyebrow">PARKINSON&apos;S ASSESSMENT</p><h1>Explore a Parkinson&apos;s-associated voice pattern</h1><div className="card">
+    <p>This educational module uses the UCI <strong>Parkinson&apos;s voice dataset</strong> (195 sustained-vowel recordings from 32 people, 2008) and a persisted scikit-learn <strong>logistic regression</strong> pipeline. Because the dataset has ~6 recordings per person, training, tuning and evaluation are all <strong>subject-aware</strong> — the same person never appears in both training and test data.</p>
     <p><strong>This module accepts pre-computed voice biomarkers.</strong> The 15 values below are produced by voice-analysis software (e.g. Praat) from a sustained-vowel recording. Medical AI Suite does <em>not</em> record or process raw audio.</p>
-    <p><small>Honest performance is modest: subject-aware cross-validated ROC-AUC ≈ 0.78 (multi-seed), and the ~7-person holdout is too small for a reliable point estimate. The much higher figure often quoted for this dataset comes from letting one person's recordings leak across the split.</small></p>
+    <p><small>Honest performance is modest: subject-aware cross-validated ROC-AUC ≈ 0.78 (multi-seed), and the ~7-person holdout is too small for a reliable point estimate. The much higher figure often quoted for this dataset comes from letting one person&apos;s recordings leak across the split.</small></p>
     <button className="button" onClick={()=>setStage('form')}>Begin entering biomarkers</button>
   </div></main>;
 
   if(stage==='processing')return <main className="page"><motion.div className="card" initial={reduced?false:{opacity:0,y:10}} animate={{opacity:1,y:0}}>
-    <h1>Preparing your result</h1><p>Validating biomarkers</p><p>Applying the fitted preprocessing pipeline</p><p>Running the Parkinson's model</p>
+    <h1>Preparing your result</h1><p>Validating biomarkers</p><p>Applying the fitted preprocessing pipeline</p><p>Running the Parkinson&apos;s model</p>
   </motion.div></main>;
 
   if(stage==='results'){
@@ -94,7 +94,7 @@ export default function ParkinsonsAssessment(){
     return <main className="page"><motion.div initial={reduced?false:{opacity:0,y:10}} animate={{opacity:1,y:0}}>
       <p className="eyebrow">RESULT</p><h1>{result.label}</h1>
       <div className="card">
-        <h2>{pct(result.probability||0)}% — the submitted voice biomarkers match {result.prediction? 'an elevated':'a lower'} Parkinson's-associated pattern in this model</h2>
+        <h2>{pct(result.probability||0)}% — the submitted voice biomarkers match {result.prediction? 'an elevated':'a lower'} Parkinson&apos;s-associated pattern in this model</h2>
         <p>Decision threshold: {result.threshold}. At or above this the model reports an elevated-risk pattern.</p>
         <p>Model: <strong>{result.selectedModel}</strong>
           {m.roc_auc!=null&&<> · subject-disjoint holdout ROC-AUC {m.roc_auc.toFixed(2)} · recall {m.recall?.toFixed(2)} · specificity {m.specificity?.toFixed(2)}</>}
@@ -102,7 +102,7 @@ export default function ParkinsonsAssessment(){
         {result.topFactors?.length>0&&<>
           <h3>Biomarkers this model weighs most (permutation importance on held-out subjects)</h3>
           <ul>{result.topFactors.map((f:any)=><li key={f.feature}>{labelOf(f.feature)}</li>)}</ul>
-          <p><small>Association with the model output does not establish a physiological cause of Parkinson's disease.</small></p>
+          <p><small>Association with the model output does not establish a physiological cause of Parkinson&apos;s disease.</small></p>
         </>}
         {result.limitations?.length>0&&<ul>{result.limitations.map((l:string,i:number)=><li key={i}><small>{l}</small></li>)}</ul>}
         <p>{result.disclaimer}</p>

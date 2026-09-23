@@ -1,11 +1,11 @@
 # Frontend (Next.js) image. Build from the frontend/ directory:
 #   docker build -t medical-ai-web frontend
-FROM node:20-alpine AS deps
+FROM node:20.19-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:20-alpine AS build
+FROM node:20.19-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -16,7 +16,7 @@ ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:20-alpine AS runtime
+FROM node:20.19-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
 RUN addgroup -g 10001 app && adduser -u 10001 -G app -D app

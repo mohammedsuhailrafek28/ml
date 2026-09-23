@@ -63,7 +63,7 @@ export default function DiabetesAssessment(){
   }
 
   if(stage==='intro')return <main className="page"><p className="eyebrow">DIABETES ASSESSMENT</p><h1>Explore a diabetes risk pattern</h1><div className="card">
-    <p>This educational module uses the <strong>Pima Indians Diabetes Database</strong> (768 records of Pima women aged 21+) and a persisted scikit-learn <strong>logistic regression</strong> pipeline chosen by cross-validation on a held-out development split. Impossible zero readings for glucose, blood pressure, skin fold, insulin and BMI are treated as "not measured" and imputed inside the pipeline. It estimates a risk <em>pattern</em> and is not a diagnosis.</p>
+    <p>This educational module uses the <strong>Pima Indians Diabetes Database</strong> (768 records of Pima women aged 21+) and a persisted scikit-learn <strong>logistic regression</strong> pipeline chosen by cross-validation on a held-out development split. Impossible zero readings for glucose, blood pressure, skin fold, insulin and BMI are treated as &quot;not measured&quot; and imputed inside the pipeline. It estimates a risk <em>pattern</em> and is not a diagnosis.</p>
     <button className="button" onClick={()=>setStage('form')}>Begin entering measurements</button>
   </div></main>;
 

@@ -81,7 +81,7 @@ export default function KidneyAssessment(){
   }
 
   if(stage==='intro')return <main className="page"><p className="eyebrow">KIDNEY ASSESSMENT</p><h1>Explore a chronic kidney disease risk pattern</h1><div className="card">
-    <p>This educational module uses the UCI <strong>Chronic Kidney Disease</strong> dataset (400 records, 2015). A fold-safe feature-selection experiment reduced the 24 recorded fields to a compact <strong>14-field</strong> set with no loss of cross-validated performance, and a persisted scikit-learn <strong>logistic regression</strong> pipeline was chosen on a held-out development split. Every field below is optional — mark it "Not available" and the pipeline will impute it. It estimates a risk <em>pattern</em> and is not a diagnosis.</p>
+    <p>This educational module uses the UCI <strong>Chronic Kidney Disease</strong> dataset (400 records, 2015). A fold-safe feature-selection experiment reduced the 24 recorded fields to a compact <strong>14-field</strong> set with no loss of cross-validated performance, and a persisted scikit-learn <strong>logistic regression</strong> pipeline was chosen on a held-out development split. Every field below is optional — mark it &quot;Not available&quot; and the pipeline will impute it. It estimates a risk <em>pattern</em> and is not a diagnosis.</p>
     <p><small>This dataset is close to separable on legitimate clinical markers, so held-out scores are very high. That reflects this small curated dataset, not clinical-grade CKD detection.</small></p>
     <button className="button" onClick={()=>setStage('form')}>Begin entering measurements</button>
   </div></main>;

@@ -70,7 +70,7 @@ datasets/raw/*.csv
 
 ## Requirements
 
-- Python 3.11, Node 20.
+- Python 3.11, Node 20.19 or newer. The frontend uses Next.js 16 and React 19.
 - `requirements.txt` — API runtime (pandas, numpy, scikit-learn, scipy, joblib, reportlab, fastapi, uvicorn).
 - `requirements-dev.txt` — adds pytest, httpx, matplotlib, ruff, and the optional legacy/notebook stack (streamlit, jupyter, seaborn, plotly, shap).
 
@@ -113,15 +113,19 @@ Frontend (`.env.local`): `NEXT_PUBLIC_API_BASE_URL` (browser-exposed; no secrets
 python -m src.training.train_all [--disease heart]   # dispatcher -> dedicated trainer
 pytest -q                                            # full suite
 ruff check --select E9,F63,F7,F82,F401,F811 src tests
-cd frontend && npx tsc --noEmit && npm run build
+cd frontend
+npm audit --omit=dev
+npm run typecheck
+npm run lint
+npm run build
 ```
 
 ## CI
 
 `.github/workflows/ci.yml` runs on push/PR: **backend** (deps, ruff error subset,
-import smoke, pytest), **frontend** (`npm ci`, `tsc`, `build`), **smoke** (start
-the API, hit health/readiness, one prediction per disease, one PDF). No secrets
-required.
+import smoke, pytest), **frontend** (`npm ci`, production dependency audit,
+typecheck, ESLint, production build), **smoke** (start the API, hit
+health/readiness, one prediction per disease, one PDF). No secrets required.
 
 ## Deployment
 
