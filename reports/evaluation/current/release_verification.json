@@ -1,0 +1,214 @@
+{
+  "report_schema_version": "1.0.0",
+  "generated_at": "2026-09-24T12:30:44.010816+00:00",
+  "release_id": "medical-ai-suite-model-release-2026-09-24",
+  "method": "hash verification plus golden vectors through src.api.services.model_registry.Registry.predict",
+  "retrained": false,
+  "recreated_historical_split": false,
+  "releases": {
+    "liver": {
+      "model_identifier": "liver:logistic_regression:ab2eb1b92956",
+      "model_sha256": "ab2eb1b92956119b8814a1ec4b462d8316edbf5543445bcfa340d62fad35a960",
+      "metadata_sha256": "4381c78d663b2d7609dc7d05fa1ccca68661459f1c97534bf3f6d1f7f0491ae8",
+      "dataset_sha256": "dbb065e6bf2b226b6d9c04f066ddc0b45173861dfb3a4df83f3710d3927ef5de",
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "golden_prediction": 1,
+      "golden_probability": 0.6419614513147555,
+      "evaluation_method": {
+        "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+        "model_selection": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+        "cross_validation": "stratified CV on development partition",
+        "holdout_is_reused": false
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "roc_auc_mean": 0.7184264738110893,
+          "roc_auc_std": 0.03248398341929603,
+          "dev_oof_f1_at_0.5": 0.8207934336525308
+        },
+        "holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.7105263157894737,
+          "precision": 0.7448979591836735,
+          "recall": 0.9012345679012346,
+          "specificity": 0.24242424242424243,
+          "f1": 0.8156424581005587,
+          "roc_auc": 0.8035914702581369,
+          "confusion_matrix": {
+            "tn": 8,
+            "fp": 25,
+            "fn": 8,
+            "tp": 73
+          }
+        }
+      },
+      "release_status": "educational/research release"
+    },
+    "diabetes": {
+      "model_identifier": "diabetes:logistic_regression:07af879e4bb7",
+      "model_sha256": "07af879e4bb77d9bf3bc283bb0c4b40f9b4f7f006ef7aa9dee918d8cdb7f3b2f",
+      "metadata_sha256": "9a54a06111dcc7354dd3664f41cc7969cf7022fd57046f73bf05df9539b6001f",
+      "dataset_sha256": "eec45131b0ddb713183755ceadfccf08d42f5e1b60b48f4c706b7f9be9f44594",
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "golden_prediction": 1,
+      "golden_probability": 0.8005304606656921,
+      "evaluation_method": {
+        "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+        "model_selection": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+        "cross_validation": "stratified CV on development partition",
+        "holdout_is_reused": false
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "roc_auc_mean": 0.8449944629014396,
+          "roc_auc_std": 0.013034589339469911,
+          "dev_oof_f1_at_0.5": 0.6829268292682927
+        },
+        "holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.7077922077922078,
+          "precision": 0.5714285714285714,
+          "recall": 0.6666666666666666,
+          "specificity": 0.73,
+          "f1": 0.6153846153846154,
+          "roc_auc": 0.8103703703703704,
+          "confusion_matrix": {
+            "tn": 73,
+            "fp": 27,
+            "fn": 18,
+            "tp": 36
+          }
+        }
+      },
+      "release_status": "educational/research release"
+    },
+    "heart": {
+      "model_identifier": "heart:logistic_regression:5220edd64dca",
+      "model_sha256": "5220edd64dcae73f30d611bc4ed90614c17576ae66f911fb4c5e23fe8281052f",
+      "metadata_sha256": "397868bd4c1e8c402fa4b9c6f43974586b40d39ab1fa9812f625777798b08387",
+      "dataset_sha256": "a3861552839432a5881cd306532a49712898771c2daa8f2153e897001478107c",
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "golden_prediction": 0,
+      "golden_probability": 0.4598359143180714,
+      "evaluation_method": {
+        "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+        "model_selection": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+        "cross_validation": "stratified CV on development partition",
+        "holdout_is_reused": false
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "roc_auc_mean": 0.9027904462687071,
+          "roc_auc_std": 0.016869568101549073,
+          "dev_oof_f1_at_0.5": 0.8144796380090498
+        },
+        "holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.8852459016393442,
+          "precision": 0.8387096774193549,
+          "recall": 0.9285714285714286,
+          "specificity": 0.8484848484848485,
+          "f1": 0.8813559322033898,
+          "roc_auc": 0.9653679653679654,
+          "confusion_matrix": {
+            "tn": 28,
+            "fp": 5,
+            "fn": 2,
+            "tp": 26
+          }
+        }
+      },
+      "release_status": "educational/research release"
+    },
+    "kidney": {
+      "model_identifier": "kidney:logistic_regression:8ef6da06f2f7",
+      "model_sha256": "8ef6da06f2f70cdb448ff73abd31e914a6b759fdda1bf063923f3cec6be4ad58",
+      "metadata_sha256": "c4976e83cc0513eeced85a81ea6e5089febccb2d67304c3db1754fd33cd20db9",
+      "dataset_sha256": "aaeb0712557ec913a61400c216b45b02cc3d0ff0ad89d3ce3112960c7271f3bf",
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "golden_prediction": 1,
+      "golden_probability": 0.8689158856778145,
+      "evaluation_method": {
+        "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+        "model_selection": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+        "cross_validation": "stratified CV on development partition",
+        "holdout_is_reused": false
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "roc_auc_mean": 1.0,
+          "roc_auc_std": 0.0,
+          "dev_oof_f1_at_0.5": 0.9974937343358395
+        },
+        "holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.9875,
+          "precision": 1.0,
+          "recall": 0.98,
+          "specificity": 1.0,
+          "f1": 0.98989898989899,
+          "roc_auc": 0.9993333333333333,
+          "confusion_matrix": {
+            "tn": 30,
+            "fp": 0,
+            "fn": 1,
+            "tp": 49
+          }
+        }
+      },
+      "release_status": "educational/research release"
+    },
+    "parkinsons": {
+      "model_identifier": "parkinsons:logistic_regression:43bfa333fd5f",
+      "model_sha256": "43bfa333fd5f3f13d9db5556d667408cefa7a4e6d795ba0036f16dcbe27d7585",
+      "metadata_sha256": "8651becfda59da1859358b032d36f7889c500f9f9dd558373947148fc2700839",
+      "dataset_sha256": "a36116c2deac07895b79ce97a2f99a1b3720ac4892995ff5c3b9ccb397ed2bc5",
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "golden_prediction": 1,
+      "golden_probability": 0.9690051433877159,
+      "evaluation_method": {
+        "split_strategy": "GroupShuffleSplit(test_size=0.2) on subject -> subject-disjoint DEV/HOLDOUT; model chosen only on DEV via StratifiedGroupKFold(5) CV with groups=subject.",
+        "model_selection": "max DEV group-CV ROC-AUC, then simplest family within 0.02 ROC-AUC of the best",
+        "cross_validation": "StratifiedGroupKFold(5), groups=subject",
+        "holdout_is_reused": false,
+        "grouping_strategy": "StratifiedGroupKFold(5, shuffle, seed), groups=subject, passed to GridSearchCV and cross_val_predict."
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "cv": "StratifiedGroupKFold(5), groups=subject",
+          "roc_auc_mean": 0.8797777777777778,
+          "roc_auc_std": 0.12104016780483338,
+          "dev_oof_f1_at_0.5": 0.925
+        },
+        "subject_disjoint_holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.6046511627906976,
+          "precision": 0.6842105263157895,
+          "recall": 0.8387096774193549,
+          "specificity": 0.0,
+          "f1": 0.7536231884057971,
+          "roc_auc": 0.5860215053763441,
+          "confusion_matrix": {
+            "tn": 0,
+            "fp": 12,
+            "fn": 5,
+            "tp": 26
+          },
+          "holdout_subjects": 7,
+          "holdout_rows": 43
+        }
+      },
+      "release_status": "experimental"
+    }
+  }
+}

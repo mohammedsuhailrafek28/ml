@@ -9,8 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install runtime deps first for layer caching.
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY requirements.lock .
+RUN pip install --upgrade pip && pip install --require-hashes -r requirements.lock
 
 # Application code + persisted model artifacts (the only inference layer).
 COPY src/ ./src/

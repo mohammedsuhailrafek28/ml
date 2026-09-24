@@ -70,13 +70,29 @@ def _check_disease(key: str) -> dict:
 
 def readiness() -> tuple[dict, int]:
     """Return (payload, http_status). 200 when ready, 503 when degraded."""
+    from src.model_release import (
+        load_release_manifest,
+        release_file_issues,
+        runtime_compatibility_issues,
+    )
+
     results = {key: _check_disease(key) for key in DISEASES}
-    ready = all(r["ok"] for r in results.values())
+    settings = get_settings()
+    release_manifest_path = settings.model_root / "release_manifest.json"
+    try:
+        manifest = load_release_manifest(release_manifest_path)
+        release_issues = runtime_compatibility_issues(manifest) + release_file_issues(
+            include_datasets=False, manifest=manifest, model_root=settings.model_root
+        )
+    except Exception as exc:  # noqa: BLE001 - readiness must report, not crash
+        release_issues = [f"release manifest unavailable or invalid: {exc}"]
+    ready = all(r["ok"] for r in results.values()) and not release_issues
     payload = {
         "status": "ready" if ready else "degraded",
         "version": API_VERSION,
         "checkedAt": datetime.now(timezone.utc).isoformat(),
         "modelRoot": str(get_settings().model_root),
+        "releaseIntegrity": {"ok": not release_issues, "issues": release_issues},
         "diseases": results,
     }
     return payload, (200 if ready else 503)

@@ -1,0 +1,118 @@
+{
+  "liver": {
+    "metrics": {
+      "accuracy": 0.7435897435897436,
+      "balanced_accuracy": 0.6630049610205528,
+      "precision": 0.797752808988764,
+      "recall": 0.8554216867469879,
+      "f1": 0.8255813953488372,
+      "roc_auc": 0.7696669029057406,
+      "specificity": 0.47058823529411764,
+      "sensitivity": 0.8554216867469879,
+      "mcc": 0.3469247656897433,
+      "cohen_kappa": 0.34392523364485983,
+      "log_loss": 0.5031126588256197,
+      "brier_score": 0.1721088547008547,
+      "tn": 16,
+      "fp": 18,
+      "fn": 12,
+      "tp": 71,
+      "train_size": 466,
+      "test_size": 117,
+      "rows": 583,
+      "columns": 11,
+      "selected_model": "random_forest"
+    },
+    "thresholds": [
+      {
+        "threshold": 0.3,
+        "precision": 0.7247706422018348,
+        "recall": 0.9518072289156626,
+        "f1": 0.8229166666666666
+      },
+      {
+        "threshold": 0.4,
+        "precision": 0.7474747474747475,
+        "recall": 0.891566265060241,
+        "f1": 0.8131868131868132
+      },
+      {
+        "threshold": 0.5,
+        "precision": 0.7912087912087912,
+        "recall": 0.8674698795180723,
+        "f1": 0.8275862068965517
+      },
+      {
+        "threshold": 0.6,
+        "precision": 0.8181818181818182,
+        "recall": 0.7590361445783133,
+        "f1": 0.7875
+      },
+      {
+        "threshold": 0.7,
+        "precision": 0.9215686274509803,
+        "recall": 0.5662650602409639,
+        "f1": 0.7014925373134329
+      }
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n           0       0.57      0.47      0.52        34\n           1       0.80      0.86      0.83        83\n\n    accuracy                           0.74       117\n   macro avg       0.68      0.66      0.67       117\nweighted avg       0.73      0.74      0.74       117\n"
+  },
+  "diabetes": {
+    "metrics": {
+      "accuracy": 0.7272727272727273,
+      "balanced_accuracy": 0.7261111111111112,
+      "precision": 0.5909090909090909,
+      "recall": 0.7222222222222222,
+      "f1": 0.65,
+      "roc_auc": 0.8138888888888889,
+      "specificity": 0.73,
+      "sensitivity": 0.7222222222222222,
+      "mcc": 0.4360491817317043,
+      "cohen_kappa": 0.43023255813953487,
+      "log_loss": 0.49943027989679584,
+      "brier_score": 0.16725636161025703,
+      "tn": 73,
+      "fp": 27,
+      "fn": 15,
+      "tp": 39,
+      "train_size": 614,
+      "test_size": 154,
+      "rows": 768,
+      "columns": 9,
+      "selected_model": "svm"
+    },
+    "thresholds": [
+      {
+        "threshold": 0.3,
+        "precision": 0.5844155844155844,
+        "recall": 0.8333333333333334,
+        "f1": 0.6870229007633588
+      },
+      {
+        "threshold": 0.4,
+        "precision": 0.6229508196721312,
+        "recall": 0.7037037037037037,
+        "f1": 0.6608695652173913
+      },
+      {
+        "threshold": 0.5,
+        "precision": 0.6595744680851063,
+        "recall": 0.5740740740740741,
+        "f1": 0.6138613861386139
+      },
+      {
+        "threshold": 0.6,
+        "precision": 0.6571428571428571,
+        "recall": 0.42592592592592593,
+        "f1": 0.5168539325842697
+      },
+      {
+        "threshold": 0.7,
+        "precision": 0.7272727272727273,
+        "recall": 0.2962962962962963,
+        "f1": 0.42105263157894735
+      }
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n           0       0.83      0.73      0.78       100\n           1       0.59      0.72      0.65        54\n\n    accuracy                           0.73       154\n   macro avg       0.71      0.73      0.71       154\nweighted avg       0.75      0.73      0.73       154\n"
+  }
+}

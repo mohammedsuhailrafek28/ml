@@ -84,6 +84,10 @@ class Registry:
         return float(self._meta_file(k).get("operating_threshold",
                self._meta_file(k).get("threshold", 0.5)))
 
+    def active_features(self, k):
+        """Ordered raw request features consumed by the persisted pipeline."""
+        return list(self._meta_file(k).get("active_features", self._config(k).features))
+
     def metadata(self, k):
         c = self._config(k)
         m = json.loads((self._dir(k) / "metrics.json").read_text())
