@@ -16,7 +16,10 @@ def test_missing_dataset_error(tmp_path):
     with pytest.raises(FileNotFoundError): load_dataset(tmp_path/'missing.csv')
 def test_pipelines_load_and_predict():
     for k,c in DISEASES.items():
-        d=pd.read_csv(c.raw_path); row=d.iloc[0].to_dict(); row.pop(c.target,None); row.pop('name',None); r=predict(k,row); assert r['prediction'] in (0,1); assert 0<=r['risk_probability']<=1
+        d=pd.read_csv(c.raw_path); row=d.iloc[0].to_dict()
+        row.pop(c.target,None); row.pop('name',None); row.pop('id',None)
+        row={field:(None if pd.isna(value) else value) for field,value in row.items()}
+        r=predict(k,row); assert r['prediction'] in (0,1); assert 0<=r['model_score']<=1
 def test_metadata_required():
     required={'selected_model','random_seed'}
     for k in DISEASES: assert required <= set(json.loads((ROOT/'models'/k/'metadata.json').read_text()))

@@ -2,6 +2,8 @@
 import {useState} from 'react';
 import {motion,useReducedMotion} from 'motion/react';
 import {predictDisease,generateDiseaseReport} from '../../../lib/api';
+import PredictionResult from '../../../components/PredictionResult';
+import type {PredictionResponse} from '../../../lib/api-types';
 
 type V={Age:number|'';Gender:string;TB:number|'';DB:number|'';Alkphos:number|'';Sgpt:number|'';Sgot:number|'';TP:number|'';ALB:number|'';'A/G Ratio':number|null|''};
 const init:V={Age:'',Gender:'',TB:'',DB:'',Alkphos:'',Sgpt:'',Sgot:'',TP:'',ALB:'','A/G Ratio':''};
@@ -19,14 +21,13 @@ const F:Record<string,{label:string;unit:string;min:number;max:number;int?:boole
   'A/G Ratio':{label:'Albumin / globulin ratio',unit:'ratio',min:0,max:5},
 };
 const labels:any={Gender:'Gender',...Object.fromEntries(Object.entries(F).map(([k,d])=>[k,d.label]))};
-const pct=(x:number)=>Math.round(x*100);
 
 export default function LiverAssessment(){
   const [v,setV]=useState<V>(init);
   const [step,setStep]=useState(0);
   const [stage,setStage]=useState('intro');
   const [ack,setAck]=useState(false);
-  const [result,setResult]=useState<any>();
+  const [result,setResult]=useState<PredictionResponse|null>(null);
   const [error,setError]=useState('');
   const reduced=useReducedMotion();
   const set=(k:string,x:any)=>setV({...v,[k]:x});
@@ -58,8 +59,8 @@ export default function LiverAssessment(){
     if(r.ok){const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='liver-assessment-report.pdf';a.click();}
   }
 
-  if(stage==='intro')return <main className="page"><p className="eyebrow">LIVER ASSESSMENT</p><h1>Explore a liver disease risk pattern</h1><div className="card">
-    <p>This educational module uses the UCI <strong>Indian Liver Patient Dataset</strong> (ILPD, 570 records after de-duplication) and a persisted scikit-learn <strong>logistic regression</strong> pipeline chosen by cross-validation. It estimates a risk <em>pattern</em> and is not a diagnosis.</p>
+  if(stage==='intro')return <main className="page"><p className="eyebrow">LIVER ASSESSMENT</p><h1>Explore a liver-dataset model output</h1><div className="card">
+    <p>This educational module uses the UCI <strong>Indian Liver Patient Dataset</strong> (ILPD, 570 records after de-duplication) and a persisted scikit-learn <strong>logistic regression</strong> pipeline chosen by cross-validation. It produces an uncalibrated dataset-associated score and is not a diagnosis.</p>
     <button className="button" onClick={()=>setStage('form')}>Begin entering measurements</button>
   </div></main>;
 
@@ -67,24 +68,10 @@ export default function LiverAssessment(){
     <h1>Preparing your result</h1><p>Validating measurements</p><p>Applying the fitted preprocessing pipeline</p><p>Running the liver model</p>
   </motion.div></main>;
 
-  if(stage==='results'){
-    const m=result.modelMetrics||{};
+  if(stage==='results'&&result){
     return <main className="page"><motion.div initial={reduced?false:{opacity:0,y:10}} animate={{opacity:1,y:0}}>
-      <p className="eyebrow">RESULT</p><h1>{result.label}</h1>
-      <div className="card">
-        <h2>{pct(result.probability||0)}% estimated probability of a higher-risk pattern</h2>
-        <p>Decision threshold: {result.threshold}. Above this the model reports a higher-risk pattern.</p>
-        <p>Model: <strong>{result.selectedModel}</strong>
-          {m.roc_auc!=null&&<> · holdout ROC-AUC {m.roc_auc.toFixed(2)} · recall {m.recall.toFixed(2)} · specificity {m.specificity.toFixed(2)}</>}
-        </p>
-        {result.topFactors?.length>0&&<>
-          <h3>Factors this model weighs most (permutation importance on held-out data)</h3>
-          <ul>{result.topFactors.map((f:any)=><li key={f.feature}>{labels[f.feature]||f.feature}</li>)}</ul>
-          <p><small>These describe model behaviour on the ILPD sample, not a cause of disease.</small></p>
-        </>}
-        <p>{result.disclaimer}</p>
-        <button className="button" onClick={pdf}>Download PDF report</button>
-      </div>
+      <p className="eyebrow">RESULT</p><h1>Liver model threshold result</h1>
+      <PredictionResult result={result} onDownload={pdf}/>
     </motion.div></main>;
   }
 

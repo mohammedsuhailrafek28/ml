@@ -22,7 +22,7 @@ from src.api.middleware import (
     error_response,
     require_api_key,
 )
-from src.api.schemas import PredictionRequest
+from src.api.schemas import PredictionRequest, PredictionResponse
 from src.api.services.model_registry import registry
 from src.api.settings import get_settings
 from src.reporting.pdf_report import create_report
@@ -45,7 +45,15 @@ async def _lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="Medical AI Suite API", version=API_VERSION, lifespan=_lifespan)
+app = FastAPI(
+    title="Medical AI Suite API",
+    version=API_VERSION,
+    description=(
+        "Educational persisted-model inference. Returned model_score values are "
+        "uncalibrated scores, not disease probabilities, diagnoses, or screening results."
+    ),
+    lifespan=_lifespan,
+)
 
 # Middleware runs bottom-up on the request; RequestContext must be outermost so
 # every response (including limiter/auth rejections) carries a request id.
@@ -126,8 +134,9 @@ def disease(disease: str):
     return registry.metadata(disease)
 
 
-@app.post("/api/v1/predictions/{disease}")
+@app.post("/api/v1/predictions/{disease}", response_model=PredictionResponse)
 def prediction(disease: str, req: PredictionRequest, _: None = Depends(require_api_key)):
+    """Return the typed, non-diagnostic communication contract for one model."""
     _require_known(disease)
     try:
         return registry.predict(disease, req.measurements)

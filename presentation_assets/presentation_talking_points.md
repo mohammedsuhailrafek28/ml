@@ -2,7 +2,7 @@
 
 1. **Title** — Medical AI Suite is an educational multi-disease ML system.
 2. **Problem** — Public health datasets require careful cleaning and leakage controls.
-3. **Objective** — Compare seven models and provide cautious risk-pattern estimates.
+3. **Objective** — Compare seven models and provide cautious dataset-pattern model outputs.
 4. **Five diseases** — Each module uses a shared, reproducible architecture.
 5. **Architecture** — Validation, cleaning, pipelines, selection, persistence, UI.
 6. **Datasets** — UCI ILPD, Cleveland Heart, Pima Diabetes, UCI CKD, UCI Parkinsons.

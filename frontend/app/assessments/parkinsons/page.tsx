@@ -2,6 +2,8 @@
 import {useState} from 'react';
 import {motion,useReducedMotion} from 'motion/react';
 import {predictDisease,generateDiseaseReport} from '../../../lib/api';
+import PredictionResult, {ReleaseBadge} from '../../../components/PredictionResult';
+import type {PredictionResponse} from '../../../lib/api-types';
 
 // The production model uses 15 non-redundant pre-computed voice biomarkers
 // (a group-aware feature-redundancy experiment dropped the collinear
@@ -42,14 +44,13 @@ const groups=[
 const KEYS=groups.flatMap(g=>g[1]) as K[];
 const init:V=Object.fromEntries(KEYS.map(k=>[k,''])) as V;
 const labelOf=(k:string)=>F[k as K]?.label ?? k;
-const pct=(x:number)=>Math.round(x*100);
 
 export default function ParkinsonsAssessment(){
   const [v,setV]=useState<V>(init);
   const [step,setStep]=useState(0);
   const [stage,setStage]=useState('intro');
   const [ack,setAck]=useState(false);
-  const [result,setResult]=useState<any>();
+  const [result,setResult]=useState<PredictionResponse|null>(null);
   const [error,setError]=useState('');
   const reduced=useReducedMotion();
   const set=(k:string,x:any)=>setV({...v,[k]:x});
@@ -78,10 +79,10 @@ export default function ParkinsonsAssessment(){
     if(r.ok){const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='parkinsons-assessment-report.pdf';a.click();}
   }
 
-  if(stage==='intro')return <main className="page"><p className="eyebrow">PARKINSON&apos;S ASSESSMENT</p><h1>Explore a Parkinson&apos;s-associated voice pattern</h1><div className="card">
+  if(stage==='intro')return <main className="page"><p className="eyebrow">PARKINSON&apos;S ASSESSMENT</p><ReleaseBadge status="experimental"/><h1>Explore a Parkinson&apos;s-associated voice pattern</h1><div className="card">
     <p>This educational module uses the UCI <strong>Parkinson&apos;s voice dataset</strong> (195 sustained-vowel recordings from 32 people, 2008) and a persisted scikit-learn <strong>logistic regression</strong> pipeline. Because the dataset has ~6 recordings per person, training, tuning and evaluation are all <strong>subject-aware</strong> — the same person never appears in both training and test data.</p>
     <p><strong>This module accepts pre-computed voice biomarkers.</strong> The 15 values below are produced by voice-analysis software (e.g. Praat) from a sustained-vowel recording. Medical AI Suite does <em>not</em> record or process raw audio.</p>
-    <p><small>Honest performance is modest: subject-aware cross-validated ROC-AUC ≈ 0.78 (multi-seed), and the ~7-person holdout is too small for a reliable point estimate. The much higher figure often quoted for this dataset comes from letting one person&apos;s recordings leak across the split.</small></p>
+    <p><strong>Experimental evidence:</strong> 195 recordings from 32 subjects, including only 8 controls. The subject-disjoint holdout contains 7 people and produced ROC-AUC 0.586 with specificity 0.0 at the fixed 0.5 threshold. This limited result is not clinical validation.</p>
     <button className="button" onClick={()=>setStage('form')}>Begin entering biomarkers</button>
   </div></main>;
 
@@ -89,41 +90,26 @@ export default function ParkinsonsAssessment(){
     <h1>Preparing your result</h1><p>Validating biomarkers</p><p>Applying the fitted preprocessing pipeline</p><p>Running the Parkinson&apos;s model</p>
   </motion.div></main>;
 
-  if(stage==='results'){
-    const m=result.modelMetrics||{};
+  if(stage==='results'&&result){
     return <main className="page"><motion.div initial={reduced?false:{opacity:0,y:10}} animate={{opacity:1,y:0}}>
-      <p className="eyebrow">RESULT</p><h1>{result.label}</h1>
-      <div className="card">
-        <h2>{pct(result.probability||0)}% — the submitted voice biomarkers match {result.prediction? 'an elevated':'a lower'} Parkinson&apos;s-associated pattern in this model</h2>
-        <p>Decision threshold: {result.threshold}. At or above this the model reports an elevated-risk pattern.</p>
-        <p>Model: <strong>{result.selectedModel}</strong>
-          {m.roc_auc!=null&&<> · subject-disjoint holdout ROC-AUC {m.roc_auc.toFixed(2)} · recall {m.recall?.toFixed(2)} · specificity {m.specificity?.toFixed(2)}</>}
-        </p>
-        {result.topFactors?.length>0&&<>
-          <h3>Biomarkers this model weighs most (permutation importance on held-out subjects)</h3>
-          <ul>{result.topFactors.map((f:any)=><li key={f.feature}>{labelOf(f.feature)}</li>)}</ul>
-          <p><small>Association with the model output does not establish a physiological cause of Parkinson&apos;s disease.</small></p>
-        </>}
-        {result.limitations?.length>0&&<ul>{result.limitations.map((l:string,i:number)=><li key={i}><small>{l}</small></li>)}</ul>}
-        <p>{result.disclaimer}</p>
-        <button className="button" onClick={pdf}>Download PDF report</button>
-      </div>
+      <p className="eyebrow">RESULT</p><h1>Parkinson&apos;s model threshold result</h1>
+      <PredictionResult result={result} onDownload={pdf}/>
     </motion.div></main>;
   }
 
-  if(stage==='review')return <main className="page"><h1>Review voice biomarkers</h1><div className="card">
+  if(stage==='review')return <main className="page"><ReleaseBadge status="experimental"/><h1>Review voice biomarkers</h1><div className="card">
     {Object.entries(v).map(([k,x])=>{
       const d=F[k as K];
       return <p key={k}><strong>{d.label}:</strong> {x===''?'Not entered':`${x}${d.unit?' '+d.unit:''}`}</p>;
     })}
-    <label><input type="checkbox" checked={ack} onChange={e=>setAck(e.target.checked)}/> I understand that this is an educational machine-learning prediction from pre-computed voice biomarkers and not a medical diagnosis.</label><br/>
+    <label><input type="checkbox" checked={ack} onChange={e=>setAck(e.target.checked)}/> I understand this is an experimental educational demonstration with weak validation evidence. It accepts pre-computed biomarkers, not raw audio; its 7-subject holdout had ROC-AUC 0.586 and specificity 0.0; and its output is not a diagnosis or screening result.</label><br/>
     <button className="button" onClick={()=>setStage('form')}>Edit</button>
     <button className="button" disabled={!ack} onClick={submit}>Run prediction</button>
     {error&&<p role="alert">{error}</p>}
   </div></main>;
 
   const [title,keys]=groups[step];
-  return <main className="page"><p className="eyebrow">STEP {step+1} OF {groups.length}</p><h1>{title}</h1><div className="card">
+  return <main className="page"><p className="eyebrow">STEP {step+1} OF {groups.length}</p><ReleaseBadge status="experimental"/><h1>{title}</h1><div className="card">
     <p><small>Pre-computed voice biomarkers from voice-analysis software.</small></p>
     {keys.map(k=>{
       const d=F[k as K];

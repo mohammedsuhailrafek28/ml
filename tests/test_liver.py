@@ -38,25 +38,19 @@ def test_feature_schema_matches_config():
     assert CFG.target not in CFG.features
 
 
-def test_prediction_and_probability():
+def test_prediction_communication_contract():
     out = registry.predict("liver", VALID)
     assert out["prediction"] in (0, 1)
-    assert 0.0 <= out["probability"] <= 1.0
-    assert out["selectedModel"] == json.loads((MODEL_DIR / "metrics.json").read_text())["selected_model"]
-    assert out["threshold"] == 0.5
+    assert 0.0 <= out["model_score"] <= 1.0
+    assert out["model_identifier"].startswith("liver:")
+    assert out["decision_threshold"] == 0.5
+    assert out["score_type"] == "uncalibrated_model_score"
 
 
-def test_prediction_label_follows_threshold():
+def test_threshold_result_follows_score():
     out = registry.predict("liver", VALID)
-    expected = "Higher-risk pattern detected" if out["probability"] >= out["threshold"] else "Lower-risk pattern detected"
-    assert out["label"] == expected
-
-
-def test_top_factors_are_real_features():
-    out = registry.predict("liver", VALID)
-    assert out["topFactors"], "explainability factors should be present"
-    for f in out["topFactors"]:
-        assert f["feature"] in CFG.features
+    expected = "at_or_above" if out["model_score"] >= out["decision_threshold"] else "below"
+    assert out["threshold_result"] == expected
 
 
 def test_metadata_is_complete():
@@ -77,8 +71,8 @@ def test_api_valid_request_succeeds():
     assert r.status_code == 200
     body = r.json()
     assert body["prediction"] in (0, 1)
-    assert 0.0 <= body["probability"] <= 1.0
-    assert body["selectedModel"]
+    assert 0.0 <= body["model_score"] <= 1.0
+    assert body["model_identifier"]
 
 
 def test_api_missing_field_rejected():

@@ -9,7 +9,7 @@ assets=ROOT/'presentation_assets'; assets.mkdir(exist_ok=True)
 def card(path,title,lines):
  fig,ax=plt.subplots(figsize=(12,6)); ax.axis('off'); ax.text(.05,.88,title,fontsize=24,weight='bold'); ax.text(.06,.75,'\n'.join(lines),fontsize=16,va='top'); fig.savefig(path,dpi=160,bbox_inches='tight'); plt.close(fig)
 card(assets/'system_architecture.png','Medical AI Suite architecture',['Five UCI datasets → validation → cleaning','Leakage-safe preprocessing → seven-model comparison','Persisted Joblib pipelines → Streamlit → PDF reports'])
-card(assets/'project_workflow.png','Prediction workflow',['Choose disease → enter measurements → validate','Apply fitted pipeline → predict class/probability','Show global influences → generate educational PDF'])
+card(assets/'project_workflow.png','Prediction workflow',['Choose disease → enter measurements → validate','Apply fitted pipeline → calculate uncalibrated score','Compare with threshold → generate educational PDF'])
 card(assets/'dataset_summary.png','Dataset summary',['Liver 583 | Heart 303 | Diabetes 768 | Kidney 400 | Parkinsons 195','Targets are binary disease/risk indicators with documented mappings'])
 card(assets/'model_comparison.png','Model comparison',['Models: Logistic Regression, Decision Tree, Random Forest','Gradient Boosting, SVM, KNN, Gaussian Naive Bayes','Selection prioritizes recall, F1, ROC-AUC and stability'])
 card(assets/'final_results.png','Final results',['Five persisted pipelines and measured evaluation artifacts','Parkinsons uses subject-grouped evaluation','All outputs are educational—not clinical evidence'])

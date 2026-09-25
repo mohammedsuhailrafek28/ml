@@ -1,3 +1,15 @@
-export type ModelMetrics={accuracy:number;precision:number;recall:number;specificity:number;f1:number;roc_auc:number};
-export type TopFactor={feature:string;importance:number};
-export type PredictionResponse={disease:string;prediction:number;label:string;probability:number|null;threshold:number;selectedModel:string;modelMetrics?:ModelMetrics|null;topFactors?:TopFactor[];limitations:string[];disclaimer:string};
+export type ThresholdResult = 'at_or_above' | 'below';
+
+export type PredictionResponse = {
+  disease: string;
+  prediction: 0 | 1;
+  model_score: number;
+  decision_threshold: number;
+  threshold_result: ThresholdResult;
+  score_type: 'uncalibrated_model_score';
+  model_identifier: string;
+  release_status: string;
+  intended_use: string;
+  limitations: string[];
+  disclaimer: string;
+};

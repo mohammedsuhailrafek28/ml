@@ -72,25 +72,19 @@ def test_feature_schema_and_target_not_leaked():
     assert any("glucose" in n for n in names)
 
 
-def test_prediction_and_probability():
+def test_prediction_communication_contract():
     out = registry.predict("diabetes", VALID)
     assert out["prediction"] in (0, 1)
-    assert 0.0 <= out["probability"] <= 1.0
-    assert out["selectedModel"] == json.loads((MODEL_DIR / "metrics.json").read_text())["selected_model"]
-    assert out["threshold"] == 0.5
+    assert 0.0 <= out["model_score"] <= 1.0
+    assert out["model_identifier"].startswith("diabetes:")
+    assert out["decision_threshold"] == 0.5
+    assert out["score_type"] == "uncalibrated_model_score"
 
 
-def test_prediction_label_follows_threshold():
+def test_threshold_result_follows_score():
     out = registry.predict("diabetes", VALID)
-    expected = "Higher-risk pattern detected" if out["probability"] >= out["threshold"] else "Lower-risk pattern detected"
-    assert out["label"] == expected
-
-
-def test_top_factors_are_real_features():
-    out = registry.predict("diabetes", VALID)
-    assert out["topFactors"]
-    for f in out["topFactors"]:
-        assert f["feature"] in CFG.features
+    expected = "at_or_above" if out["model_score"] >= out["decision_threshold"] else "below"
+    assert out["threshold_result"] == expected
 
 
 def test_metadata_is_complete():
@@ -121,8 +115,8 @@ def test_api_valid_request_succeeds():
     assert r.status_code == 200
     body = r.json()
     assert body["prediction"] in (0, 1)
-    assert 0.0 <= body["probability"] <= 1.0
-    assert body["selectedModel"]
+    assert 0.0 <= body["model_score"] <= 1.0
+    assert body["model_identifier"]
 
 
 def test_api_missing_field_rejected():
@@ -168,8 +162,8 @@ def test_api_zero_glucose_is_accepted_and_treated_as_missing():
     r0 = client.post("/api/v1/predictions/diabetes",
                      json={"measurements": {**VALID, "glucose": 0}})
     assert r0.status_code == 200
-    p_missing = r0.json()["probability"]
-    p_real_low = registry.predict("diabetes", {**VALID, "glucose": 1})["probability"]
+    p_missing = r0.json()["model_score"]
+    p_real_low = registry.predict("diabetes", {**VALID, "glucose": 1})["model_score"]
     assert p_missing != p_real_low, "glucose=0 must not be scaled as a real value"
 
 
@@ -218,6 +212,6 @@ def test_frontend_style_payload_round_trip():
     r = client.post("/api/v1/predictions/diabetes", json={"measurements": form_payload})
     assert r.status_code == 200
     body = r.json()
-    assert 0.0 <= body["probability"] <= 1.0
-    assert body["label"] in ("Higher-risk pattern detected", "Lower-risk pattern detected")
-    assert body["threshold"] == 0.5
+    assert 0.0 <= body["model_score"] <= 1.0
+    assert body["threshold_result"] in ("at_or_above", "below")
+    assert body["decision_threshold"] == 0.5

@@ -1,24 +1,54 @@
-from pathlib import Path
+"""Generate a cautious, contract-aligned PDF model report."""
 from datetime import datetime
+from pathlib import Path
+from textwrap import wrap
+
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from src.utils.config import DISCLAIMER
-import json
+
+
 def create_report(path, disease, values, result):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
-    c=canvas.Canvas(str(path), pagesize=letter); y=760
-    c.setFont('Helvetica-Bold',16); c.drawString(50,y,'Medical AI Suite — Educational report'); y-=35
-    c.setFont('Helvetica',10)
-    key={'Liver disease':'liver','Heart disease':'heart','Diabetes':'diabetes','Kidney disease':'kidney','Chronic kidney disease':'kidney',"Parkinsons disease":'parkinsons',"Parkinson's disease":'parkinsons'}.get(disease)
-    selected='Unavailable'
-    try: selected=json.loads((Path(__file__).resolve().parents[2]/'models'/key/'metrics.json').read_text())['selected_model']
-    except Exception: pass
-    prob=result.get('risk_probability', result.get('probability'))
-    thr=result.get('threshold', 0.5)
-    factors=result.get('topFactors') or []
-    factor_line=('Top model factors: '+', '.join(f.get('feature','') for f in factors)) if factors \
-        else 'Global model influences: See the model comparison and feature-importance artifacts.'
-    lines=["Medical AI Suite — Disease prediction report",f'Module: {disease}',f"Prediction: {result.get('prediction')}",f"Risk probability: {prob}",f'Selected model: {selected}',f'Threshold: {thr}',f'Generated: {datetime.now():%Y-%m-%d %H:%M}','','Input measurements:']+[f'{k}: {v if v is not None else "Not provided"}' for k,v in values.items()]+['',factor_line,'',DISCLAIMER,'This output is not a diagnosis and must not replace evaluation by a qualified healthcare professional.']
+    document = canvas.Canvas(str(path), pagesize=letter)
+    y = 760
+    document.setFont("Helvetica-Bold", 16)
+    document.drawString(50, y, "Medical AI Suite - Educational model report")
+    y -= 35
+    document.setFont("Helvetica", 10)
+
+    relation = "at or above" if result["threshold_result"] == "at_or_above" else "below"
+    status = result["release_status"]
+    if status == "experimental":
+        status = "EXPERIMENTAL - limited subject-disjoint evidence"
+    lines = [
+        f"Module: {disease}",
+        f"Release status: {status}",
+        f"Model classification: threshold class {result['prediction']}",
+        f"Uncalibrated model score: {result['model_score']:.4f}",
+        f"Decision threshold: {result['decision_threshold']:.4f}",
+        f"Threshold result: {relation} the decision threshold",
+        "Score type: uncalibrated model score (not disease probability)",
+        f"Model identifier: {result['model_identifier']}",
+        f"Generated: {datetime.now():%Y-%m-%d %H:%M}",
+        "",
+        f"Intended use: {result['intended_use']}",
+        "",
+        "Known limitations:",
+    ] + [f"- {item}" for item in result["limitations"]] + [
+        "",
+        "Input measurements:",
+    ] + [f'{key}: {value if value is not None else "Not provided"}' for key, value in values.items()] + [
+        "",
+        f"RESEARCH-USE DISCLAIMER: {result['disclaimer']}",
+    ]
+
     for line in lines:
-        c.drawString(50,y,line[:110]); y-=18
-    c.save()
+        wrapped = wrap(line, width=95, subsequent_indent="  ") or [""]
+        for segment in wrapped:
+            if y < 55:
+                document.showPage()
+                document.setFont("Helvetica", 10)
+                y = 760
+            document.drawString(50, y, segment)
+            y -= 18
+    document.save()

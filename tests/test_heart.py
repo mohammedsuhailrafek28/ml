@@ -60,25 +60,19 @@ def test_feature_schema_matches_config():
     assert CFG.target not in CFG.features
 
 
-def test_prediction_and_probability():
+def test_prediction_communication_contract():
     out = registry.predict("heart", VALID)
     assert out["prediction"] in (0, 1)
-    assert 0.0 <= out["probability"] <= 1.0
-    assert out["selectedModel"] == json.loads((MODEL_DIR / "metrics.json").read_text())["selected_model"]
-    assert out["threshold"] == 0.5
+    assert 0.0 <= out["model_score"] <= 1.0
+    assert out["model_identifier"].startswith("heart:")
+    assert out["decision_threshold"] == 0.5
+    assert out["score_type"] == "uncalibrated_model_score"
 
 
-def test_prediction_label_follows_threshold():
+def test_threshold_result_follows_score():
     out = registry.predict("heart", VALID)
-    expected = "Higher-risk pattern detected" if out["probability"] >= out["threshold"] else "Lower-risk pattern detected"
-    assert out["label"] == expected
-
-
-def test_top_factors_are_real_features():
-    out = registry.predict("heart", VALID)
-    assert out["topFactors"], "explainability factors should be present"
-    for f in out["topFactors"]:
-        assert f["feature"] in CFG.features
+    expected = "at_or_above" if out["model_score"] >= out["decision_threshold"] else "below"
+    assert out["threshold_result"] == expected
 
 
 def test_metadata_is_complete():
@@ -100,8 +94,8 @@ def test_api_valid_request_succeeds():
     assert r.status_code == 200
     body = r.json()
     assert body["prediction"] in (0, 1)
-    assert 0.0 <= body["probability"] <= 1.0
-    assert body["selectedModel"]
+    assert 0.0 <= body["model_score"] <= 1.0
+    assert body["model_identifier"]
 
 
 def test_api_missing_field_rejected():
@@ -163,17 +157,17 @@ def test_api_metadata_endpoint():
 
 # --------------------------- ca / thal encoding (train == serve) --------------
 def test_ca_thal_string_int_float_are_equivalent():
-    base = registry.predict("heart", VALID)["probability"]
-    as_int = registry.predict("heart", {**VALID, "ca": 0, "thal": 6})["probability"]
-    as_float = registry.predict("heart", {**VALID, "ca": 0.0, "thal": 6.0})["probability"]
-    as_floatstr = registry.predict("heart", {**VALID, "ca": "0.0", "thal": "6.0"})["probability"]
+    base = registry.predict("heart", VALID)["model_score"]
+    as_int = registry.predict("heart", {**VALID, "ca": 0, "thal": 6})["model_score"]
+    as_float = registry.predict("heart", {**VALID, "ca": 0.0, "thal": 6.0})["model_score"]
+    as_floatstr = registry.predict("heart", {**VALID, "ca": "0.0", "thal": "6.0"})["model_score"]
     assert base == pytest.approx(as_int) == pytest.approx(as_float) == pytest.approx(as_floatstr)
 
 
-def test_changing_ca_changes_probability():
+def test_changing_ca_changes_model_score():
     """A different (valid) ca value must actually flow through the encoder."""
-    p0 = registry.predict("heart", {**VALID, "ca": "0"})["probability"]
-    p3 = registry.predict("heart", {**VALID, "ca": "3"})["probability"]
+    p0 = registry.predict("heart", {**VALID, "ca": "0"})["model_score"]
+    p3 = registry.predict("heart", {**VALID, "ca": "3"})["model_score"]
     assert p0 != p3, "ca is being swallowed (all-zero one-hot) instead of encoded"
 
 
@@ -230,6 +224,6 @@ def test_frontend_style_payload_round_trip():
     r = client.post("/api/v1/predictions/heart", json={"measurements": form_payload})
     assert r.status_code == 200
     body = r.json()
-    assert 0.0 <= body["probability"] <= 1.0
-    assert body["label"] in ("Higher-risk pattern detected", "Lower-risk pattern detected")
-    assert body["threshold"] == 0.5
+    assert 0.0 <= body["model_score"] <= 1.0
+    assert body["threshold_result"] in ("at_or_above", "below")
+    assert body["decision_threshold"] == 0.5

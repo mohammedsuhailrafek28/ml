@@ -100,25 +100,24 @@ def test_pipeline_artifact_loads():
     assert list(pipe.named_steps) == ["imputer", "scaler", "model"]
 
 
-def test_prediction_and_probability():
+def test_prediction_communication_contract():
     out = registry.predict("parkinsons", REDUCED)
     assert out["prediction"] in (0, 1)
-    assert 0.0 <= out["probability"] <= 1.0
-    assert out["selectedModel"] == json.loads((MODEL_DIR / "metrics.json").read_text())["selected_model"]
-    assert out["threshold"] == 0.5
+    assert 0.0 <= out["model_score"] <= 1.0
+    assert out["model_identifier"].startswith("parkinsons:")
+    assert out["decision_threshold"] == 0.5
+    assert out["score_type"] == "uncalibrated_model_score"
+    assert out["release_status"] == "experimental"
+    assert "pre-computed voice biomarkers" in " ".join(out["limitations"])
+    assert "195 recordings from 32 subjects (8 controls)" in " ".join(out["limitations"])
+    assert "ROC-AUC 0.586 and specificity 0.00" in " ".join(out["limitations"])
+    assert "not a probability" in out["disclaimer"]
 
 
 def test_full_and_reduced_payload_agree():
-    a = registry.predict("parkinsons", FULL)["probability"]
-    b = registry.predict("parkinsons", REDUCED)["probability"]
+    a = registry.predict("parkinsons", FULL)["model_score"]
+    b = registry.predict("parkinsons", REDUCED)["model_score"]
     assert a == pytest.approx(b)  # model only consumes the active feature subset
-
-
-def test_top_factors_are_real_features():
-    out = registry.predict("parkinsons", REDUCED)
-    assert out["topFactors"]
-    for f in out["topFactors"]:
-        assert f["feature"] in CFG.features
 
 
 def test_metadata_records_subject_aware_methodology():
@@ -185,7 +184,7 @@ def test_api_valid_full_request_succeeds():
 def test_api_valid_reduced_request_succeeds():
     r = client.post("/api/v1/predictions/parkinsons", json={"measurements": REDUCED})
     assert r.status_code == 200
-    assert 0.0 <= r.json()["probability"] <= 1.0
+    assert 0.0 <= r.json()["model_score"] <= 1.0
 
 
 def test_api_missing_required_field_rejected():
@@ -240,6 +239,6 @@ def test_frontend_style_payload_round_trip():
     r = client.post("/api/v1/predictions/parkinsons", json={"measurements": REDUCED})
     assert r.status_code == 200
     body = r.json()
-    assert 0.0 <= body["probability"] <= 1.0
-    assert body["label"] in ("Higher-risk pattern detected", "Lower-risk pattern detected")
-    assert body["threshold"] == 0.5
+    assert 0.0 <= body["model_score"] <= 1.0
+    assert body["threshold_result"] in ("at_or_above", "below")
+    assert body["decision_threshold"] == 0.5

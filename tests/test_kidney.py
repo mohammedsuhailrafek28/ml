@@ -71,31 +71,25 @@ def test_categorical_tokens_are_clean_in_feature_names():
     assert not any(n.endswith("_ yes") or "dm_\t" in n for n in names)
 
 
-def test_prediction_and_probability():
+def test_prediction_communication_contract():
     out = registry.predict("kidney", VALID)
     assert out["prediction"] in (0, 1)
-    assert 0.0 <= out["probability"] <= 1.0
-    assert out["selectedModel"] == json.loads((MODEL_DIR / "metrics.json").read_text())["selected_model"]
-    assert out["threshold"] == 0.5
+    assert 0.0 <= out["model_score"] <= 1.0
+    assert out["model_identifier"].startswith("kidney:")
+    assert out["decision_threshold"] == 0.5
+    assert out["score_type"] == "uncalibrated_model_score"
 
 
-def test_prediction_label_follows_threshold():
+def test_threshold_result_follows_score():
     out = registry.predict("kidney", VALID)
-    expected = "Higher-risk pattern detected" if out["probability"] >= out["threshold"] else "Lower-risk pattern detected"
-    assert out["label"] == expected
+    expected = "at_or_above" if out["model_score"] >= out["decision_threshold"] else "below"
+    assert out["threshold_result"] == expected
 
 
 def test_messy_categorical_tokens_normalise():
-    base = registry.predict("kidney", VALID)["probability"]
-    messy = registry.predict("kidney", {**VALID, "dm": "\tyes", "htn": " YES ", "appet": "Good"})["probability"]
+    base = registry.predict("kidney", VALID)["model_score"]
+    messy = registry.predict("kidney", {**VALID, "dm": "\tyes", "htn": " YES ", "appet": "Good"})["model_score"]
     assert base == pytest.approx(messy)
-
-
-def test_top_factors_are_real_features():
-    out = registry.predict("kidney", VALID)
-    assert out["topFactors"]
-    for f in out["topFactors"]:
-        assert f["feature"] in CFG.features
 
 
 def test_metadata_is_complete_and_records_investigations():
@@ -143,14 +137,14 @@ def test_api_valid_request_succeeds():
     assert r.status_code == 200
     body = r.json()
     assert body["prediction"] in (0, 1)
-    assert 0.0 <= body["probability"] <= 1.0
+    assert 0.0 <= body["model_score"] <= 1.0
 
 
 def test_api_request_with_missing_optional_values_ok():
     r = client.post("/api/v1/predictions/kidney",
                     json={"measurements": {"hemo": 9.1, "sc": 4.2, "sg": 1.01, "al": 3}})
     assert r.status_code == 200
-    assert 0.0 <= r.json()["probability"] <= 1.0
+    assert 0.0 <= r.json()["model_score"] <= 1.0
 
 
 def test_api_explicit_null_optional_ok():
@@ -250,6 +244,6 @@ def test_frontend_style_payload_round_trip():
     r = client.post("/api/v1/predictions/kidney", json={"measurements": form_payload})
     assert r.status_code == 200
     body = r.json()
-    assert 0.0 <= body["probability"] <= 1.0
-    assert body["label"] in ("Higher-risk pattern detected", "Lower-risk pattern detected")
-    assert body["threshold"] == 0.5
+    assert 0.0 <= body["model_score"] <= 1.0
+    assert body["threshold_result"] in ("at_or_above", "below")
+    assert body["decision_threshold"] == 0.5

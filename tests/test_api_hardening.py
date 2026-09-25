@@ -165,10 +165,28 @@ def test_cors_allows_configured_origin(env):
 
 
 # --------------------------- no ML regression -------------------------
-def test_prediction_shape_unchanged(env):
+def test_prediction_communication_contract(env):
     env(API_KEY=None, MODEL_ROOT=None)
     r = _client().post("/api/v1/predictions/liver", json={"measurements": LIVER})
     b = r.json()
-    for key in ("prediction", "probability", "threshold", "selectedModel",
-                "modelMetrics", "topFactors", "limitations", "disclaimer"):
+    for key in ("prediction", "model_score", "decision_threshold", "threshold_result",
+                "score_type", "model_identifier", "release_status", "intended_use",
+                "limitations", "disclaimer"):
         assert key in b
+    assert not {"probability", "threshold", "label", "selectedModel"} & set(b)
+    assert "not a probability" in b["disclaimer"]
+
+
+def test_prediction_openapi_response_is_typed(env):
+    env(API_KEY=None, MODEL_ROOT=None)
+    schema = _client().get("/openapi.json").json()
+    response = schema["paths"]["/api/v1/predictions/{disease}"]["post"]["responses"]["200"]
+    assert response["content"]["application/json"]["schema"]["$ref"].endswith(
+        "/PredictionResponse"
+    )
+    properties = schema["components"]["schemas"]["PredictionResponse"]["properties"]
+    assert set(properties) == {
+        "disease", "prediction", "model_score", "decision_threshold",
+        "threshold_result", "score_type", "model_identifier", "release_status",
+        "intended_use", "limitations", "disclaimer",
+    }

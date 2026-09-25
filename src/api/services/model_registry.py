@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 from joblib import load
+from src.model_release import load_release_manifest
 from src.utils.config import DISEASES
 from src.preprocessing.heart_schema import (
     HEART_CATEGORICAL,
@@ -46,11 +47,18 @@ LIVER_RANGES = {
 LIVER_GENDER = {"Male", "Female"}
 # A/G Ratio is the only feature allowed to be missing (imputed by the pipeline).
 LIVER_OPTIONAL = {"A/G Ratio"}
+RESEARCH_DISCLAIMER = (
+    "This uncalibrated model score is an educational research output, "
+    "not a probability of disease, diagnosis, screening result, triage "
+    "decision, or treatment recommendation. Consult a qualified "
+    "healthcare professional for medical advice."
+)
 
 
 class Registry:
     def __init__(self):
         self.models = {}
+        self.release_manifest = load_release_manifest()
 
     def _config(self, k):
         if k not in DISEASES:
@@ -81,8 +89,11 @@ class Registry:
                 if (self._dir(k) / f"{k}_pipeline.joblib").exists()]
 
     def threshold(self, k):
-        return float(self._meta_file(k).get("operating_threshold",
-               self._meta_file(k).get("threshold", 0.5)))
+        return float(self.release_manifest["releases"][k]["threshold"])
+
+    def release(self, k):
+        """Communication facts from the authoritative persisted-model release."""
+        return self.release_manifest["releases"][k]
 
     def active_features(self, k):
         """Ordered raw request features consumed by the persisted pipeline."""
@@ -108,6 +119,13 @@ class Registry:
                     "numeric_features", "categorical_features"):
             if key in meta:
                 out[key] = meta[key]
+        release = self.release(k)
+        out.update({
+            "release_status": release["release_status"],
+            "intended_use": release["intended_use"],
+            "limitations": release["known_limitations"],
+            "disclaimer": RESEARCH_DISCLAIMER,
+        })
         return out
 
     def catalog(self):
@@ -257,22 +275,28 @@ class Registry:
             pred = int(prob >= thr)
         else:
             pred = int(model.predict(frame)[0])
-        meta = self._meta_file(k)
-        factors = [
-            {"feature": d["feature"], "importance": round(d["importance_mean"], 4)}
-            for d in meta.get("permutation_importance_holdout", [])[:5]
-        ]
+        release = self.release(k)
+        limitations = list(release["known_limitations"])
+        if k == "parkinsons":
+            evidence = release["verified_metrics"]["subject_disjoint_holdout"]
+            limitations.append(
+                "Experimental evidence: 195 recordings from 32 subjects (8 controls); "
+                f"the {evidence['holdout_subjects']}-subject subject-separated holdout "
+                f"had ROC-AUC {evidence['roc_auc']:.3f} and specificity "
+                f"{evidence['specificity']:.2f} at threshold {thr:.2f}."
+            )
         return {
             "disease": k,
             "prediction": pred,
-            "label": "Higher-risk pattern detected" if pred else "Lower-risk pattern detected",
-            "probability": prob,
-            "threshold": thr,
-            "selectedModel": self.metadata(k)["selected_model"],
-            "modelMetrics": meta.get("holdout_metrics"),
-            "topFactors": factors,
-            "limitations": meta.get("limitations", ["Educational model only", "Not clinically validated"]),
-            "disclaimer": meta.get("disclaimer", "This prediction is not a medical diagnosis."),
+            "model_score": prob,
+            "decision_threshold": thr,
+            "threshold_result": "at_or_above" if pred else "below",
+            "score_type": "uncalibrated_model_score",
+            "model_identifier": release["model"]["identifier"],
+            "release_status": release["release_status"],
+            "intended_use": release["intended_use"],
+            "limitations": limitations,
+            "disclaimer": RESEARCH_DISCLAIMER,
         }
 
 

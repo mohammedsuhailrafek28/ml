@@ -47,9 +47,9 @@ def evaluate() -> dict:
             "metadata_sha256": contract["metadata"]["sha256"],
             "dataset_sha256": contract["dataset"]["sha256"],
             "estimator_type": contract["estimator_type"],
-            "threshold": result["threshold"],
+            "decision_threshold": result["decision_threshold"],
             "golden_prediction": result["prediction"],
-            "golden_probability": result["probability"],
+            "golden_model_score": result["model_score"],
             "evaluation_method": contract["evaluation_method"],
             "verified_metrics": contract["verified_metrics"],
             "release_status": contract["release_status"],
@@ -76,14 +76,14 @@ def render_markdown(report: dict) -> str:
         "retrain models or recreate historical holdout splits. Evaluation metrics below",
         "come from the metadata stored with each released artifact.",
         "",
-        "| Disease | Model | SHA-256 | Golden class | Golden probability | Status |",
+        "| Disease | Model | SHA-256 | Golden class | Golden model score | Status |",
         "|---|---|---|---:|---:|---|",
     ]
     for disease, result in report["releases"].items():
         lines.append(
             f"| {disease} | {result['estimator_type'].split('.')[-1]} | "
             f"`{result['model_sha256']}` | {result['golden_prediction']} | "
-            f"{result['golden_probability']:.12f} | {result['release_status']} |"
+            f"{result['golden_model_score']:.12f} | {result['release_status']} |"
         )
     lines.extend([
         "",

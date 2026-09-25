@@ -7,8 +7,10 @@ import sys
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 from joblib import load
 
+from src.api.main import app
 from src.api.services.model_registry import Registry
 from src.model_release import (
     load_release_manifest,
@@ -66,6 +68,19 @@ def test_release_statuses_reflect_evidence():
     assert holdout["specificity"] == 0.0
 
 
+def test_disease_catalog_uses_release_communication_facts():
+    response = TestClient(app).get("/api/v1/diseases")
+    assert response.status_code == 200
+    catalog = {item["slug"]: item for item in response.json()}
+    assert set(catalog) == set(DISEASES)
+    for disease, item in catalog.items():
+        release = MANIFEST["releases"][disease]
+        assert item["release_status"] == release["release_status"]
+        assert item["intended_use"] == release["intended_use"]
+        assert item["limitations"] == release["known_limitations"]
+        assert "not a probability" in item["disclaimer"]
+
+
 @pytest.mark.parametrize("vector", GOLDEN["vectors"], ids=lambda vector: vector["disease_identifier"])
 def test_golden_prediction_vector_through_production_registry(vector):
     registry = Registry()
@@ -79,7 +94,33 @@ def test_golden_prediction_vector_through_production_registry(vector):
     assert release["disease_identifier"] == result["disease"] == disease
     assert release["model"]["identifier"] == vector["model_identifier"]
     assert result["prediction"] == vector["expected_prediction"]
-    assert result["threshold"] == vector["threshold"]
-    assert result["probability"] == pytest.approx(
-        vector["expected_probability"], abs=GOLDEN["score_tolerance"], rel=0
+    assert result["decision_threshold"] == vector["threshold"]
+    assert result["model_score"] == pytest.approx(
+        vector["expected_model_score"], abs=GOLDEN["score_tolerance"], rel=0
     )
+
+
+@pytest.mark.parametrize("vector", GOLDEN["vectors"], ids=lambda vector: vector["disease_identifier"])
+def test_all_prediction_routes_share_release_contract(vector):
+    disease = vector["disease_identifier"]
+    release = MANIFEST["releases"][disease]
+    response = TestClient(app).post(
+        f"/api/v1/predictions/{disease}",
+        json={"measurements": vector["measurements"]},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert set(body) == {
+        "disease", "prediction", "model_score", "decision_threshold",
+        "threshold_result", "score_type", "model_identifier", "release_status",
+        "intended_use", "limitations", "disclaimer",
+    }
+    assert body["decision_threshold"] == release["threshold"]
+    assert body["release_status"] == release["release_status"]
+    assert body["model_identifier"] == release["model"]["identifier"]
+    assert body["score_type"] == "uncalibrated_model_score"
+    assert body["model_score"] == pytest.approx(
+        vector["expected_model_score"], abs=GOLDEN["score_tolerance"], rel=0
+    )
+    assert body["prediction"] == vector["expected_prediction"]
+    assert "not a probability" in body["disclaimer"]

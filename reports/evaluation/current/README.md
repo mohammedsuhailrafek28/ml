@@ -7,7 +7,7 @@ golden prediction through the production registry for each disease. It does not
 retrain models or recreate historical holdout splits. Evaluation metrics below
 come from the metadata stored with each released artifact.
 
-| Disease | Model | SHA-256 | Golden class | Golden probability | Status |
+| Disease | Model | SHA-256 | Golden class | Golden model score | Status |
 |---|---|---|---:|---:|---|
 | liver | LogisticRegression | `ab2eb1b92956119b8814a1ec4b462d8316edbf5543445bcfa340d62fad35a960` | 1 | 0.641961451315 | educational/research release |
 | diabetes | LogisticRegression | `07af879e4bb77d9bf3bc283bb0c4b40f9b4f7f006ef7aa9dee918d8cdb7f3b2f` | 1 | 0.800530460666 | educational/research release |
