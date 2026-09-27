@@ -114,7 +114,7 @@ export default function AssessmentWizard({disease}: {disease: Disease}) {
   }
 
   if (stage === 'intro') return <main className="page assessment-page">
-    {experimental && <ReleaseBadge status="experimental"/>}
+    <ReleaseBadge status={experimental ? 'experimental' : 'educational/research release'}/>
     <h1>{copy.title}</h1>
     <div className="assessment-intro">
       <p>{copy.description}</p>
@@ -128,6 +128,7 @@ export default function AssessmentWizard({disease}: {disease: Disease}) {
   </main>;
 
   if (stage === 'processing') return <main className="page assessment-page" aria-busy="true" aria-live="polite">
+    <ReleaseBadge status={experimental ? 'experimental' : 'educational/research release'}/>
     <h1 tabIndex={-1} ref={heading}>Preparing your result</h1>
     <div className="assessment-panel"><p>Validating your entries and running the persisted {prettyName[disease]} model…</p><div className="loading-track" aria-hidden="true"><span/></div></div>
   </main>;
@@ -139,7 +140,7 @@ export default function AssessmentWizard({disease}: {disease: Disease}) {
   </main>;
 
   if (stage === 'review') return <main className="page assessment-page">
-    {experimental && <ReleaseBadge status="experimental"/>}
+    <ReleaseBadge status={experimental ? 'experimental' : 'educational/research release'}/>
     <h1 tabIndex={-1} ref={heading}>Review {prettyName[disease]} {experimental ? 'voice biomarkers' : 'measurements'}</h1>
     <div className="assessment-panel">
       <p>Check each value before sending it to the model. Entries stay in this page and are not saved in browser storage.</p>
@@ -163,7 +164,7 @@ export default function AssessmentWizard({disease}: {disease: Disease}) {
 
   const current = groups[step];
   return <main className="page assessment-page">
-    {experimental && <ReleaseBadge status="experimental"/>}
+    <ReleaseBadge status={experimental ? 'experimental' : 'educational/research release'}/>
     <h1 tabIndex={-1} ref={heading}>{current.name}</h1>
     <div className="wizard-progress">
       <p>Step {step + 1} of {groups.length}</p>

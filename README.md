@@ -136,6 +136,45 @@ The browser calls same-origin `/api/...` Next.js handlers. For local development
 `BACKEND_API_KEY` blank only when the backend runs in development mode without
 `API_KEY`. Neither value is exposed through `NEXT_PUBLIC_*`.
 
+### Production-browser journeys
+
+Prerequisites: Node 20.19+, Python 3.11, and Chromium for the Playwright version
+locked in `frontend/package-lock.json`. Install the browser once with
+`npx playwright install chromium` (Linux CI also installs its OS dependencies).
+From `frontend/`, run:
+
+```bash
+npm ci
+npm run test:e2e
+```
+
+The command builds Next.js once and tests that production build in Chromium at
+1440Ã—900 and 390Ã—844. It starts FastAPI and Next.js on isolated loopback ports,
+using the persisted golden vectors as synthetic, non-personal inputs. Unless
+`E2E_PYTHON` points to a clean Python 3.11 environment already installed from
+`requirements-dev.lock`, the runner creates a temporary environment outside the
+repository, installs that hash-locked file, checks it, and removes it on exit.
+The runner generates a random test-only service key in memory and passes it only
+to the backend and Next.js server processes; it is not written to `.env`, source,
+browser code, traces, screenshots, or reports. Child processes are stopped on
+success, failure, or interruption. Do not reuse this test credential elsewhere.
+
+Playwright coverage exercises the landing/catalog/forms/review/result/PDF flow
+for each disease; server-side BFF boundaries and injected service failures;
+keyboard behavior; serious/critical Axe findings; responsive layouts; and
+browser storage, headers, URLs, bundle, and cache boundaries. Only failed tests
+retain Playwright screenshots, traces, and videos under `frontend/test-results/`.
+To inspect a failed trace, run from `frontend/`:
+
+```bash
+npx playwright show-trace test-results/<failed-test>/trace.zip
+```
+
+CI supports Chromium only for E2E; the mandatory desktop/mobile viewport sizes
+are 1440Ã—900 and 390Ã—844. Backend pytest, the frontend BFF/security unit tests,
+and these real-browser journeys are separate checks: `pytest -q`,
+`npm run test:security`, and `npm run test:e2e` respectively.
+
 ## Environment variables
 
 Backend (`.env`, see `.env.example`): `APP_ENV`, `ALLOWED_ORIGINS`, `API_HOST`,
@@ -199,7 +238,10 @@ make a failing drift test pass.
 dependency integrity, release-manifest and golden-vector verification, ruff error
 subset, import smoke, pytest), **frontend** (`npm ci`, production dependency
 audit, boundary security tests, typecheck, ESLint, production build, browser-
-bundle secret scan), **smoke** (ephemeral service key, hash-locked runtime,
+bundle secret scan), **browser-e2e** (Node 20.19, isolated hash-locked Python
+3.11 environment, pinned Playwright Chromium, one production build, five browser
+journeys, failure/accessibility/privacy checks; uploads test artifacts only on
+failure), and **smoke** (ephemeral service key, hash-locked runtime,
 health/readiness, one protected prediction per disease, one in-memory PDF).
 
 ## Deployment
