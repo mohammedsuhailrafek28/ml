@@ -32,8 +32,10 @@ jobs:
         run: |
           python -m scripts.build_model_release_manifest --check
           python scripts/evaluate_persisted_models.py --check > /tmp/model-release-verification.json
+      - name: Verify frontend contracts match API models and release feature order
+        run: python -m scripts.generate_frontend_contracts --check
       - name: Ruff (pyflakes error subset)
-        run: ruff check --select E9,F63,F7,F82,F401,F811 src tests
+        run: ruff check --select E9,F63,F7,F82,F401,F811 src tests scripts
       - name: Import / startup smoke
         run: python -c "from src.api.main import app; from src.api.health import readiness; p,s=readiness(); print('readiness', s); assert s in (200,503)"
       - name: Pytest
@@ -55,6 +57,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit --audit-level=high
       - run: npm run test:security
       - run: npm run typecheck
       - run: npm run lint

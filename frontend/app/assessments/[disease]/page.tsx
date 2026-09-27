@@ -1,3 +1,13 @@
-import Link from 'next/link';
-export function generateStaticParams(){return ['liver','heart','diabetes','kidney','parkinsons'].map(disease=>({disease}))}
-export default async function Intro({params}:{params:Promise<{disease:string}>}){const p=await params; const experimental=p.disease==='parkinsons'; return <main className="page"><p className="eyebrow">ASSESSMENT INTRODUCTION</p>{experimental&&<span className="status-badge status-badge--experimental">Experimental</span>}<h1>{experimental?"Parkinson's":p.disease} assessment</h1><div className="card"><p>This module uses a persisted Scikit-learn pipeline and public research data. Enter verified measurements in the next step.</p>{experimental&&<p>Pre-computed voice biomarkers only; no raw-audio processing. The 7-subject holdout had ROC-AUC 0.586 and specificity 0.0.</p>}<p><strong>Educational use only:</strong> the uncalibrated model score is not a disease probability, diagnosis, or screening result.</p><Link className="button" href={`/assessments/${p.disease}/review`}>Begin entering measurements</Link></div></main>}
+import {notFound} from 'next/navigation';
+import AssessmentWizard from '../../../features/assessments/AssessmentWizard';
+import {diseaseContracts} from '../../../features/assessments/generated/contracts';
+
+export function generateStaticParams() {
+  return Object.keys(diseaseContracts).map((disease) => ({disease}));
+}
+
+export default async function DiseaseAssessment({params}: {params: Promise<{disease: string}>}) {
+  const {disease} = await params;
+  if (!Object.hasOwn(diseaseContracts, disease)) notFound();
+  return <AssessmentWizard disease={disease as keyof typeof diseaseContracts}/>;
+}

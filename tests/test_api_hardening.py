@@ -12,8 +12,10 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.api import settings as settings_mod
+from src.model_release import load_release_manifest
 
 warnings.filterwarnings("ignore")
+MANIFEST = load_release_manifest()
 
 LIVER = {
     "Age": 45, "Gender": "Male", "TB": 1.0, "DB": 0.3, "Alkphos": 190,
@@ -281,7 +283,7 @@ def test_logs_exclude_measurements_and_credentials(env, caplog):
 def test_prediction_openapi_response_is_typed(env):
     env(API_KEY=None, MODEL_ROOT=None)
     schema = _client().get("/openapi.json").json()
-    response = schema["paths"]["/api/v1/predictions/{disease}"]["post"]["responses"]["200"]
+    response = schema["paths"]["/api/v1/predictions/liver"]["post"]["responses"]["200"]
     assert response["content"]["application/json"]["schema"]["$ref"].endswith(
         "/PredictionResponse"
     )
@@ -291,3 +293,19 @@ def test_prediction_openapi_response_is_typed(env):
         "threshold_result", "score_type", "model_identifier", "release_status",
         "intended_use", "limitations", "disclaimer",
     }
+
+
+def test_prediction_openapi_request_is_disease_specific(env):
+    env(API_KEY=None, MODEL_ROOT=None)
+    schema = _client().get("/openapi.json").json()
+    for disease in ("liver", "diabetes", "heart", "kidney", "parkinsons"):
+        operation = schema["paths"][f"/api/v1/predictions/{disease}"]["post"]
+        ref = operation["requestBody"]["content"]["application/json"]["schema"]["$ref"]
+        request_model = schema["components"]["schemas"][ref.split("/")[-1]]
+        measurements_ref = request_model["properties"]["measurements"]["$ref"]
+        measurements = schema["components"]["schemas"][measurements_ref.split("/")[-1]]
+        assert measurements["additionalProperties"] is False
+        active = set(MANIFEST["releases"][disease]["ordered_active_features"])
+        assert active <= set(measurements["properties"])
+        if disease not in {"kidney", "parkinsons"}:
+            assert set(measurements["properties"]) == active

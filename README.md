@@ -74,7 +74,9 @@ datasets/raw/*.csv
 - `src/api/settings.py` — environment-driven runtime config (no new deps).
 - `src/api/middleware.py` — request IDs, structured logging (no payloads), body-size limit, in-memory rate guard, security headers, shared error envelope.
 - `src/api/health.py` — liveness + readiness + model-artifact integrity.
-- `src/api/services/model_registry.py` — loads persisted pipelines; per-disease input validation; the **only** inference layer.
+- `src/api/contracts.py` — authoritative Pydantic input fields, validation constraints, labels, help, and form grouping, ordered against the release manifest.
+- `src/api/services/model_registry.py` — validates through the shared contracts and loads persisted pipelines; the **only** inference layer.
+- `scripts/generate_frontend_contracts.py` — deterministic TypeScript and JSON Schema generator for the shared assessment wizard (`--check` verifies checked-in output).
 - `src/preprocessing/<disease>_schema.py` — per-disease feature semantics (single source of truth for training + API + tests).
 - `src/training/train_all.py` — thin dispatcher to the five dedicated trainers.
 - `app.py` — **legacy** Streamlit demo (fallback only; not the production surface).
@@ -110,6 +112,7 @@ python -m uvicorn src.api.main:app --reload
 API: `GET /api/v1/health` (liveness), `GET /api/v1/ready` (readiness, 503 when a
 model fails integrity), `GET /api/v1/diseases`, `GET /api/v1/diseases/{disease}`,
 `POST /api/v1/predictions/{disease}`, `POST /api/v1/reports/{disease}`.
+Prediction and report operations publish disease-specific measurement schemas in OpenAPI.
 In production, disease metadata, prediction, and report routes require the
 shared service credential. Health and readiness remain unauthenticated probes.
 
@@ -162,6 +165,13 @@ npm run test:security
 npm run typecheck
 npm run lint
 npm run build
+```
+
+From the repository root, verify that the checked-in frontend contracts match
+the Pydantic input models and persisted release feature order:
+
+```bash
+python -m scripts.generate_frontend_contracts --check
 ```
 
 To regenerate the manifest and current verification report after an intentional,

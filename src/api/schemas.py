@@ -1,11 +1,30 @@
 """Typed public API contracts."""
-from typing import Any, Literal
+from typing import Literal
+from pydantic import create_model
+from src.api.contracts import MEASUREMENT_MODELS
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+
+def _request_model(disease: str):
+    return create_model(
+        f"{disease.title()}PredictionRequest",
+        __config__=ConfigDict(extra="forbid"),
+        measurements=(MEASUREMENT_MODELS[disease], Field(..., description="Disease-specific validated input fields.")),
+    )
 
 
 class PredictionRequest(BaseModel):
-    measurements: dict[str, Any] = Field(min_length=1)
+    """Backwards-compatible generic import; route handlers use disease models."""
+    measurements: dict[str, object] = Field(min_length=1)
+
+
+DISEASE_REQUEST_MODELS = {disease: _request_model(disease) for disease in MEASUREMENT_MODELS}
+LiverPredictionRequest = DISEASE_REQUEST_MODELS["liver"]
+DiabetesPredictionRequest = DISEASE_REQUEST_MODELS["diabetes"]
+HeartPredictionRequest = DISEASE_REQUEST_MODELS["heart"]
+KidneyPredictionRequest = DISEASE_REQUEST_MODELS["kidney"]
+ParkinsonsPredictionRequest = DISEASE_REQUEST_MODELS["parkinsons"]
 
 
 class PredictionResponse(BaseModel):

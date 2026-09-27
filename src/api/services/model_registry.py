@@ -244,6 +244,11 @@ class Registry:
 
     def predict(self, k, values):
         c = self._config(k)
+        # All entry points use the same strict, metadata-rich input contract.
+        # Keep the persisted estimator, preprocessing and release semantics intact.
+        from src.api.contracts import validate_measurements
+
+        values = validate_measurements(k, values)
         unknown = set(values) - set(c.features)
         if unknown:
             raise ValueError(f"Unexpected fields: {sorted(unknown)}")

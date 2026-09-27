@@ -22,7 +22,10 @@ from src.api.middleware import (
     error_response,
     require_api_key,
 )
-from src.api.schemas import PredictionRequest, PredictionResponse
+from src.api.schemas import (
+    DiabetesPredictionRequest, HeartPredictionRequest, KidneyPredictionRequest,
+    LiverPredictionRequest, ParkinsonsPredictionRequest, PredictionRequest, PredictionResponse,
+)
 from src.api.services.model_registry import registry
 from src.api.settings import get_settings
 from src.reporting.pdf_report import create_report
@@ -80,7 +83,13 @@ def _rid(request: Request) -> str:
 
 @app.exception_handler(RequestValidationError)
 async def _validation_handler(request: Request, exc: RequestValidationError):
-    return error_response(422, "validation_error", "Invalid request body", _rid(request))
+    # Expose only schema locations, never submitted values or Pydantic's raw
+    # error context. This gives callers useful field-level guidance safely.
+    fields = sorted({str(location[-1]) for error in exc.errors()
+                     if (location := error.get("loc")) and isinstance(location[-1], str)
+                     and location[-1] not in {"body", "measurements"}})
+    message = "Invalid request body" + (f"; check fields: {', '.join(fields)}" if fields else "")
+    return error_response(422, "validation_error", message, _rid(request))
 
 
 @app.exception_handler(HTTPException)
@@ -134,28 +143,24 @@ def disease(disease: str, _: None = Depends(require_api_key)):
     return registry.metadata(disease)
 
 
-@app.post("/api/v1/predictions/{disease}", response_model=PredictionResponse)
-def prediction(disease: str, req: PredictionRequest, _: None = Depends(require_api_key)):
-    """Return the typed, non-diagnostic communication contract for one model."""
-    _require_known(disease)
+def _prediction(disease: str, req):
     try:
-        return registry.predict(disease, req.measurements)
+        return registry.predict(disease, req.measurements.model_dump(exclude_unset=True))
     except KeyError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@app.post("/api/v1/reports/{disease}")
-def report(disease: str, req: PredictionRequest, _: None = Depends(require_api_key)):
-    _require_known(disease)
+def _report(disease: str, req):
     try:
-        result = registry.predict(disease, req.measurements)
+        measurements = req.measurements.model_dump(exclude_unset=True)
+        result = registry.predict(disease, measurements)
     except KeyError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
-    pdf = create_report(registry.metadata(disease)["name"], req.measurements, result)
+    pdf = create_report(registry.metadata(disease)["name"], measurements, result)
     return Response(
         content=pdf,
         media_type="application/pdf",
@@ -164,3 +169,79 @@ def report(disease: str, req: PredictionRequest, _: None = Depends(require_api_k
             "Cache-Control": "no-store",
         },
     )
+
+
+# Fixed disease paths preserve the public URLs while giving every operation its
+# own measurement schema in generated OpenAPI documentation.
+@app.post("/api/v1/predictions/liver", response_model=PredictionResponse)
+def prediction_liver(req: LiverPredictionRequest, _: None = Depends(require_api_key)):
+    return _prediction("liver", req)
+
+
+@app.post("/api/v1/predictions/diabetes", response_model=PredictionResponse)
+def prediction_diabetes(req: DiabetesPredictionRequest, _: None = Depends(require_api_key)):
+    return _prediction("diabetes", req)
+
+
+@app.post("/api/v1/predictions/heart", response_model=PredictionResponse)
+def prediction_heart(req: HeartPredictionRequest, _: None = Depends(require_api_key)):
+    return _prediction("heart", req)
+
+
+@app.post("/api/v1/predictions/kidney", response_model=PredictionResponse)
+def prediction_kidney(req: KidneyPredictionRequest, _: None = Depends(require_api_key)):
+    return _prediction("kidney", req)
+
+
+@app.post("/api/v1/predictions/parkinsons", response_model=PredictionResponse)
+def prediction_parkinsons(req: ParkinsonsPredictionRequest, _: None = Depends(require_api_key)):
+    return _prediction("parkinsons", req)
+
+
+@app.post("/api/v1/reports/liver")
+def report_liver(req: LiverPredictionRequest, _: None = Depends(require_api_key)):
+    return _report("liver", req)
+
+
+@app.post("/api/v1/reports/diabetes")
+def report_diabetes(req: DiabetesPredictionRequest, _: None = Depends(require_api_key)):
+    return _report("diabetes", req)
+
+
+@app.post("/api/v1/reports/heart")
+def report_heart(req: HeartPredictionRequest, _: None = Depends(require_api_key)):
+    return _report("heart", req)
+
+
+@app.post("/api/v1/reports/kidney")
+def report_kidney(req: KidneyPredictionRequest, _: None = Depends(require_api_key)):
+    return _report("kidney", req)
+
+
+@app.post("/api/v1/reports/parkinsons")
+def report_parkinsons(req: ParkinsonsPredictionRequest, _: None = Depends(require_api_key)):
+    return _report("parkinsons", req)
+
+
+# Keep the historical unknown-slug error envelope. These fallback operations
+# are deliberately omitted from OpenAPI so published schemas stay disease-specific.
+@app.post("/api/v1/predictions/{disease}", include_in_schema=False)
+def prediction_unknown(disease: str, req: PredictionRequest, _: None = Depends(require_api_key)):
+    _require_known(disease)
+    model = {
+        "liver": LiverPredictionRequest, "diabetes": DiabetesPredictionRequest,
+        "heart": HeartPredictionRequest, "kidney": KidneyPredictionRequest,
+        "parkinsons": ParkinsonsPredictionRequest,
+    }[disease]
+    return _prediction(disease, model.model_validate({"measurements": req.measurements}))
+
+
+@app.post("/api/v1/reports/{disease}", include_in_schema=False)
+def report_unknown(disease: str, req: PredictionRequest, _: None = Depends(require_api_key)):
+    _require_known(disease)
+    model = {
+        "liver": LiverPredictionRequest, "diabetes": DiabetesPredictionRequest,
+        "heart": HeartPredictionRequest, "kidney": KidneyPredictionRequest,
+        "parkinsons": ParkinsonsPredictionRequest,
+    }[disease]
+    return _report(disease, model.model_validate({"measurements": req.measurements}))
