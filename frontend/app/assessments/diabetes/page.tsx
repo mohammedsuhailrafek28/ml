@@ -1,7 +1,7 @@
 'use client';
 import {useState} from 'react';
 import {motion,useReducedMotion} from 'motion/react';
-import {predictDisease,generateDiseaseReport} from '../../../lib/api';
+import {predictDisease} from '../../../lib/api';
 import PredictionResult from '../../../components/PredictionResult';
 import type {PredictionResponse} from '../../../lib/api-types';
 
@@ -58,11 +58,6 @@ export default function DiabetesAssessment(){
       setError(msg);setStage('review');
     }
   }
-  async function pdf(){
-    const r=await generateDiseaseReport('diabetes',payload());
-    if(r.ok){const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='diabetes-assessment-report.pdf';a.click();}
-  }
-
   if(stage==='intro')return <main className="page"><p className="eyebrow">DIABETES ASSESSMENT</p><h1>Explore a diabetes-dataset model output</h1><div className="card">
     <p>This educational module uses the <strong>Pima Indians Diabetes Database</strong> (768 records of Pima women aged 21+) and a persisted scikit-learn <strong>logistic regression</strong> pipeline chosen by cross-validation on a held-out development split. Impossible zero readings for glucose, blood pressure, skin fold, insulin and BMI are treated as &quot;not measured&quot; and imputed inside the pipeline. It produces an uncalibrated dataset-associated score and is not a diagnosis.</p>
     <button className="button" onClick={()=>setStage('form')}>Begin entering measurements</button>
@@ -75,7 +70,7 @@ export default function DiabetesAssessment(){
   if(stage==='results'&&result){
     return <main className="page"><motion.div initial={reduced?false:{opacity:0,y:10}} animate={{opacity:1,y:0}}>
       <p className="eyebrow">RESULT</p><h1>Diabetes model threshold result</h1>
-      <PredictionResult result={result} onDownload={pdf}/>
+      <PredictionResult result={result} disease="diabetes" measurements={payload()}/>
     </motion.div></main>;
   }
 

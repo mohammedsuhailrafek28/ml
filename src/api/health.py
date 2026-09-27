@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from src.api.settings import get_settings
 from src.utils.config import DISEASES
 
-API_VERSION = "1.1"
+API_VERSION = "1.2"
 
 
 def liveness() -> dict:
@@ -38,8 +38,8 @@ def _check_disease(key: str) -> dict:
     if meta_path.exists():
         try:
             meta = json.loads(meta_path.read_text())
-        except Exception as exc:  # noqa: BLE001
-            issues.append(f"metadata.json unparseable: {exc}")
+        except Exception:  # noqa: BLE001 - public health output must not leak paths/details
+            issues.append("metadata.json is invalid")
 
     if meta:
         selected_model = meta.get("selected_model") or meta.get("selected_algorithm")
@@ -49,7 +49,7 @@ def _check_disease(key: str) -> dict:
             issues.append("metadata missing holdout metrics")
         ap = meta.get("artifact_path")
         if ap and not (settings.model_root.parent / ap).exists() and not pipe_path.exists():
-            issues.append(f"metadata artifact_path does not resolve: {ap}")
+            issues.append("metadata artifact_path does not resolve")
 
     if pipe_path.exists():
         try:
@@ -58,8 +58,8 @@ def _check_disease(key: str) -> dict:
             model = load(pipe_path)
             if not hasattr(model, "predict_proba"):
                 issues.append("loaded model has no predict_proba")
-        except Exception as exc:  # noqa: BLE001
-            issues.append(f"pipeline failed to load: {exc}")
+        except Exception:  # noqa: BLE001 - public health output must not leak paths/details
+            issues.append("pipeline failed to load")
 
     return {
         "ok": not issues,
@@ -84,14 +84,13 @@ def readiness() -> tuple[dict, int]:
         release_issues = runtime_compatibility_issues(manifest) + release_file_issues(
             include_datasets=False, manifest=manifest, model_root=settings.model_root
         )
-    except Exception as exc:  # noqa: BLE001 - readiness must report, not crash
-        release_issues = [f"release manifest unavailable or invalid: {exc}"]
+    except Exception:  # noqa: BLE001 - readiness must report safely, not crash
+        release_issues = ["release manifest unavailable or invalid"]
     ready = all(r["ok"] for r in results.values()) and not release_issues
     payload = {
         "status": "ready" if ready else "degraded",
         "version": API_VERSION,
         "checkedAt": datetime.now(timezone.utc).isoformat(),
-        "modelRoot": str(get_settings().model_root),
         "releaseIntegrity": {"ok": not release_issues, "issues": release_issues},
         "diseases": results,
     }

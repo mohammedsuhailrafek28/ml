@@ -1,8 +1,12 @@
+'use client';
+import {useState} from 'react';
 import type {PredictionResponse} from '../lib/api-types';
+import {generateDiseaseReport} from '../lib/api';
 
 type Props = {
   result: PredictionResponse;
-  onDownload: () => void;
+  disease: string;
+  measurements: Record<string,unknown>;
 };
 
 export function ReleaseBadge({status}:{status:string}) {
@@ -12,8 +16,26 @@ export function ReleaseBadge({status}:{status:string}) {
   </span>;
 }
 
-export default function PredictionResult({result,onDownload}:Props) {
+export default function PredictionResult({result,disease,measurements}:Props) {
+  const [reportLoading,setReportLoading]=useState(false);
+  const [reportError,setReportError]=useState('');
   const relation=result.threshold_result==='at_or_above'?'At or above':'Below';
+  async function downloadReport(){
+    if(reportLoading)return;
+    setReportLoading(true);setReportError('');
+    let objectUrl:string|undefined;
+    try{
+      const blob=await generateDiseaseReport(disease,measurements);
+      objectUrl=URL.createObjectURL(blob);
+      const link=document.createElement('a');
+      link.href=objectUrl;link.download=`${disease}_report.pdf`;link.click();
+    }catch{
+      setReportError('The report could not be generated. Please try again.');
+    }finally{
+      if(objectUrl){const completedUrl=objectUrl;setTimeout(()=>URL.revokeObjectURL(completedUrl),0)}
+      setReportLoading(false);
+    }
+  }
   return <div className="card result-card">
     <ReleaseBadge status={result.release_status}/>
     <h2>{relation} the model&apos;s decision threshold</h2>
@@ -31,6 +53,9 @@ export default function PredictionResult({result,onDownload}:Props) {
     <ul>{result.limitations.map((item,index)=><li key={index}>{item}</li>)}</ul>
     <p className="disclaimer"><strong>Important:</strong> {result.disclaimer}</p>
     <p>If symptoms or test results concern you, discuss them with a qualified healthcare professional.</p>
-    <button className="button" onClick={onDownload}>Download PDF report</button>
+    <button className="button" disabled={reportLoading} onClick={downloadReport}>
+      {reportLoading?'Generating report…':'Download PDF report'}
+    </button>
+    {reportError&&<p role="alert">{reportError}</p>}
   </div>;
 }

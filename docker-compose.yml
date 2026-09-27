@@ -1,30 +1,32 @@
-# Local full-stack run:  docker compose up --build
-# Copy .env.example -> .env first and set ALLOWED_ORIGINS / API_KEY as needed.
+# Secure full-stack default: set SERVICE_API_KEY to a random 32+ character value,
+# then run `docker compose up --build`. Only the Next.js service is published.
 services:
   api:
     build: .
     image: medical-ai-api
     environment:
       APP_ENV: ${APP_ENV:-production}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
-      API_KEY: ${API_KEY:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY to a random 32+ character value}
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
       MAX_REQUEST_BYTES: ${MAX_REQUEST_BYTES:-65536}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     restart: unless-stopped
 
   web:
     build:
       context: ./frontend
-      args:
-        # Baked into the browser bundle at build time. Must be reachable from the
-        # end user's browser (the Docker host), not an internal service name.
-        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
     image: medical-ai-web
+    environment:
+      BACKEND_INTERNAL_URL: http://api:8000
+      BACKEND_API_KEY: ${SERVICE_API_KEY:?Set SERVICE_API_KEY to a random 32+ character value}
+      BACKEND_TIMEOUT_MS: ${BACKEND_TIMEOUT_MS:-8000}
+      BFF_MAX_REQUEST_BYTES: ${BFF_MAX_REQUEST_BYTES:-16384}
     ports:
       - "3000:3000"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     restart: unless-stopped

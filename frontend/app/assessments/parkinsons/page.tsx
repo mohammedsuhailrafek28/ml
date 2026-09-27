@@ -1,7 +1,7 @@
 'use client';
 import {useState} from 'react';
 import {motion,useReducedMotion} from 'motion/react';
-import {predictDisease,generateDiseaseReport} from '../../../lib/api';
+import {predictDisease} from '../../../lib/api';
 import PredictionResult, {ReleaseBadge} from '../../../components/PredictionResult';
 import type {PredictionResponse} from '../../../lib/api-types';
 
@@ -74,11 +74,6 @@ export default function ParkinsonsAssessment(){
       setError(msg);setStage('review');
     }
   }
-  async function pdf(){
-    const r=await generateDiseaseReport('parkinsons',payload());
-    if(r.ok){const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='parkinsons-assessment-report.pdf';a.click();}
-  }
-
   if(stage==='intro')return <main className="page"><p className="eyebrow">PARKINSON&apos;S ASSESSMENT</p><ReleaseBadge status="experimental"/><h1>Explore a Parkinson&apos;s-associated voice pattern</h1><div className="card">
     <p>This educational module uses the UCI <strong>Parkinson&apos;s voice dataset</strong> (195 sustained-vowel recordings from 32 people, 2008) and a persisted scikit-learn <strong>logistic regression</strong> pipeline. Because the dataset has ~6 recordings per person, training, tuning and evaluation are all <strong>subject-aware</strong> — the same person never appears in both training and test data.</p>
     <p><strong>This module accepts pre-computed voice biomarkers.</strong> The 15 values below are produced by voice-analysis software (e.g. Praat) from a sustained-vowel recording. Medical AI Suite does <em>not</em> record or process raw audio.</p>
@@ -93,7 +88,7 @@ export default function ParkinsonsAssessment(){
   if(stage==='results'&&result){
     return <main className="page"><motion.div initial={reduced?false:{opacity:0,y:10}} animate={{opacity:1,y:0}}>
       <p className="eyebrow">RESULT</p><h1>Parkinson&apos;s model threshold result</h1>
-      <PredictionResult result={result} onDownload={pdf}/>
+      <PredictionResult result={result} disease="parkinsons" measurements={payload()}/>
     </motion.div></main>;
   }
 

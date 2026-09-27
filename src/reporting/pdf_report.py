@@ -1,15 +1,16 @@
-"""Generate a cautious, contract-aligned PDF model report."""
+"""Generate a cautious, contract-aligned PDF entirely in memory."""
 from datetime import datetime
-from pathlib import Path
+from io import BytesIO
 from textwrap import wrap
 
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 
-def create_report(path, disease, values, result):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    document = canvas.Canvas(str(path), pagesize=letter)
+def create_report(disease, values, result) -> bytes:
+    """Return one independent PDF byte stream without writing to disk."""
+    output = BytesIO()
+    document = canvas.Canvas(output, pagesize=letter, pageCompression=0)
     y = 760
     document.setFont("Helvetica-Bold", 16)
     document.drawString(50, y, "Medical AI Suite - Educational model report")
@@ -52,3 +53,4 @@ def create_report(path, disease, values, result):
             document.drawString(50, y, segment)
             y -= 18
     document.save()
+    return output.getvalue()

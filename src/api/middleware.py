@@ -8,6 +8,7 @@ latency, request id) and NEVER the request body / measurement payload.
 from __future__ import annotations
 
 import json
+import hmac
 import logging
 import time
 import uuid
@@ -157,7 +158,7 @@ def require_api_key(request: Request) -> None:
     if not settings.auth_enabled:
         return
     supplied = request.headers.get("X-API-Key", "")
-    if supplied != settings.api_key:
+    if not hmac.compare_digest(supplied, settings.api_key or ""):
         rid = getattr(request.state, "request_id", uuid.uuid4().hex)
         from fastapi import HTTPException
 

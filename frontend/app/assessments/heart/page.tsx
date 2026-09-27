@@ -1,7 +1,7 @@
 'use client';
 import {useState} from 'react';
 import {motion,useReducedMotion} from 'motion/react';
-import {predictDisease,generateDiseaseReport} from '../../../lib/api';
+import {predictDisease} from '../../../lib/api';
 import PredictionResult from '../../../components/PredictionResult';
 import type {PredictionResponse} from '../../../lib/api-types';
 
@@ -79,11 +79,6 @@ export default function HeartAssessment(){
       setError(msg);setStage('review');
     }
   }
-  async function pdf(){
-    const r=await generateDiseaseReport('heart',payload());
-    if(r.ok){const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='heart-assessment-report.pdf';a.click();}
-  }
-
   if(stage==='intro')return <main className="page"><p className="eyebrow">HEART ASSESSMENT</p><h1>Explore a heart-dataset model output</h1><div className="card">
     <p>This educational module uses the UCI <strong>Cleveland Heart Disease</strong> database (303 patient records) and a persisted scikit-learn <strong>logistic regression</strong> pipeline chosen by cross-validation on a held-out development split. It produces an uncalibrated dataset-associated score and is not a diagnosis.</p>
     <button className="button" onClick={()=>setStage('form')}>Begin entering measurements</button>
@@ -96,7 +91,7 @@ export default function HeartAssessment(){
   if(stage==='results'&&result){
     return <main className="page"><motion.div initial={reduced?false:{opacity:0,y:10}} animate={{opacity:1,y:0}}>
       <p className="eyebrow">RESULT</p><h1>Heart model threshold result</h1>
-      <PredictionResult result={result} onDownload={pdf}/>
+      <PredictionResult result={result} disease="heart" measurements={payload()}/>
     </motion.div></main>;
   }
 

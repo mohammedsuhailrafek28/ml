@@ -31,8 +31,7 @@ Thumbs.db
 .idea/
 .vscode/
 
-# ---- Generated at runtime (NOT source-controlled) ----
-# Per-viewer / per-run report output written by the API report endpoint.
+# ---- Legacy generated report paths (the API now generates PDFs in memory) ----
 reports/generated/
 medical_ai_*.pdf
 

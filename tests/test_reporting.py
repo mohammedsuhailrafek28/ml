@@ -18,7 +18,7 @@ class _Canvas:
         pass
 
 
-def test_pdf_uses_the_prediction_communication_contract(monkeypatch, tmp_path):
+def test_pdf_uses_the_prediction_communication_contract(monkeypatch):
     output = _Canvas()
     monkeypatch.setattr(pdf_report.canvas, "Canvas", lambda *_a, **_k: output)
     result = {
@@ -35,9 +35,10 @@ def test_pdf_uses_the_prediction_communication_contract(monkeypatch, tmp_path):
         "disclaimer": "Not a probability of disease or a diagnosis.",
     }
 
-    pdf_report.create_report(tmp_path / "report.pdf", "Parkinson's disease", {"PPE": 0.2}, result)
+    generated = pdf_report.create_report("Parkinson's disease", {"PPE": 0.2}, result)
     text = " ".join(output.text)
 
+    assert generated == b""
     assert "EXPERIMENTAL" in text
     assert "Model classification: threshold class 1" in text
     assert "Uncalibrated model score: 0.9690" in text

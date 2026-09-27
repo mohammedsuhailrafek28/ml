@@ -1,7 +1,7 @@
 'use client';
 import {useState} from 'react';
 import {motion,useReducedMotion} from 'motion/react';
-import {predictDisease,generateDiseaseReport} from '../../../lib/api';
+import {predictDisease} from '../../../lib/api';
 import PredictionResult from '../../../components/PredictionResult';
 import type {PredictionResponse} from '../../../lib/api-types';
 
@@ -76,11 +76,6 @@ export default function KidneyAssessment(){
       setError(msg);setStage('review');
     }
   }
-  async function pdf(){
-    const r=await generateDiseaseReport('kidney',payload());
-    if(r.ok){const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='kidney-assessment-report.pdf';a.click();}
-  }
-
   if(stage==='intro')return <main className="page"><p className="eyebrow">KIDNEY ASSESSMENT</p><h1>Explore a kidney-dataset model output</h1><div className="card">
     <p>This educational module uses the UCI <strong>Chronic Kidney Disease</strong> dataset (400 records, 2015). A fold-safe feature-selection experiment reduced the 24 recorded fields to a compact <strong>14-field</strong> set with no loss of cross-validated performance, and a persisted scikit-learn <strong>logistic regression</strong> pipeline was chosen on a held-out development split. Every field below is optional — mark it &quot;Not available&quot; and the pipeline will impute it. It produces an uncalibrated dataset-associated score and is not a diagnosis.</p>
     <p><small>This dataset is close to separable on legitimate clinical markers, so held-out scores are very high. That reflects this small curated dataset, not clinical-grade CKD detection.</small></p>
@@ -94,7 +89,7 @@ export default function KidneyAssessment(){
   if(stage==='results'&&result){
     return <main className="page"><motion.div initial={reduced?false:{opacity:0,y:10}} animate={{opacity:1,y:0}}>
       <p className="eyebrow">RESULT</p><h1>Kidney model threshold result</h1>
-      <PredictionResult result={result} onDownload={pdf}/>
+      <PredictionResult result={result} disease="kidney" measurements={payload()}/>
     </motion.div></main>;
   }
 

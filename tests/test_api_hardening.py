@@ -3,6 +3,9 @@ body-size limit, optional API key, CORS. No disease ML behaviour is touched.
 """
 import importlib
 import os
+from pathlib import Path
+import subprocess
+import sys
 import warnings
 
 import pytest
@@ -49,7 +52,7 @@ def test_defaults_are_dev_friendly(env):
 
 
 def test_production_requires_explicit_origins(env):
-    s = env(APP_ENV="production", ALLOWED_ORIGINS=None)
+    s = env(APP_ENV="production", ALLOWED_ORIGINS=None, API_KEY="x" * 32)
     assert s.is_production is True
     assert s.allowed_origins == ()
     assert s.debug_errors is False
@@ -68,6 +71,34 @@ def test_api_key_enables_auth(env):
     assert env(API_KEY="").auth_enabled is False
 
 
+def test_production_rejects_missing_or_short_service_key(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.delenv("API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="at least 32"):
+        settings_mod.reload_settings()
+    monkeypatch.setenv("API_KEY", "too-short")
+    with pytest.raises(RuntimeError, match="at least 32"):
+        settings_mod.reload_settings()
+    monkeypatch.setenv("APP_ENV", "development")
+    monkeypatch.delenv("API_KEY", raising=False)
+    settings_mod.reload_settings()
+
+
+def test_production_import_fails_without_service_key():
+    process_env = {**os.environ, "APP_ENV": "production"}
+    process_env.pop("API_KEY", None)
+    completed = subprocess.run(
+        [sys.executable, "-c", "import src.api.main"],
+        cwd=Path(__file__).resolve().parents[1],
+        env=process_env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode != 0
+    assert "Production requires API_KEY" in completed.stderr
+
+
 # --------------------------- readiness / integrity ------------------------
 def test_ready_endpoint_ok_with_real_models(env):
     env(MODEL_ROOT=None)
@@ -77,6 +108,9 @@ def test_ready_endpoint_ok_with_real_models(env):
     assert body["status"] == "ready"
     assert set(body["diseases"]) == {"liver", "heart", "diabetes", "kidney", "parkinsons"}
     assert all(d["ok"] for d in body["diseases"].values())
+    serialized = r.text
+    assert str(Path.cwd()) not in serialized
+    assert "modelRoot" not in body
 
 
 def test_ready_degrades_when_artifacts_missing(env, tmp_path):
@@ -86,6 +120,7 @@ def test_ready_degrades_when_artifacts_missing(env, tmp_path):
     body = r.json()
     assert body["status"] == "degraded"
     assert any(not d["ok"] and d["issues"] for d in body["diseases"].values())
+    assert str(tmp_path) not in r.text
 
 
 def test_health_is_cheap_and_lists_loaded(env):
@@ -95,6 +130,7 @@ def test_health_is_cheap_and_lists_loaded(env):
     body = r.json()
     assert body["status"] == "alive"
     assert "loaded_diseases" in body
+    assert str(Path.cwd()) not in r.text
 
 
 # --------------------------- error envelope / request id -----------------
@@ -150,6 +186,53 @@ def test_api_key_required_when_configured(env):
     assert c.get("/api/v1/health").status_code == 200
 
 
+def test_metadata_endpoints_require_configured_key(env):
+    env(API_KEY="s" * 32, MODEL_ROOT=None)
+    c = _client()
+    assert c.get("/api/v1/diseases").status_code == 401
+    assert c.get("/api/v1/diseases/liver").status_code == 401
+    headers = {"X-API-Key": "s" * 32}
+    assert c.get("/api/v1/diseases", headers=headers).status_code == 200
+    assert c.get("/api/v1/diseases/liver", headers=headers).status_code == 200
+
+
+def test_invalid_service_key_is_rejected(env):
+    env(API_KEY="s" * 32, MODEL_ROOT=None)
+    response = _client().post(
+        "/api/v1/predictions/liver",
+        json={"measurements": LIVER},
+        headers={"X-API-Key": "w" * 32},
+    )
+    assert response.status_code == 401
+
+
+def test_production_service_boundary_protects_all_sensitive_routes(env):
+    secret = "production-service-boundary-test-key-123456"
+    env(APP_ENV="production", API_KEY=secret, ALLOWED_ORIGINS=None, MODEL_ROOT=None)
+    client = _client()
+    protected_requests = (
+        ("get", "/api/v1/diseases", None),
+        ("get", "/api/v1/diseases/liver", None),
+        ("post", "/api/v1/predictions/liver", {"measurements": LIVER}),
+        ("post", "/api/v1/reports/liver", {"measurements": LIVER}),
+    )
+
+    for method, path, payload in protected_requests:
+        call = getattr(client, method)
+        request_kwargs = {} if payload is None else {"json": payload}
+        assert call(path, **request_kwargs).status_code == 401
+        assert call(path, **request_kwargs, headers={"X-API-Key": "w" * 32}).status_code == 401
+        response = call(path, **request_kwargs, headers={"X-API-Key": secret})
+        assert response.status_code == 200
+        assert response.headers["cache-control"] == "no-store"
+
+    for path in ("/api/v1/health", "/api/v1/ready"):
+        response = client.get(path)
+        assert response.status_code == 200
+        assert secret not in response.text
+        assert str(Path.cwd()) not in response.text
+
+
 def test_demo_mode_needs_no_key(env):
     env(API_KEY=None, MODEL_ROOT=None)
     r = _client().post("/api/v1/predictions/liver", json={"measurements": LIVER})
@@ -175,6 +258,24 @@ def test_prediction_communication_contract(env):
         assert key in b
     assert not {"probability", "threshold", "label", "selectedModel"} & set(b)
     assert "not a probability" in b["disclaimer"]
+    assert r.headers["cache-control"] == "no-store"
+
+
+def test_logs_exclude_measurements_and_credentials(env, caplog):
+    secret = "log-test-service-key-not-for-production-123456"
+    env(API_KEY=secret, MODEL_ROOT=None)
+    unique_measurement = 47.123456
+    payload = {**LIVER, "TB": unique_measurement}
+    with caplog.at_level("INFO", logger="medical_ai.api"):
+        response = _client().post(
+            "/api/v1/predictions/liver",
+            json={"measurements": payload},
+            headers={"X-API-Key": secret},
+        )
+    assert response.status_code == 200
+    logs = caplog.text
+    assert secret not in logs
+    assert str(unique_measurement) not in logs
 
 
 def test_prediction_openapi_response_is_typed(env):

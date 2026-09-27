@@ -65,8 +65,9 @@ in this system.
 datasets/raw/*.csv
   -> src/training/train_<disease>.py   (dedicated, leakage-safe / subject-aware trainer)
        -> models/<disease>/            persisted joblib pipeline + metadata.json + metrics.json
-  -> src/api/                          FastAPI: validation, inference, health/readiness, PDF report
-       -> frontend/                    Next.js App Router: one assessment flow per disease
+  -> src/api/                          private FastAPI service: validation, inference, in-memory PDF
+       <- frontend/app/api/            allowlisted Next.js server boundary with service credential
+            <- browser                 same-origin requests; no backend secret or internal URL
 ```
 
 - `src/api/main.py` — routes + middleware wiring.
@@ -109,6 +110,8 @@ python -m uvicorn src.api.main:app --reload
 API: `GET /api/v1/health` (liveness), `GET /api/v1/ready` (readiness, 503 when a
 model fails integrity), `GET /api/v1/diseases`, `GET /api/v1/diseases/{disease}`,
 `POST /api/v1/predictions/{disease}`, `POST /api/v1/reports/{disease}`.
+In production, disease metadata, prediction, and report routes require the
+shared service credential. Health and readiness remain unauthenticated probes.
 
 Prediction responses use a typed communication contract: `model_score`
 (explicitly `score_type: uncalibrated_model_score`), `decision_threshold`,
@@ -121,18 +124,30 @@ probability. The OpenAPI schema at `/docs` is authoritative for response types.
 ```bash
 cd frontend
 npm ci
-copy .env.example .env.local            # optional; defaults to http://localhost:8000
+copy .env.example .env.local            # server-only backend connection settings
 npm run dev                             # http://localhost:3000
 ```
 
+The browser calls same-origin `/api/...` Next.js handlers. For local development,
+`.env.local` supplies `BACKEND_INTERNAL_URL=http://localhost:8000`; leave
+`BACKEND_API_KEY` blank only when the backend runs in development mode without
+`API_KEY`. Neither value is exposed through `NEXT_PUBLIC_*`.
+
 ## Environment variables
 
-Backend (`.env`, see `.env.example`): `APP_ENV`, `ALLOWED_ORIGINS` (required in
-production; never wildcard), `API_HOST`, `API_PORT`, `API_KEY` (blank = open demo
-mode; when set, send `X-API-Key`), `MAX_REQUEST_BYTES`, `RATE_LIMIT_PER_MINUTE`,
-`MODEL_ROOT`, `REPORT_DIR`, `LOG_LEVEL`.
+Backend (`.env`, see `.env.example`): `APP_ENV`, `ALLOWED_ORIGINS`, `API_HOST`,
+`API_PORT`, `API_KEY`, `MAX_REQUEST_BYTES`, `RATE_LIMIT_PER_MINUTE`, `MODEL_ROOT`,
+and `LOG_LEVEL`. Production refuses to start unless `API_KEY` is at least 32
+characters; generate a random value and inject it at runtime.
 
-Frontend (`.env.local`): `NEXT_PUBLIC_API_BASE_URL` (browser-exposed; no secrets).
+Next.js server (`frontend/.env.local`): `BACKEND_INTERNAL_URL`,
+`BACKEND_API_KEY`, `BACKEND_TIMEOUT_MS`, and `BFF_MAX_REQUEST_BYTES`. These are
+server-only values. The shared key protects service-to-service calls; it does not
+identify or authorize individual users.
+
+PDF reports are generated per request in memory and returned with
+`Cache-Control: no-store`; the backend does not retain report files or submitted
+measurements.
 
 ## Training & testing
 
@@ -143,6 +158,7 @@ pytest -q                                            # full suite
 ruff check --select E9,F63,F7,F82,F401,F811 src tests
 cd frontend
 npm audit --omit=dev
+npm run test:security
 npm run typecheck
 npm run lint
 npm run build
@@ -172,9 +188,9 @@ make a failing drift test pass.
 `.github/workflows/ci.yml` runs on push/PR: **backend** (hash-locked dependencies,
 dependency integrity, release-manifest and golden-vector verification, ruff error
 subset, import smoke, pytest), **frontend** (`npm ci`, production dependency
-audit, typecheck, ESLint, production build), **smoke** (hash-locked runtime,
-start the API, hit health/readiness, one prediction per disease, one PDF). No
-secrets required.
+audit, boundary security tests, typecheck, ESLint, production build, browser-
+bundle secret scan), **smoke** (ephemeral service key, hash-locked runtime,
+health/readiness, one protected prediction per disease, one in-memory PDF).
 
 ## Deployment
 
@@ -182,9 +198,16 @@ secrets required.
 (multi-stage, non-root), `docker-compose.yml` for a local full stack:
 
 ```bash
-copy .env.example .env
-docker compose up --build       # api :8000, web :3000
+# PowerShell example; use an equivalent secret generator in other shells.
+$env:SERVICE_API_KEY = python -c "import secrets; print(secrets.token_urlsafe(32))"
+docker compose up --build       # web :3000; API is internal-only
 ```
+
+The production-default Compose topology publishes only Next.js on port 3000.
+Next.js reaches FastAPI as `http://api:8000` on the private Compose network and
+adds the shared credential server-side. For non-container local development,
+run FastAPI in `APP_ENV=development` on port 8000 and Next.js separately as shown
+above.
 
 The images are provided for reproducibility; they have not been build-verified in
 the development environment used to author this repo (no Docker available there).
@@ -193,7 +216,7 @@ the development environment used to author this repo (no Docker available there)
 
 - Datasets are small, single-cohort teaching datasets from the 1980s–2010s. Metrics are not clinical validation and will not transfer to real screening populations.
 - Kidney's ~1.0 and Parkinson's small holdout are dataset artefacts, documented above and in metadata.
-- No TLS termination, no persistent auth store, no distributed rate limiting — these belong to the deployment layer. `API_KEY` is a single shared key for basic gating only.
+- No TLS termination, user identity, authorization policy, persistent auth store, or distributed rate limiting is included. `API_KEY` is a shared service credential between Next.js and FastAPI, not end-user authentication.
 - `datasets/raw/kidney_download` is a leftover download archive (gitignored going forward); the tracked `datasets/raw/*.csv` are the real inputs.
 
 ## Datasets & attribution

@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 
 from src.api.health import API_VERSION, liveness, readiness, startup_integrity_log
 from src.api.middleware import (
@@ -124,12 +124,12 @@ def ready(request: Request):
 
 
 @app.get("/api/v1/diseases")
-def diseases():
+def diseases(_: None = Depends(require_api_key)):
     return registry.catalog()
 
 
 @app.get("/api/v1/diseases/{disease}")
-def disease(disease: str):
+def disease(disease: str, _: None = Depends(require_api_key)):
     _require_known(disease)
     return registry.metadata(disease)
 
@@ -155,8 +155,12 @@ def report(disease: str, req: PredictionRequest, _: None = Depends(require_api_k
         raise HTTPException(status_code=400, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
-    settings.report_dir.mkdir(parents=True, exist_ok=True)
-    path = settings.report_dir / f"medical_ai_{disease}.pdf"
-    create_report(path, registry.metadata(disease)["name"], req.measurements, result)
-    return FileResponse(path, media_type="application/pdf",
-                        filename=f"{disease}_report.pdf")
+    pdf = create_report(registry.metadata(disease)["name"], req.measurements, result)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{disease}_report.pdf"',
+            "Cache-Control": "no-store",
+        },
+    )
