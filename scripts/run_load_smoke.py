@@ -162,11 +162,18 @@ def main() -> int:
         web_env = {
             **os.environ, "NODE_ENV": "production", "NEXT_TELEMETRY_DISABLED": "1",
             "BACKEND_INTERNAL_URL": api_url, "BACKEND_API_KEY": api_key,
+            "APP_VERSION": json.loads((ROOT / "release" / "application.json").read_text(encoding="utf-8"))["version"],
+            "HOSTNAME": "127.0.0.1", "PORT": str(web_port),
             "BACKEND_TIMEOUT_MS": "15000", "BFF_MAX_REQUEST_BYTES": "16384",
         }
-        next_cli = ROOT / "frontend/node_modules/next/dist/bin/next"
+        subprocess.run(
+            [node, str(ROOT / "frontend/scripts/prepare-standalone.mjs")],
+            cwd=ROOT / "frontend", env=web_env, check=True,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        standalone_server = ROOT / "frontend/.next/standalone/server.js"
         web = subprocess.Popen(
-            [node, str(next_cli), "start", "-H", "127.0.0.1", "-p", str(web_port)],
+            [node, str(standalone_server)],
             cwd=ROOT / "frontend", env=web_env, stdout=web_log, stderr=subprocess.STDOUT,
             start_new_session=os.name != "nt",
             creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,

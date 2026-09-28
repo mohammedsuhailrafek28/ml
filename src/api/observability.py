@@ -8,9 +8,10 @@ from datetime import datetime, timezone
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram
 
 from src.api.settings import get_settings
+from src.application_release import application_release
 from src.utils.config import DISEASES
 
-API_VERSION = "1.2"
+API_VERSION = application_release()["version"]
 METRICS_REGISTRY = CollectorRegistry()
 
 HTTP_REQUESTS = Counter(

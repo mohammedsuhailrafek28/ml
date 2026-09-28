@@ -16,7 +16,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
-from src.api.health import API_VERSION, liveness, readiness, startup_integrity_log
+from src.api.health import liveness, readiness, startup_integrity_log
+from src.application_release import application_release
 from src.api.middleware import (
     BodySizeLimitMiddleware,
     RateLimitMiddleware,
@@ -50,7 +51,7 @@ async def _lifespan(_: FastAPI):
 
 app = FastAPI(
     title="Medical AI Suite API",
-    version=API_VERSION,
+    version=application_release()["version"],
     description=(
         "Educational persisted-model inference. Returned model_score values are "
         "uncalibrated scores, not disease probabilities, diagnoses, or screening results."

@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url';
 
 const frontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const root = path.resolve(frontend, '..');
+const applicationVersion = JSON.parse(readFileSync(path.join(root, 'release/application.json'), 'utf8')).version;
 const temporaryPrefix = 'medical-ai-suite-e2e-';
 const requiredNodeVersion = 'v20.19.0';
 const temporaryPython = mkdtempSync(path.join(tmpdir(), temporaryPrefix));
@@ -241,13 +242,15 @@ async function main() {
   assertNodeVersion('Next.js production build');
   runSync(process.execPath, ['node_modules/next/dist/bin/next', 'build'], {
     cwd: frontend,
-    env: {...process.env, BACKEND_INTERNAL_URL: internalUrl, BACKEND_API_KEY: serviceKey},
+    env: {...process.env, APP_VERSION: applicationVersion, BACKEND_INTERNAL_URL: internalUrl, BACKEND_API_KEY: serviceKey},
   });
+  runSync(process.execPath, ['scripts/prepare-standalone.mjs'], {cwd: frontend});
   if (interrupted) return;
   assertBundleClean(internalUrl, serviceKey);
   assertNodeVersion('Next.js production server');
-  const web = start(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-H', '127.0.0.1', '-p', String(frontendPort)], {
-    BACKEND_INTERNAL_URL: internalUrl, BACKEND_API_KEY: serviceKey, BACKEND_TIMEOUT_MS: '15000', NODE_ENV: 'production',
+  const web = start(process.execPath, [path.join(frontend, '.next/standalone/server.js')], {
+    APP_VERSION: applicationVersion, BACKEND_INTERNAL_URL: internalUrl, BACKEND_API_KEY: serviceKey,
+    BACKEND_TIMEOUT_MS: '15000', NODE_ENV: 'production', HOSTNAME: '127.0.0.1', PORT: String(frontendPort),
   }, 'next', frontend);
   const baseUrl = `http://127.0.0.1:${frontendPort}`;
   await waitFor(baseUrl, web, 'Next.js production server');

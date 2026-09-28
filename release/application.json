@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "version": "0.9.0-rc.1",
+  "release_status": "educational/research release candidate",
+  "intended_use": "Educational and research use only.",
+  "clinical_status": "not clinically validated",
+  "runtime_versions": {"backend_python": "3.11.15", "frontend_node": "20.19.0"}
+}

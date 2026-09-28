@@ -38,3 +38,4 @@
 @keyframes loading-slide{from{transform:translateX(0)}to{transform:translateX(160%)}}
 @media(max-width:680px){.assessment-page{margin:32px auto 56px}.field-grid,.review-list{grid-template-columns:1fr}.wizard-actions{align-items:stretch}.wizard-actions .button{flex:1 1 42%}.assessment-intro,.assessment-panel{padding:20px}}
 @media(prefers-reduced-motion:reduce){.button{transition:none}.loading-track span{animation-duration:3s}}
+.release-info{max-width:min(100%,900px);margin:10px auto 0}.release-info span{display:block;margin-top:8px;overflow-wrap:anywhere}

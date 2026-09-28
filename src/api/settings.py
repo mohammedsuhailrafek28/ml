@@ -3,7 +3,7 @@
 No new dependency: a small frozen dataclass populated from ``os.environ`` with
 safe local-development defaults. Nothing here affects model training or metrics.
 
-Environment variables (development defaults shown; API_KEY is required in production):
+Environment variables (development defaults shown; a service key is required in production):
 
     APP_ENV               "development" (default) | "production"
     ALLOWED_ORIGINS       comma-separated CORS origins.
@@ -11,8 +11,9 @@ Environment variables (development defaults shown; API_KEY is required in produc
                           In production: empty unless set (no wildcard).
     API_HOST              bind host for `python -m src.api` (default 127.0.0.1)
     API_PORT              bind port (default 8000)
-    API_KEY               shared service credential. Required in production and
-                          must contain at least 32 characters.
+    API_KEY               shared service credential; development compatibility.
+    API_KEY_FILE          runtime-mounted service credential file, preferred.
+                          Production requires 32+ characters.
     MAX_REQUEST_BYTES     max request body size (default 65536)
     RATE_LIMIT_PER_MINUTE per-client request cap for prediction/report routes
                           (default 120; set 0 to disable)
@@ -78,7 +79,14 @@ def _load() -> Settings:
             return default
 
     model_root = Path(os.environ.get("MODEL_ROOT", _REPO_ROOT / "models")).resolve()
-    api_key = (os.environ.get("API_KEY") or "").strip() or None
+    key_file = os.environ.get("API_KEY_FILE", "").strip()
+    if key_file:
+        try:
+            api_key = Path(key_file).read_text(encoding="utf-8").strip() or None
+        except OSError:
+            raise RuntimeError("Configured API_KEY_FILE is not readable") from None
+    else:
+        api_key = (os.environ.get("API_KEY") or "").strip() or None
     if env.lower() == "production" and (api_key is None or len(api_key) < 32):
         raise RuntimeError(
             "Production requires API_KEY with at least 32 characters; "

@@ -1,7 +1,8 @@
 const DISEASES = new Set(['liver', 'diabetes', 'heart', 'kidney', 'parkinsons']);
 const DEFAULT_BODY_LIMIT = 16 * 1024;
 const DEFAULT_TIMEOUT_MS = 8_000;
-const APP_VERSION = '1.2';
+const APP_VERSION = 'unknown';
+import {readFileSync} from 'node:fs';
 
 export function isKnownDisease(value) {
   return DISEASES.has(value);
@@ -51,7 +52,12 @@ function backendConfig(protectedEndpoint) {
   try { url=new URL(raw); } catch { throw new Error('backend_configuration'); }
   if(!['http:','https:'].includes(url.protocol)) throw new Error('backend_configuration');
   if(url.username||url.password) throw new Error('backend_configuration');
-  const key=process.env.BACKEND_API_KEY?.trim()||'';
+  let key=process.env.BACKEND_API_KEY?.trim()||'';
+  const keyFile=process.env.BACKEND_API_KEY_FILE?.trim();
+  if(keyFile) {
+    try { key=readFileSync(keyFile,'utf8').trim(); }
+    catch { throw new Error('backend_configuration'); }
+  }
   if(protectedEndpoint&&process.env.NODE_ENV==='production'&&key.length<32) {
     throw new Error('backend_configuration');
   }

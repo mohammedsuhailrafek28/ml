@@ -12,11 +12,12 @@ import logging
 from datetime import datetime, timezone
 
 from src.api.settings import get_settings
-from src.api.observability import API_VERSION, emit_log, set_readiness
+from src.api.observability import emit_log, set_readiness
+from src.application_release import public_release_provenance
 from src.utils.config import DISEASES
 
 def liveness() -> dict:
-    return {"status": "alive", "version": API_VERSION}
+    return {"status": "alive", **public_release_provenance()}
 
 
 def _check_disease(key: str) -> dict:
@@ -88,7 +89,7 @@ def readiness() -> tuple[dict, int]:
     ready = all(r["ok"] for r in results.values()) and not release_issues
     payload = {
         "status": "ready" if ready else "degraded",
-        "version": API_VERSION,
+        **public_release_provenance(),
         "checkedAt": datetime.now(timezone.utc).isoformat(),
         "releaseIntegrity": {"ok": not release_issues, "issues": release_issues},
         "diseases": results,

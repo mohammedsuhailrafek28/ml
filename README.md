@@ -93,7 +93,8 @@ datasets/raw/*.csv
 
 ## Requirements
 
-- Python 3.11, Node 20.19 or newer. The frontend uses Next.js 16 and React 19.
+- Python 3.11.15 and Node 20.19.0 are the release image runtimes. Local frontend
+  development requires Node 20.19.0 or newer. The frontend uses Next.js 16 and React 19.
 - `requirements.txt` and `requirements-dev.txt` are human-maintained top-level
   requirements. Artifact-sensitive scientific packages are exact pins.
 - `requirements.lock` and `requirements-dev.lock` are the authoritative,
@@ -178,9 +179,10 @@ and these real-browser journeys are separate checks: `pytest -q`,
 ## Environment variables
 
 Backend (`.env`, see `.env.example`): `APP_ENV`, `ALLOWED_ORIGINS`, `API_HOST`,
-`API_PORT`, `API_KEY`, `MAX_REQUEST_BYTES`, `RATE_LIMIT_PER_MINUTE`, `MODEL_ROOT`,
-and `LOG_LEVEL`. Production refuses to start unless `API_KEY` is at least 32
-characters; generate a random value and inject it at runtime.
+`API_PORT`, `API_KEY_FILE` (preferred), development-compatible `API_KEY`,
+`MAX_REQUEST_BYTES`, `RATE_LIMIT_PER_MINUTE`, `MODEL_ROOT`, and `LOG_LEVEL`.
+Production requires a random 32+ character key supplied through `API_KEY_FILE`
+or `API_KEY`.
 
 Next.js server (`frontend/.env.local`): `BACKEND_INTERNAL_URL`,
 `BACKEND_API_KEY`, `BACKEND_TIMEOUT_MS`, and `BFF_MAX_REQUEST_BYTES`. These are
@@ -246,29 +248,48 @@ health/readiness, one protected prediction per disease, one in-memory PDF).
 
 ## Deployment
 
-`Dockerfile` (backend, non-root, stdlib healthcheck), `frontend/Dockerfile`
-(multi-stage, non-root), `docker-compose.yml` for a local full stack:
+The current versioned candidate is `0.9.0-rc.1`, identified in
+`release/application.json`. The API health response and frontend release footer
+show safe provenance including version, runtime-injected revision, and the
+model-manifest identifier/hash. `scripts/build_application_release_manifest.py`
+generates/checks a deterministic integrity manifest.
 
-```bash
-# PowerShell example; use an equivalent secret generator in other shells.
-$env:SERVICE_API_KEY = python -c "import secrets; print(secrets.token_urlsafe(32))"
-docker compose up --build       # web :3000; API is internal-only
+`Dockerfile` and `frontend/Dockerfile` are separate multi-stage production
+images. The API copies only active runtime model artifacts; the frontend uses
+Next.js standalone output. They use exact Python 3.11.15 and Node
+20.19.0-alpine3.21 tags, dedicated non-root users, and minimal runtime stages.
+Compose publishes only the loopback frontend by default; FastAPI and protected
+metrics remain internal. The service key is mounted at runtime from an ignored
+file rather than passed in environment variables or image layers. See the
+[deployment](docs/deployment-runbook.md), [rollback](docs/rollback-runbook.md),
+[backup/recovery](docs/backup-recovery.md), [security/privacy](docs/security-privacy-operations.md),
+and [release verification](docs/release-verification.md) runbooks.
+
+To start a local stack, create the ignored runtime key file and then run:
+
+```powershell
+Copy-Item .env.example .env
+New-Item -ItemType Directory -Force .secrets | Out-Null
+python -c "import secrets; print(secrets.token_urlsafe(48), end='')" | Set-Content -NoNewline .secrets/service_api_key
+docker compose --env-file .env up --build --detach --wait
 ```
 
-The production-default Compose topology publishes only Next.js on port 3000.
-Next.js reaches FastAPI as `http://api:8000` on the private Compose network and
-adds the shared credential server-side. For non-container local development,
-run FastAPI in `APP_ENV=development` on port 8000 and Next.js separately as shown
-above.
-
-The images are provided for reproducibility; they have not been build-verified in
-the development environment used to author this repo (no Docker available there).
+The browser receives neither backend URL nor service credential. A separate
+`release-candidate.yml` CI job builds both images with Buildx, validates the
+Compose hardening and golden prediction/PDF flows, runs browser and bounded
+container smoke checks, runs Gitleaks against the current candidate source tree
+and reachable Git history, and runs Trivy against both final images for
+Critical/High vulnerabilities and embedded secrets. Trivy also generates
+CycloneDX image SBOMs. Redacted scan reports and SBOMs are CI artifacts only;
+the workflow does not publish images or SBOMs. Hosted CI remains unobserved
+until an actual workflow run completes.
 
 ## Production caveats
 
 - Datasets are small, single-cohort teaching datasets from the 1980s–2010s. Metrics are not clinical validation and will not transfer to real screening populations.
 - Kidney's ~1.0 and Parkinson's small holdout are dataset artefacts, documented above and in metadata.
-- No TLS termination, user identity, authorization policy, persistent auth store, or distributed rate limiting is included. `API_KEY` is a shared service credential between Next.js and FastAPI, not end-user authentication.
+- No TLS termination, user identity, authorization policy, persistent auth store, distributed rate limiting, or centralized monitoring is included. The mounted service key authenticates the BFF-to-API connection, not an end user. Rate limiting is process-local.
+- This is an educational/research release candidate, not a diagnosis or screening service. It is not clinically validated; Parkinson's remains Experimental and scores are uncalibrated estimator outputs. Local load tests do not demonstrate availability; no deployed availability SLO has been measured.
 - `datasets/raw/kidney_download` is a leftover download archive (gitignored going forward); the tracked `datasets/raw/*.csv` are the real inputs.
 
 ## Datasets & attribution
