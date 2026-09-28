@@ -21,7 +21,6 @@ jobs:
     env:
       CI: "true"
       E2E_BASE_URL: http://127.0.0.1:3000
-      SERVICE_API_KEY_FILE: ${{ runner.temp }}/medical-ai-service-key
       API_IMAGE: medical-ai-api:${{ github.sha }}
       WEB_IMAGE: medical-ai-web:${{ github.sha }}
       APP_SOURCE_REVISION: ${{ github.sha }}
@@ -64,12 +63,15 @@ jobs:
       - name: Create ephemeral Compose secret without displaying it
         shell: bash
         run: |
+          service_api_key_file="$RUNNER_TEMP/medical-ai-service-key"
+          echo "SERVICE_API_KEY_FILE=$service_api_key_file" >> "$GITHUB_ENV"
+          export SERVICE_API_KEY_FILE="$service_api_key_file"
           umask 077
-          python -c 'import secrets; print(secrets.token_urlsafe(48), end="")' > "$SERVICE_API_KEY_FILE"
-          test "$(wc -c < "$SERVICE_API_KEY_FILE")" -ge 32
+          python -c 'import secrets; print(secrets.token_urlsafe(48), end="")' > "$service_api_key_file"
+          test "$(wc -c < "$service_api_key_file")" -ge 32
           # Local Compose file secrets are read-only bind mounts; the ephemeral
           # single-tenant runner needs the non-root container uid to read it.
-          chmod 0444 "$SERVICE_API_KEY_FILE"
+          chmod 0444 "$service_api_key_file"
           docker compose config --quiet
       - name: Build hardened images locally with Buildx
         run: docker compose build --pull

@@ -116,7 +116,7 @@
     },
     "release_ci_workflow": {
       "path": ".github/workflows/release-candidate.yml",
-      "sha256": "f90aca64d8917b6ac333a8554fcc7d7590fbf4913a711eef50ce5e6326125c24"
+      "sha256": "59ec3754755cf60ba88d1ac5915b7f0f042d4c09f0dc8af1a96c6a206623a26f"
     },
     "release_provenance_runtime": {
       "path": "src/application_release.py",

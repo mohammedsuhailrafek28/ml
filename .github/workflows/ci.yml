@@ -77,7 +77,6 @@ jobs:
     permissions:
       contents: read
     env:
-      E2E_PYTHON: ${{ runner.temp }}/e2e-venv/bin/python
       FORCE_COLOR: "0"
     steps:
       - uses: actions/checkout@v4
@@ -93,9 +92,11 @@ jobs:
           cache-dependency-path: requirements-dev.lock
       - name: Create isolated Python 3.11 E2E environment
         run: |
+          e2e_python="$RUNNER_TEMP/e2e-venv/bin/python"
+          echo "E2E_PYTHON=$e2e_python" >> "$GITHUB_ENV"
           python -m venv "$RUNNER_TEMP/e2e-venv"
-          "$E2E_PYTHON" -m pip install --require-hashes -r requirements-dev.lock
-          "$E2E_PYTHON" -m pip check
+          "$e2e_python" -m pip install --require-hashes -r requirements-dev.lock
+          "$e2e_python" -m pip check
       - name: Install locked frontend dependencies
         working-directory: frontend
         run: npm ci
@@ -106,7 +107,8 @@ jobs:
         working-directory: frontend
         run: npm run test:e2e
       - name: Run authenticated API+BFF load smoke
-        run: "$E2E_PYTHON" -m scripts.run_load_smoke --requests 50 --concurrency 5
+        run: |
+          "$E2E_PYTHON" -m scripts.run_load_smoke --requests 50 --concurrency 5
       - name: Preserve browser traces only after failure
         if: failure()
         uses: actions/upload-artifact@v4
