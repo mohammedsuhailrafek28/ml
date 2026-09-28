@@ -168,7 +168,11 @@ function createProxyServer() {
     try {
       const upstream = await fetch(`http://127.0.0.1:${apiPort}${apiPath}`, {
         method: request.method,
-        headers: {'Content-Type': request.headers['content-type'] ?? 'application/json', 'X-API-Key': request.headers['x-api-key'] ?? ''},
+        headers: {
+          'Content-Type': request.headers['content-type'] ?? 'application/json',
+          'X-API-Key': request.headers['x-api-key'] ?? '',
+          'X-Request-ID': request.headers['x-request-id'] ?? '',
+        },
         body: ['GET', 'HEAD'].includes(request.method ?? '') ? undefined : body,
         signal: abort.signal,
       });

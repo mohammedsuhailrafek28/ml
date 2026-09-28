@@ -8,13 +8,12 @@ Readiness = every disease's persisted pipeline + metadata load and are
 from __future__ import annotations
 
 import json
+import logging
 from datetime import datetime, timezone
 
 from src.api.settings import get_settings
+from src.api.observability import API_VERSION, emit_log, set_readiness
 from src.utils.config import DISEASES
-
-API_VERSION = "1.2"
-
 
 def liveness() -> dict:
     return {"status": "alive", "version": API_VERSION}
@@ -100,11 +99,13 @@ def readiness() -> tuple[dict, int]:
 def startup_integrity_log(logger) -> bool:
     """Run readiness once at startup and log the outcome. Returns True if ready."""
     payload, status = readiness()
+    ready = status == 200
+    set_readiness(ready)
     if status == 200:
-        logger.info(json.dumps({"event": "startup_integrity", "status": "ready"}))
+        emit_log(logging.INFO, "startup_integrity", status="ready")
         return True
-    broken = {k: v["issues"] for k, v in payload["diseases"].items() if not v["ok"]}
-    logger.error(
-        json.dumps({"event": "startup_integrity", "status": "degraded", "problems": broken})
-    )
+    broken = [k for k, value in payload["diseases"].items() if not value["ok"]]
+    emit_log(logging.ERROR, "startup_integrity", status="degraded",
+             affected_diseases=broken,
+             error_category="release_integrity" if not payload["releaseIntegrity"]["ok"] else "model_integrity")
     return False

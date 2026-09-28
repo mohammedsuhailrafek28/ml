@@ -2,6 +2,7 @@ import json
 import pandas as pd
 from joblib import load
 from src.model_release import load_release_manifest
+from src.api.observability import emit_log, observe_model_load
 from src.utils.config import DISEASES
 from src.preprocessing.heart_schema import (
     HEART_CATEGORICAL,
@@ -77,7 +78,21 @@ class Registry:
 
     def _model(self, k):
         if k not in self.models:
-            self.models[k] = load(self._dir(k) / f"{k}_pipeline.joblib")
+            release = self.release(k)
+            try:
+                model = load(self._dir(k) / f"{k}_pipeline.joblib")
+            except Exception:
+                observe_model_load(k, False)
+                emit_log(40, "model_load", disease=k,
+                         model_identifier=release["model"]["identifier"],
+                         release_status=release["release_status"], result="failure",
+                         error_category="model_load")
+                raise
+            self.models[k] = model
+            observe_model_load(k, True)
+            emit_log(20, "model_load", disease=k,
+                     model_identifier=release["model"]["identifier"],
+                     release_status=release["release_status"], result="success")
         return self.models[k]
 
     def _meta_file(self, k):

@@ -148,14 +148,14 @@ for (const disease of diseases) {
   test(`${disease}: catalog to persisted prediction and PDF`, async ({page}) => {
     const errors: string[] = [];
     const consoleOutput: string[] = [];
-    const apiResponses: {url: string; cache: string | undefined}[] = [];
+    const apiResponses: {url: string; cache: string | undefined; requestId: string | undefined}[] = [];
     const browserRequests: {url: string; headers: Record<string, string>}[] = [];
     page.on('console', (message) => { consoleOutput.push(message.text()); if (message.type() === 'error') errors.push(message.text()); });
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('request', async (request) => browserRequests.push({url: request.url(), headers: await request.allHeaders()}));
     page.on('response', async (response) => {
       if (response.url().includes('/api/predictions/') || response.url().includes('/api/reports/')) {
-        apiResponses.push({url: response.url(), cache: await response.headerValue('cache-control') ?? undefined});
+        apiResponses.push({url: response.url(), cache: await response.headerValue('cache-control') ?? undefined, requestId: await response.headerValue('x-request-id') ?? undefined});
       }
     });
     await page.addInitScript(() => {
@@ -267,6 +267,13 @@ for (const disease of diseases) {
       expect([...url.searchParams.values()].some((value) => values.includes(value))).toBeFalsy();
     }
     expect(apiResponses.filter((response) => /\/api\/(predictions|reports)\//.test(response.url)).every((response) => response.cache === 'no-store')).toBeTruthy();
+    const correlatedResponses = apiResponses.filter((response) => /\/api\/(predictions|reports)\//.test(response.url));
+    expect(correlatedResponses).toHaveLength(2);
+    for (const response of correlatedResponses) {
+      expect(response.requestId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+      const request = browserRequests.find((entry) => entry.url === response.url);
+      expect(request?.headers['x-request-id']).toBe(response.requestId);
+    }
     const proxy = await proxyState();
     expect(proxy.keySeen).toBeTruthy();
     expect(proxy.paths).toContain(`POST /api/v1/predictions/${disease}`);

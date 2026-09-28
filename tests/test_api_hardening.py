@@ -163,8 +163,17 @@ def test_request_id_header_present(env):
 
 def test_supplied_request_id_is_echoed(env):
     env(MODEL_ROOT=None)
-    r = _client().get("/api/v1/health", headers={"X-Request-ID": "abc123"})
-    assert r.headers.get("X-Request-ID") == "abc123"
+    request_id = "a3a2e986-324d-4e51-a99d-d0767e86b68f"
+    r = _client().get("/api/v1/health", headers={"X-Request-ID": request_id})
+    assert r.headers.get("X-Request-ID") == request_id
+
+
+def test_untrusted_request_id_is_replaced(env):
+    env(MODEL_ROOT=None)
+    marker = "golden-measurement-41.2468135"
+    r = _client().get("/api/v1/health", headers={"X-Request-ID": marker})
+    assert r.headers.get("X-Request-ID") != marker
+    assert len(r.headers["X-Request-ID"]) == 36
 
 
 # --------------------------- body size / rate limit ---------------------

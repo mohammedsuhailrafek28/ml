@@ -71,6 +71,37 @@ test('backend status and safe error body are preserved without configuration lea
   assert.equal(body.includes(process.env.BACKEND_API_KEY),false);
 });
 
+test('request IDs correlate BFF traffic while production logs exclude inputs and secrets',async()=>{
+  configure();
+  process.env.NODE_ENV='production';
+  const requestId='a3a2e986-324d-4e51-a99d-d0767e86b68f';
+  const marker='phase7-distinctive-measurement-3.14159265';
+  let upstreamHeaders;
+  globalThis.fetch=async(_url,init)=>{
+    upstreamHeaders=new Headers(init.headers);
+    return Response.json({ok:true},{headers:{'X-Request-ID':requestId}});
+  };
+  const lines=[];
+  const originalInfo=console.info;
+  console.info=(line)=>lines.push(line);
+  try {
+    const request=new Request('http://web/api/predictions/liver',{method:'POST',headers:{'Content-Type':'application/json','X-Request-ID':requestId,'Authorization':`Bearer ${process.env.BACKEND_API_KEY}`},body:JSON.stringify({measurements:{marker}})});
+    const response=await forwardJson(request,'/api/v1/predictions/liver','liver');
+    assert.equal(response.headers.get('x-request-id'),requestId);
+    assert.equal(upstreamHeaders.get('x-request-id'),requestId);
+    assert.equal(upstreamHeaders.get('x-api-key'),process.env.BACKEND_API_KEY);
+    assert.equal(lines.length,1);
+    const event=JSON.parse(lines[0]);
+    assert.equal(event.event,'bff_http_request');
+    assert.equal(event.request_id,requestId);
+    assert.equal(event.route,'/api/v1/predictions/{disease}');
+    const output=JSON.stringify(event);
+    for(const secret of [marker,process.env.BACKEND_API_KEY,process.env.BACKEND_INTERNAL_URL,'Authorization'])assert.equal(output.includes(secret),false);
+  } finally {
+    console.info=originalInfo;
+  }
+});
+
 test('backend timeout becomes a no-store 504 response',async()=>{
   configure();
   process.env.BACKEND_TIMEOUT_MS='100';

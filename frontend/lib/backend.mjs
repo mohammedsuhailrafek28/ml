@@ -1,6 +1,7 @@
 const DISEASES = new Set(['liver', 'diabetes', 'heart', 'kidney', 'parkinsons']);
 const DEFAULT_BODY_LIMIT = 16 * 1024;
 const DEFAULT_TIMEOUT_MS = 8_000;
+const APP_VERSION = '1.2';
 
 export function isKnownDisease(value) {
   return DISEASES.has(value);
@@ -8,7 +9,27 @@ export function isKnownDisease(value) {
 
 function requestId(request) {
   const supplied=request.headers.get('x-request-id')?.trim()||'';
-  return /^[A-Za-z0-9._-]{1,128}$/.test(supplied)?supplied:crypto.randomUUID();
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(supplied)?supplied.toLowerCase():crypto.randomUUID();
+}
+
+function routeInfo(path) {
+  const fixed=new Map([
+    ['/api/v1/health',['/api/v1/health',null]],
+    ['/api/v1/ready',['/api/v1/ready',null]],
+    ['/api/v1/diseases',['/api/v1/diseases',null]],
+  ]);
+  if(fixed.has(path))return fixed.get(path);
+  const match=/^\/api\/v1\/(diseases|predictions|reports)\/([^/]+)$/.exec(path);
+  if(match&&DISEASES.has(match[2]))return [`/api/v1/${match[1]}/{disease}`,match[2]];
+  return ['unmatched',null];
+}
+
+function safeRequestLog(request,path,id,status,start) {
+  const [route,disease]=routeInfo(path);
+  const category=status===401?'authentication':status===429?'rate_limit':status===422?'validation':status>=500?'server':status>=400?'client':'none';
+  const event={timestamp:new Date().toISOString(),level:status>=500?'ERROR':status>=400?'WARNING':'INFO',event:'bff_http_request',request_id:id,http_method:['GET','POST','PUT','PATCH','DELETE','OPTIONS','HEAD'].includes(request.method)?request.method:'OTHER',route,status_code:status,duration_ms:Number((performance.now()-start).toFixed(2)),disease,error_category:category,app_version:process.env.APP_VERSION||APP_VERSION,environment:process.env.NODE_ENV||'development'};
+  if(process.env.NODE_ENV==='production')console.info(JSON.stringify(event));
+  else console.info(`bff_http_request request_id=${id} route=${route} status=${status} duration_ms=${event.duration_ms}`);
 }
 
 function boundedInteger(raw, fallback, minimum, maximum) {
@@ -39,28 +60,32 @@ function backendConfig(protectedEndpoint) {
 
 async function callBackend(request, path, options) {
   const id=requestId(request);
+  const started=performance.now();
+  let status=500;
+  const finish=(response)=>{status=response.status;return response;};
+  try {
   let config;
   try { config=backendConfig(options.protectedEndpoint); }
-  catch { return errorResponse(503,'service_unavailable','Backend service is not configured',id); }
+  catch { return finish(errorResponse(503,'service_unavailable','Backend service is not configured',id)); }
 
   const headers=new Headers({'X-Request-ID':id});
   if(options.protectedEndpoint&&config.key) headers.set('X-API-Key',config.key);
   let body;
   if(options.method==='POST') {
     if(!(request.headers.get('content-type')||'').toLowerCase().startsWith('application/json')) {
-      return errorResponse(415,'unsupported_media_type','Content-Type must be application/json',id);
+      return finish(errorResponse(415,'unsupported_media_type','Content-Type must be application/json',id));
     }
     const limit=boundedInteger(process.env.BFF_MAX_REQUEST_BYTES,DEFAULT_BODY_LIMIT,1024,64*1024);
     const declared=Number.parseInt(request.headers.get('content-length')||'0',10);
     if(Number.isFinite(declared)&&declared>limit) {
-      return errorResponse(413,'request_too_large',`Request body exceeds ${limit} bytes`,id);
+      return finish(errorResponse(413,'request_too_large',`Request body exceeds ${limit} bytes`,id));
     }
     const bytes=await request.arrayBuffer();
     if(bytes.byteLength>limit) {
-      return errorResponse(413,'request_too_large',`Request body exceeds ${limit} bytes`,id);
+      return finish(errorResponse(413,'request_too_large',`Request body exceeds ${limit} bytes`,id));
     }
     try { JSON.parse(new TextDecoder().decode(bytes)); }
-    catch { return errorResponse(400,'bad_request','Request body must contain valid JSON',id); }
+    catch { return finish(errorResponse(400,'bad_request','Request body must contain valid JSON',id)); }
     body=bytes;
     headers.set('Content-Type','application/json');
   }
@@ -84,22 +109,25 @@ async function callBackend(request, path, options) {
     });
     if(options.pdf&&upstream.ok) {
       if(!(upstream.headers.get('content-type')||'').toLowerCase().startsWith('application/pdf')) {
-        return errorResponse(502,'bad_gateway','Backend returned an invalid report response',id);
+        return finish(errorResponse(502,'bad_gateway','Backend returned an invalid report response',id));
       }
       responseHeaders.set('Content-Type','application/pdf');
       responseHeaders.set('Content-Disposition',`attachment; filename="${options.disease}_report.pdf"`);
     } else {
       responseHeaders.set('Content-Type',upstream.headers.get('content-type')||'application/json');
     }
-    return new Response(upstream.body,{status:upstream.status,headers:responseHeaders});
+    return finish(new Response(upstream.body,{status:upstream.status,headers:responseHeaders}));
   } catch(error) {
     if(controller.signal.aborted&&!request.signal.aborted) {
-      return errorResponse(504,'gateway_timeout','Backend service timed out',id);
+      return finish(errorResponse(504,'gateway_timeout','Backend service timed out',id));
     }
-    return errorResponse(502,'bad_gateway','Backend service request failed',id);
+    return finish(errorResponse(502,'bad_gateway','Backend service request failed',id));
   } finally {
     clearTimeout(timeout);
     request.signal.removeEventListener('abort',cancel);
+  }
+  } finally {
+    safeRequestLog(request,path,id,status,started);
   }
 }
 

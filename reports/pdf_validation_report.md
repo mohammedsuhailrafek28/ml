@@ -1,1 +1,5 @@
-# PDF validation\n\nliver | reports\generated_reports\liver_sample_report.pdf | 2129 | 1 | True\nheart | reports\generated_reports\heart_sample_report.pdf | 2162 | 1 | True\ndiabetes | reports\generated_reports\diabetes_sample_report.pdf | 2125 | 1 | True\nkidney | reports\generated_reports\kidney_sample_report.pdf | 2283 | 1 | True\nparkinsons | reports\generated_reports\parkinsons_sample_report.pdf | 2403 | 1 | True
+# PDF validation and privacy audit
+
+The seven active-directory PDF artifacts were inspected with a temporary `pypdf` installation on 2026-09-27. All were parseable one-page PDFs and contained prediction output plus raw input measurements. No direct name, date-of-birth, email, or phone field was found, but health measurements remain sensitive data. The repository did not establish their synthetic/public-data provenance, and their creation dates predate the current model release. They were removed; see [the artifact audit](generated_reports/README.md).
+
+The historical evaluation PDF in `reports/evaluation/superseded/` is preserved as historical evidence, not a current report example. Runtime PDF generation remains covered by the API and browser tests, which verify the `%PDF` signature and non-empty response without retaining generated reports on disk.

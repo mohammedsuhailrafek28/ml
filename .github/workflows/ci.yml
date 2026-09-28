@@ -105,6 +105,8 @@ jobs:
       - name: Build once, start isolated services, and run browser journeys
         working-directory: frontend
         run: npm run test:e2e
+      - name: Run authenticated API+BFF load smoke
+        run: "$E2E_PYTHON" -m scripts.run_load_smoke --requests 50 --concurrency 5
       - name: Preserve browser traces only after failure
         if: failure()
         uses: actions/upload-artifact@v4

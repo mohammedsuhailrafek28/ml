@@ -7,7 +7,7 @@ latency, request id) and NEVER the request body / measurement payload.
 """
 from __future__ import annotations
 
-import json
+import re
 import hmac
 import logging
 import time
@@ -19,8 +19,12 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.api.settings import get_settings
+from src.api.observability import (
+    AUTH_REJECTIONS, IN_FLIGHT, RATE_LIMIT_REJECTIONS, bounded_method,
+    emit_log, error_category, normalized_route, record_http,
+)
 
-logger = logging.getLogger("medical_ai.api")
+_REQUEST_ID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$")
 
 _SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
@@ -28,15 +32,6 @@ _SECURITY_HEADERS = {
     "Referrer-Policy": "no-referrer",
     "Cache-Control": "no-store",
 }
-
-
-def _disease_from_path(path: str) -> str | None:
-    parts = [p for p in path.split("/") if p]
-    if len(parts) >= 4 and parts[:2] == ["api", "v1"] and parts[2] in {
-        "predictions", "reports", "diseases",
-    }:
-        return parts[3]
-    return None
 
 
 def error_response(status: int, code: str, message: str, request_id: str) -> JSONResponse:
@@ -55,47 +50,42 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
     """Assign a request id, time the request, add headers, log safe metadata."""
 
     async def dispatch(self, request: Request, call_next):
-        rid = request.headers.get("X-Request-ID", "").strip() or uuid.uuid4().hex
+        supplied = request.headers.get("X-Request-ID", "").strip()
+        rid = supplied.lower() if _REQUEST_ID.fullmatch(supplied) else str(uuid.uuid4())
         request.state.request_id = rid
         start = time.perf_counter()
+        route, disease = normalized_route(request.url.path)
+        method = bounded_method(request.method)
+        count_in_flight = route != "/internal/metrics"
+        if count_in_flight:
+            IN_FLIGHT.inc()
         try:
             response = await call_next(request)
         except Exception:  # noqa: BLE001 - converted to a safe 500 below
-            latency_ms = round((time.perf_counter() - start) * 1000, 1)
-            logger.error(
-                json.dumps(
-                    {
-                        "event": "request_error",
-                        "request_id": rid,
-                        "method": request.method,
-                        "path": request.url.path,
-                        "disease": _disease_from_path(request.url.path),
-                        "status_code": 500,
-                        "latency_ms": latency_ms,
-                    }
-                )
-            )
+            emit_log(logging.ERROR, "request_exception", request_id=rid,
+                     error_category="unhandled_exception")
+            if not get_settings().is_production:
+                logging.getLogger("medical_ai.api").error("Unhandled request exception request_id=%s", rid)
             settings = get_settings()
             msg = "Internal server error" if settings.is_production else "Unhandled exception"
-            return error_response(500, "internal_error", msg, rid)
-        latency_ms = round((time.perf_counter() - start) * 1000, 1)
-        response.headers["X-Request-ID"] = rid
-        for k, v in _SECURITY_HEADERS.items():
-            response.headers.setdefault(k, v)
-        logger.info(
-            json.dumps(
-                {
-                    "event": "request",
-                    "request_id": rid,
-                    "method": request.method,
-                    "path": request.url.path,
-                    "disease": _disease_from_path(request.url.path),
-                    "status_code": response.status_code,
-                    "latency_ms": latency_ms,
-                }
-            )
-        )
-        return response
+            response = error_response(500, "internal_error", msg, rid)
+        try:
+            duration = time.perf_counter() - start
+            response.headers["X-Request-ID"] = rid
+            for k, v in _SECURITY_HEADERS.items():
+                response.headers.setdefault(k, v)
+            record_http(method, route, response.status_code, duration)
+            emit_log(logging.WARNING if response.status_code >= 400 else logging.INFO,
+                     "http_request", request_id=rid, http_method=method, route=route,
+                     status_code=response.status_code, duration_ms=round(duration * 1000, 2),
+                     disease=disease,
+                     model_identifier=getattr(request.state, "model_identifier", None),
+                     release_status=getattr(request.state, "release_status", None),
+                     error_category=error_category(response.status_code))
+            return response
+        finally:
+            if count_in_flight:
+                IN_FLIGHT.dec()
 
 
 class BodySizeLimitMiddleware(BaseHTTPMiddleware):
@@ -140,6 +130,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         while window and now - window[0] > 60.0:
             window.popleft()
         if len(window) >= limit:
+            RATE_LIMIT_REJECTIONS.inc()
             rid = getattr(request.state, "request_id", uuid.uuid4().hex)
             return error_response(
                 429, "rate_limited",
@@ -159,6 +150,7 @@ def require_api_key(request: Request) -> None:
         return
     supplied = request.headers.get("X-API-Key", "")
     if not hmac.compare_digest(supplied, settings.api_key or ""):
+        AUTH_REJECTIONS.inc()
         rid = getattr(request.state, "request_id", uuid.uuid4().hex)
         from fastapi import HTTPException
 
