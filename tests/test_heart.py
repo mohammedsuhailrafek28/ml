@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from sklearn.model_selection import train_test_split
 
 from src.api.main import app
+from src.model_release import training_metadata_dataset_sha256
 from src.api.services.model_registry import registry
 from src.preprocessing.heart_schema import normalize_categoricals
 from src.utils.config import DISEASES, RANDOM_STATE, TEST_SIZE
@@ -84,7 +85,7 @@ def test_metadata_is_complete():
                 "training_timestamp", "categorical_values"):
         assert key in meta, f"metadata missing {key}"
     assert meta["dataset_sha256"] == \
-        __import__("hashlib").sha256(CFG.raw_path.read_bytes()).hexdigest()
+        training_metadata_dataset_sha256(CFG.raw_path)
     assert meta["target_mapping"] == {"0": 0, "1-4": 1}
 
 

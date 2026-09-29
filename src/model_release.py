@@ -36,6 +36,13 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
+def training_metadata_dataset_sha256(path: Path) -> str:
+    """Reproduce the CRLF-byte digest stored by the original Windows training runs."""
+    content = path.read_bytes().replace(b"\r\n", b"\n")
+    content = content.replace(b"\n", b"\r\n")
+    return hashlib.sha256(content).hexdigest()
+
+
 def active_features(disease: str, manifest: dict | None = None) -> list[str]:
     doc = manifest or load_release_manifest()
     return list(doc["releases"][disease]["ordered_active_features"])

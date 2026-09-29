@@ -17,6 +17,7 @@ from sklearn.model_selection import GroupShuffleSplit, StratifiedGroupKFold
 
 from src.api.main import app
 from src.api.services.model_registry import registry
+from src.model_release import training_metadata_dataset_sha256
 from src.preprocessing.parkinsons_schema import (
     PARKINSONS_FEATURES,
     PARKINSONS_REDUCED_FEATURES,
@@ -137,7 +138,7 @@ def test_metadata_records_subject_aware_methodology():
     # the stale "no group split implemented" claim must be gone
     assert "no group split" not in json.dumps(meta).lower()
     assert meta["dataset_sha256"] == \
-        __import__("hashlib").sha256(CFG.raw_path.read_bytes()).hexdigest()
+        training_metadata_dataset_sha256(CFG.raw_path)
 
 
 def test_naive_vs_subject_aware_gap_is_recorded_and_large():

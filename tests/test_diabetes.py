@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split
 
 from src.api.main import app
 from src.api.services.model_registry import registry
+from src.model_release import training_metadata_dataset_sha256
 from src.preprocessing.diabetes_schema import ZeroToNaN
 from src.utils.config import DISEASES, RANDOM_STATE, TEST_SIZE
 
@@ -96,7 +97,7 @@ def test_metadata_is_complete():
                 "training_timestamp", "zero_as_missing_columns", "feature_engineering"):
         assert key in meta, f"metadata missing {key}"
     assert meta["dataset_sha256"] == \
-        __import__("hashlib").sha256(CFG.raw_path.read_bytes()).hexdigest()
+        training_metadata_dataset_sha256(CFG.raw_path)
     assert meta["zero_as_missing_columns"] == \
         ["glucose", "blood_pressure", "skin_thickness", "insulin", "bmi"]
 
