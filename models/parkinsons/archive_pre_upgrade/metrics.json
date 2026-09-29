@@ -1,0 +1,13 @@
+{
+  "selected_model": "gradient_boosting",
+  "metrics": {
+    "accuracy": 0.7441860465116279,
+    "precision": 0.7380952380952381,
+    "recall": 1.0,
+    "f1": 0.8493150684931506,
+    "roc_auc": 0.7231182795698925,
+    "model": "gradient_boosting",
+    "cv_mean": 0.8920364899312266,
+    "cv_std": 0.060015950389561284
+  }
+}

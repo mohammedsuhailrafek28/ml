@@ -1,0 +1,59 @@
+{
+  "method": "permutation_importance",
+  "scoring": "roc_auc",
+  "n_repeats": 10,
+  "evaluated_on": "untouched holdout test set",
+  "note": "Importance = mean drop in holdout ROC-AUC when the feature is shuffled. Not a causal claim.",
+  "features": [
+    {
+      "feature": "ALB",
+      "importance_mean": 0.11642349420127203,
+      "importance_std": 0.03947463001783363
+    },
+    {
+      "feature": "DB",
+      "importance_mean": 0.06584362139917697,
+      "importance_std": 0.04483254389252228
+    },
+    {
+      "feature": "Sgpt",
+      "importance_mean": 0.03228582117471009,
+      "importance_std": 0.03947046377288872
+    },
+    {
+      "feature": "Age",
+      "importance_mean": 0.02012719790497569,
+      "importance_std": 0.022549831617277652
+    },
+    {
+      "feature": "Alkphos",
+      "importance_mean": 0.0164983164983165,
+      "importance_std": 0.017693100291804452
+    },
+    {
+      "feature": "TB",
+      "importance_mean": 0.014627759072203516,
+      "importance_std": 0.020682952323666227
+    },
+    {
+      "feature": "Sgot",
+      "importance_mean": 0.010774410774410803,
+      "importance_std": 0.021195190364287988
+    },
+    {
+      "feature": "TP",
+      "importance_mean": 0.0050879161990273316,
+      "importance_std": 0.03608894321571066
+    },
+    {
+      "feature": "A/G Ratio",
+      "importance_mean": 0.0021324354657688005,
+      "importance_std": 0.008418838486594502
+    },
+    {
+      "feature": "Gender",
+      "importance_mean": -0.010475121586232705,
+      "importance_std": 0.007020947362631044
+    }
+  ]
+}

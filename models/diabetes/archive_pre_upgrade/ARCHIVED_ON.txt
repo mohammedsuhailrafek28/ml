@@ -1,0 +1,3 @@
+Diabetes artifacts archived on 2026-08-27T08:09:31Z before the leakage-safe upgrade (src/training/train_diabetes.py).
+Old selected model: svm (class_weight=balanced), selected on the test set by (f1, recall).
+The old persisted pipeline does NOT contain the zero->NaN step; that ran outside the pipeline in train_all.py (train/serve inconsistency). Recoverable copy only.

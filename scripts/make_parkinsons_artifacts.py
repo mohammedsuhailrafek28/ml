@@ -1,11 +1,21 @@
-import json,sys
+"""DEPRECATED. Parkinson's artifacts are now produced by the subject-aware trainer.
+
+The previous version re-split the frame, loaded the persisted model, and scored
+it on the same split to regenerate figures / minimal metadata -- and its
+metadata wrongly claimed no group split existed. All of that now lives in one
+place, with GroupShuffleSplit + StratifiedGroupKFold throughout:
+
+    python -m src.training.train_parkinsons
+
+This shim simply forwards to it so any old muscle-memory entrypoint still works.
+"""
+import sys
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-import pandas as pd,numpy as np,joblib,matplotlib.pyplot as plt
-from sklearn.model_selection import GroupShuffleSplit
-from sklearn.metrics import ConfusionMatrixDisplay,RocCurveDisplay
-from sklearn.inspection import permutation_importance
-from src.utils.config import DISEASES
-c=DISEASES['parkinsons']; d=pd.read_csv(c.raw_path); X=d[list(c.features)]; y=d[c.target]; groups=d['name'].astype(str).str.extract(r'^(phon_R\d+_S\d+)',expand=False).fillna(d['name'].astype(str)); d.to_csv('datasets/processed/parkinsons_cleaned.csv',index=False); tr,te=next(GroupShuffleSplit(n_splits=1,test_size=.2,random_state=42).split(X,y,groups)); m=joblib.load(c.model_dir/'parkinsons_pipeline.joblib'); pred=m.predict(X.iloc[te]); proba=m.predict_proba(X.iloc[te])[:,1]; out=Path('reports/figures'); out.mkdir(parents=True,exist_ok=True); groups.value_counts().plot.bar(title='Parkinsons records per subject'); plt.savefig(out/'parkinsons_records_per_subject.png'); plt.close()
-ConfusionMatrixDisplay.from_predictions(y.iloc[te],pred); plt.savefig(out/'parkinsons_confusion_matrix.png'); plt.close(); RocCurveDisplay.from_predictions(y.iloc[te],proba); plt.savefig(out/'parkinsons_roc_curve.png'); plt.close(); y.value_counts().sort_index().plot.bar(title='Parkinsons target distribution'); plt.savefig(out/'parkinsons_target_distribution.png'); plt.close(); imp=permutation_importance(m,X.iloc[te],y.iloc[te],n_repeats=3,random_state=42,scoring='f1'); pd.Series(imp.importances_mean,index=c.features).sort_values().plot.barh(title='Parkinsons permutation importance'); plt.savefig(out/'parkinsons_feature_importance.png'); plt.close()
-(c.model_dir/'feature_names.json').write_text(json.dumps(c.features,indent=2)); (c.model_dir/'metadata.json').write_text(json.dumps({'dataset':'UCI Parkinsons','source':'https://archive.ics.uci.edu/dataset/174/parkinsons','shape':list(d.shape),'target_mapping':{'0':0,'1':1},'identifier_excluded':['name'],'subject_grouping':'name prefixes inspected; no group split implemented in shared trainer','selected_model':json.loads((c.model_dir/'metrics.json').read_text())['selected_model'],'random_seed':42},indent=2)); pd.read_csv('reports/model_results/parkinsons_metrics.csv').to_csv(c.model_dir/'model_comparison.csv',index=False)
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.training.train_parkinsons import train_parkinsons  # noqa: E402
+
+if __name__ == "__main__":
+    train_parkinsons()
+    print("Parkinson's artifacts regenerated via src.training.train_parkinsons")

@@ -1,0 +1,21 @@
+# Lightweight safety-net lint only. This codebase deliberately uses a dense,
+# compact style in places; full style/format linting is intentionally DEFERRED
+# to avoid hundreds of unrelated churn changes in a hardening pass.
+#
+# CI runs: ruff check --select E9,F63,F7,F82,F401,F811
+#   E9  - syntax errors
+#   F63 - invalid comparisons / assert on tuple
+#   F7  - misplaced statements (e.g. break outside loop)
+#   F82 - undefined names
+#   F401 - unused imports  (F811 - redefinitions)
+line-length = 120
+target-version = "py311"
+extend-exclude = ["notebooks", ".venv", "frontend"]
+
+[lint]
+select = ["E9", "F63", "F7", "F82", "F401", "F811"]
+
+[lint.per-file-ignores]
+# Trainers/tests legitimately re-import helpers locally; do not flag those here.
+"tests/*" = ["F401", "F811"]
+"scripts/*" = ["F401", "F403", "F405"]

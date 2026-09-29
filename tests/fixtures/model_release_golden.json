@@ -1,0 +1,52 @@
+{
+  "fixture_schema_version": "1.0.0",
+  "source": "Representative values derived from public datasets; no personal or user-submitted data.",
+  "score_tolerance": 1e-10,
+  "vectors": [
+    {
+      "disease_identifier": "liver",
+      "measurements": {"Age": 45, "Gender": "Male", "TB": 1.0, "DB": 0.3, "Alkphos": 190, "Sgpt": 25, "Sgot": 30, "TP": 6.8, "ALB": 3.3, "A/G Ratio": 0.9},
+      "normalized_feature_order": ["Age", "Gender", "TB", "DB", "Alkphos", "Sgpt", "Sgot", "TP", "ALB", "A/G Ratio"],
+      "expected_prediction": 1,
+      "expected_model_score": 0.6419614513147555,
+      "model_identifier": "liver:logistic_regression:ab2eb1b92956",
+      "threshold": 0.5
+    },
+    {
+      "disease_identifier": "diabetes",
+      "measurements": {"pregnancies": 6, "glucose": 148, "blood_pressure": 72, "skin_thickness": 35, "insulin": 0, "bmi": 33.6, "diabetes_pedigree": 0.627, "age": 50},
+      "normalized_feature_order": ["pregnancies", "glucose", "blood_pressure", "skin_thickness", "insulin", "bmi", "diabetes_pedigree", "age"],
+      "expected_prediction": 1,
+      "expected_model_score": 0.8005304606656921,
+      "model_identifier": "diabetes:logistic_regression:07af879e4bb7",
+      "threshold": 0.5
+    },
+    {
+      "disease_identifier": "heart",
+      "measurements": {"age": 63, "sex": "1", "cp": "1", "trestbps": 145, "chol": 233, "fbs": "1", "restecg": "2", "thalach": 150, "exang": "0", "oldpeak": 2.3, "slope": "3", "ca": "0", "thal": "6"},
+      "normalized_feature_order": ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"],
+      "expected_prediction": 0,
+      "expected_model_score": 0.4598359143180714,
+      "model_identifier": "heart:logistic_regression:5220edd64dca",
+      "threshold": 0.5
+    },
+    {
+      "disease_identifier": "kidney",
+      "measurements": {"age": 48, "bp": 80, "sg": 1.02, "al": 1, "bgr": 121, "bu": 36, "sc": 1.2, "hemo": 15.4, "pcv": 44, "rc": 5.2, "htn": "yes", "dm": "yes", "appet": "good", "ane": "no"},
+      "normalized_feature_order": ["hemo", "sc", "sg", "al", "pcv", "rc", "bgr", "bu", "age", "bp", "htn", "dm", "appet", "ane"],
+      "expected_prediction": 1,
+      "expected_model_score": 0.8689158856778145,
+      "model_identifier": "kidney:logistic_regression:8ef6da06f2f7",
+      "threshold": 0.5
+    },
+    {
+      "disease_identifier": "parkinsons",
+      "measurements": {"MDVP:Fo(Hz)": 119.99, "MDVP:Fhi(Hz)": 157.3, "MDVP:Flo(Hz)": 74.99, "MDVP:Jitter(%)": 0.00784, "MDVP:Jitter(Abs)": 0.00007, "MDVP:Shimmer(dB)": 0.426, "MDVP:APQ": 0.02971, "NHR": 0.02211, "HNR": 21.033, "RPDE": 0.414783, "DFA": 0.815285, "spread1": -4.813031, "spread2": 0.266482, "D2": 2.301442, "PPE": 0.284654},
+      "normalized_feature_order": ["MDVP:Fo(Hz)", "MDVP:Fhi(Hz)", "MDVP:Flo(Hz)", "MDVP:Jitter(%)", "MDVP:Jitter(Abs)", "MDVP:Shimmer(dB)", "MDVP:APQ", "NHR", "HNR", "RPDE", "DFA", "spread1", "spread2", "D2", "PPE"],
+      "expected_prediction": 1,
+      "expected_model_score": 0.9690051433877159,
+      "model_identifier": "parkinsons:logistic_regression:43bfa333fd5f",
+      "threshold": 0.5
+    }
+  ]
+}

@@ -1,13 +1,330 @@
 {
-  "selected_model": "gradient_boosting",
-  "metrics": {
+  "selected_model": "logistic_regression",
+  "selection": {
+    "rule": "max DEV group-CV ROC-AUC, then simplest family within 0.02 ROC-AUC of the best",
+    "cv_leader": "logistic_regression",
+    "cv_leader_roc_auc": 0.8797777777777778,
+    "tie_band_members": [
+      "logistic_regression",
+      "random_forest",
+      "gradient_boosting",
+      "svm"
+    ],
+    "selected": "logistic_regression",
+    "active_feature_set": "reduced"
+  },
+  "naive_vs_subject_aware": {
+    "probe_model": "logistic_regression (standardised)",
+    "naive_row_split_holdout_roc_auc": 0.9241379310344828,
+    "subject_aware_split_holdout_roc_auc": 0.5725806451612903,
+    "inflation": 0.3516,
+    "note": "Row-level train_test_split lets a subject's ~6 recordings appear in both train and test. The gap is the leakage this trainer avoids; only the subject-aware number is meaningful."
+  },
+  "feature_experiment": {
+    "full_feature_count": 22,
+    "reduced_feature_count": 15,
+    "reduced_features": [
+      "MDVP:Fo(Hz)",
+      "MDVP:Fhi(Hz)",
+      "MDVP:Flo(Hz)",
+      "MDVP:Jitter(%)",
+      "MDVP:Jitter(Abs)",
+      "MDVP:Shimmer(dB)",
+      "MDVP:APQ",
+      "NHR",
+      "HNR",
+      "RPDE",
+      "DFA",
+      "spread1",
+      "spread2",
+      "D2",
+      "PPE"
+    ],
+    "rationale": "jitter (RAP/PPQ/DDP) and shimmer (APQ3/APQ5/DDA/Shimmer) families have |r|>0.95; keep one representative each.",
+    "rule": "adopt the reduced set only if mean group-CV ROC-AUC drops by < 0.01 AND CV std does not increase",
+    "probes": {
+      "logistic_regression": {
+        "full_cv_roc_auc_mean": 0.8630555555555557,
+        "full_cv_roc_auc_std": 0.16412318469090958,
+        "reduced_cv_roc_auc_mean": 0.8630555555555557,
+        "reduced_cv_roc_auc_std": 0.16199375083206755
+      },
+      "random_forest": {
+        "full_cv_roc_auc_mean": 0.7975555555555556,
+        "full_cv_roc_auc_std": 0.24662502150951332,
+        "reduced_cv_roc_auc_mean": 0.8481388888888887,
+        "reduced_cv_roc_auc_std": 0.16611913767304046
+      }
+    },
+    "adopted": true,
+    "decision": "Reduced 15-feature set ADOPTED on group-aware DEV CV."
+  },
+  "multi_seed_group_stability_dev": {
+    "seeds": [
+      21,
+      42,
+      84,
+      123,
+      2026
+    ],
+    "valid_seeds": 5,
+    "scoring": "roc_auc",
+    "cv": "StratifiedGroupKFold(4), groups=subject",
+    "per_seed": {
+      "21": {
+        "mean": 0.702244623655914,
+        "std": 0.18021733282090494,
+        "valid_folds": 4,
+        "dev_subjects": 25
+      },
+      "42": {
+        "mean": 0.9380824372759857,
+        "std": 0.07272337618583408,
+        "valid_folds": 4,
+        "dev_subjects": 25
+      },
+      "84": {
+        "mean": 0.7930331541218638,
+        "std": 0.12318071344238272,
+        "valid_folds": 4,
+        "dev_subjects": 25
+      },
+      "123": {
+        "mean": 0.7159996017522899,
+        "std": 0.2183309419616346,
+        "valid_folds": 3,
+        "dev_subjects": 25
+      },
+      "2026": {
+        "mean": 0.7468279569892473,
+        "std": 0.21970509538870925,
+        "valid_folds": 4,
+        "dev_subjects": 25
+      }
+    },
+    "mean": 0.7792375547590602,
+    "std": 0.085322151205342,
+    "min": 0.702244623655914,
+    "max": 0.9380824372759857
+  },
+  "operating_threshold": 0.5,
+  "threshold_rule": "Fixed at 0.5 (group out-of-fold sweep published; only ~25 training subjects).",
+  "cv_dev": {
+    "scoring": "roc_auc",
+    "cv": "StratifiedGroupKFold(5), groups=subject",
+    "roc_auc_mean": 0.8797777777777778,
+    "roc_auc_std": 0.12104016780483338,
+    "dev_oof_f1_at_0.5": 0.925
+  },
+  "holdout": {
+    "threshold": 0.5,
+    "accuracy": 0.6046511627906976,
+    "precision": 0.6842105263157895,
+    "recall": 0.8387096774193549,
+    "specificity": 0.0,
+    "f1": 0.7536231884057971,
+    "roc_auc": 0.5860215053763441,
+    "confusion_matrix": {
+      "tn": 0,
+      "fp": 12,
+      "fn": 5,
+      "tp": 26
+    },
+    "holdout_subjects": 7,
+    "holdout_rows": 43
+  },
+  "previous_model_original_holdout": {
+    "threshold": 0.5,
     "accuracy": 0.7441860465116279,
     "precision": 0.7380952380952381,
     "recall": 1.0,
+    "specificity": 0.08333333333333333,
     "f1": 0.8493150684931506,
     "roc_auc": 0.7231182795698925,
-    "model": "gradient_boosting",
-    "cv_mean": 0.8920364899312266,
-    "cv_std": 0.060015950389561284
-  }
+    "confusion_matrix": {
+      "tn": 1,
+      "fp": 11,
+      "fn": 0,
+      "tp": 31
+    },
+    "note": "Old Gradient Boosting on its own original subject-disjoint holdout. The old trainer DID use GroupShuffleSplit + GroupKFold, but selected the model by (f1, recall) on this holdout, which favoured a degenerate high-recall model (recall 1.0, ROC-AUC 0.72)."
+  },
+  "threshold_grid_dev_oof": [
+    {
+      "threshold": 0.05,
+      "precision": 0.7631578947368421,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.8656716417910447,
+      "youden_j": 0.0
+    },
+    {
+      "threshold": 0.1,
+      "precision": 0.7631578947368421,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.8656716417910447,
+      "youden_j": 0.0
+    },
+    {
+      "threshold": 0.15,
+      "precision": 0.7785234899328859,
+      "recall": 1.0,
+      "specificity": 0.08333333333333333,
+      "f1": 0.8754716981132076,
+      "youden_j": 0.08333333333333326
+    },
+    {
+      "threshold": 0.2,
+      "precision": 0.8,
+      "recall": 1.0,
+      "specificity": 0.19444444444444445,
+      "f1": 0.8888888888888888,
+      "youden_j": 0.19444444444444442
+    },
+    {
+      "threshold": 0.25,
+      "precision": 0.8098591549295775,
+      "recall": 0.9913793103448276,
+      "specificity": 0.25,
+      "f1": 0.8914728682170543,
+      "youden_j": 0.24137931034482762
+    },
+    {
+      "threshold": 0.3,
+      "precision": 0.8394160583941606,
+      "recall": 0.9913793103448276,
+      "specificity": 0.3888888888888889,
+      "f1": 0.9090909090909091,
+      "youden_j": 0.38026819923371646
+    },
+    {
+      "threshold": 0.35,
+      "precision": 0.8646616541353384,
+      "recall": 0.9913793103448276,
+      "specificity": 0.5,
+      "f1": 0.9236947791164659,
+      "youden_j": 0.4913793103448276
+    },
+    {
+      "threshold": 0.4,
+      "precision": 0.890625,
+      "recall": 0.9827586206896551,
+      "specificity": 0.6111111111111112,
+      "f1": 0.9344262295081968,
+      "youden_j": 0.5938697318007664
+    },
+    {
+      "threshold": 0.45,
+      "precision": 0.8976377952755905,
+      "recall": 0.9827586206896551,
+      "specificity": 0.6388888888888888,
+      "f1": 0.9382716049382716,
+      "youden_j": 0.6216475095785441
+    },
+    {
+      "threshold": 0.5,
+      "precision": 0.8951612903225806,
+      "recall": 0.9568965517241379,
+      "specificity": 0.6388888888888888,
+      "f1": 0.925,
+      "youden_j": 0.5957854406130267
+    },
+    {
+      "threshold": 0.55,
+      "precision": 0.8951612903225806,
+      "recall": 0.9568965517241379,
+      "specificity": 0.6388888888888888,
+      "f1": 0.925,
+      "youden_j": 0.5957854406130267
+    },
+    {
+      "threshold": 0.6,
+      "precision": 0.8943089430894309,
+      "recall": 0.9482758620689655,
+      "specificity": 0.6388888888888888,
+      "f1": 0.9205020920502092,
+      "youden_j": 0.5871647509578544
+    },
+    {
+      "threshold": 0.65,
+      "precision": 0.8916666666666667,
+      "recall": 0.9224137931034483,
+      "specificity": 0.6388888888888888,
+      "f1": 0.9067796610169492,
+      "youden_j": 0.5613026819923372
+    },
+    {
+      "threshold": 0.7,
+      "precision": 0.8869565217391304,
+      "recall": 0.8793103448275862,
+      "specificity": 0.6388888888888888,
+      "f1": 0.8831168831168831,
+      "youden_j": 0.5181992337164751
+    },
+    {
+      "threshold": 0.75,
+      "precision": 0.9,
+      "recall": 0.853448275862069,
+      "specificity": 0.6944444444444444,
+      "f1": 0.8761061946902655,
+      "youden_j": 0.5478927203065134
+    },
+    {
+      "threshold": 0.8,
+      "precision": 0.9320388349514563,
+      "recall": 0.8275862068965517,
+      "specificity": 0.8055555555555556,
+      "f1": 0.8767123287671232,
+      "youden_j": 0.6331417624521074
+    },
+    {
+      "threshold": 0.85,
+      "precision": 0.9425287356321839,
+      "recall": 0.7068965517241379,
+      "specificity": 0.8611111111111112,
+      "f1": 0.8078817733990148,
+      "youden_j": 0.5680076628352491
+    },
+    {
+      "threshold": 0.9,
+      "precision": 1.0,
+      "recall": 0.5948275862068966,
+      "specificity": 1.0,
+      "f1": 0.745945945945946,
+      "youden_j": 0.5948275862068966
+    },
+    {
+      "threshold": 0.95,
+      "precision": 1.0,
+      "recall": 0.4051724137931034,
+      "specificity": 1.0,
+      "f1": 0.5766871165644172,
+      "youden_j": 0.4051724137931034
+    }
+  ],
+  "metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.6046511627906976,
+    "precision": 0.6842105263157895,
+    "recall": 0.8387096774193549,
+    "specificity": 0.0,
+    "f1": 0.7536231884057971,
+    "roc_auc": 0.5860215053763441,
+    "confusion_matrix": {
+      "tn": 0,
+      "fp": 12,
+      "fn": 5,
+      "tp": 26
+    },
+    "holdout_subjects": 7,
+    "holdout_rows": 43,
+    "model": "logistic_regression",
+    "cv_mean": 0.8797777777777778
+  },
+  "accuracy": 0.6046511627906976,
+  "precision": 0.6842105263157895,
+  "recall": 0.8387096774193549,
+  "f1": 0.7536231884057971,
+  "roc_auc": 0.5860215053763441
 }

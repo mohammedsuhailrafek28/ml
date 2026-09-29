@@ -1,0 +1,137 @@
+{
+  "application_version": "0.9.0-rc.1",
+  "clinical_status": "not clinically validated",
+  "inputs": {
+    "application_identity": {
+      "path": "release/application.json",
+      "sha256": "f6247e1336fe661cd16293da79abf7f62eb73a9a14ab25bd962ddb077f19df70"
+    },
+    "backend_app": {
+      "path": "src/api/main.py",
+      "sha256": "06e00ebd6042e2c83058568ac7d4a104a6e2a55f43482c7755cb10613c74c47a"
+    },
+    "backend_dockerfile": {
+      "path": "Dockerfile",
+      "sha256": "b188cbecf19c4dc3b710f7f3805a006a624691fbd71022108f357d2a119e3fb7"
+    },
+    "backend_dockerignore": {
+      "path": ".dockerignore",
+      "sha256": "3b56ee696367c94cfd025a9cf0deeacc2ab6b58174bdf2a1af965211108de273"
+    },
+    "backend_health": {
+      "path": "src/api/health.py",
+      "sha256": "a8444b1b23a3c2e8457fc3d2b0ab76c1fbe929624175e40f51854d7e972c7712"
+    },
+    "backend_observability": {
+      "path": "src/api/observability.py",
+      "sha256": "df3fdc2706ac7d791741aaa411a2251b3732a56ffc568cd69af5ee2aa7b10e49"
+    },
+    "backend_settings": {
+      "path": "src/api/settings.py",
+      "sha256": "9f7c99234d0ddcb8a86135dc6f6ad19989efb463bf579b036ebaca2342129837"
+    },
+    "browser_e2e_runner": {
+      "path": "frontend/scripts/run-e2e.mjs",
+      "sha256": "80c2d5c6a50d422b7fdd598098f0b1cce6574d3f4631dfa6c43c2ebed1ecfb95"
+    },
+    "compose_environment_example": {
+      "path": ".env.example",
+      "sha256": "555fd183f130678cba24d464188f66bf1348c539aa2d17112ada3383bc64a52b"
+    },
+    "compose_topology": {
+      "path": "docker-compose.yml",
+      "sha256": "1321a24be287dece5938709bb044de52a715db82d837c52b3b80852ec4bb79ee"
+    },
+    "container_browser_check": {
+      "path": "scripts/check_container_browser_boundary.py",
+      "sha256": "aa620acce648d4773e4d59c5e98265e3eec84e0abeaf0a3fb85306ed894b00bc"
+    },
+    "container_browser_spec": {
+      "path": "frontend/e2e/container-release.spec.ts",
+      "sha256": "08b42ae62e522b7ddb3e32a938d9553fd43b5c82f2392eb175effd935fbaad8b"
+    },
+    "container_metrics_auth_check": {
+      "path": "scripts/check_container_metrics_auth.py",
+      "sha256": "738ddba5f8c6797e95d5c5c86d72f53275b48e93b3149a06b26c93ae89194b50"
+    },
+    "container_runtime_check": {
+      "path": "scripts/check_container_runtime.py",
+      "sha256": "f6662fc1fe849f5760e98853af9e943279f7307c6315cd4003ee57e36bb1ed13"
+    },
+    "container_smoke_tool": {
+      "path": "scripts/container_smoke.mjs",
+      "sha256": "6868376ce6633d02313c58fee6d73fd3b5fa817e3092f68e9c1a7560e74dbf88"
+    },
+    "frontend_bff": {
+      "path": "frontend/lib/backend.mjs",
+      "sha256": "9762321c3a8b12e590ea3daa92bc53b14c0ae19bb8d2daa3f85e67cba19f1045"
+    },
+    "frontend_contract_schema": {
+      "path": "frontend/features/assessments/generated/contracts.schema.json",
+      "sha256": "3b992338285d77bf53ee1ebfb580294ed6f7e6bb41bf0d2e5e02b954e809354c"
+    },
+    "frontend_contract_types": {
+      "path": "frontend/features/assessments/generated/contracts.ts",
+      "sha256": "b204a18e584f817ab880d8c117163f25d684745fb8fa214d0fbe3774396fb6b6"
+    },
+    "frontend_dockerfile": {
+      "path": "frontend/Dockerfile",
+      "sha256": "73d02c64992a64f74959962e1eaf18a19bffb6f10092a1a2783f917a36dca141"
+    },
+    "frontend_dockerignore": {
+      "path": "frontend/.dockerignore",
+      "sha256": "8e37fbf3a86755d65fff84896ffa3c531405667f6f77f64351ad42f60b89bde7"
+    },
+    "frontend_global_styles": {
+      "path": "frontend/app/globals.css",
+      "sha256": "99ab01083ee6817266701e70f505664b78a5850b158220b7a800867a4cf89446"
+    },
+    "frontend_next_config": {
+      "path": "frontend/next.config.mjs",
+      "sha256": "3251370959ca5fe7da1f3ef759d9047d96b1e6f678ec881afca29bacc2cd3b27"
+    },
+    "frontend_package_lock": {
+      "path": "frontend/package-lock.json",
+      "sha256": "78f6eca2f5da1f05f0dbdfd84c2974a597a3e834f1e83c45f853779e0872697e"
+    },
+    "frontend_package_manifest": {
+      "path": "frontend/package.json",
+      "sha256": "05966fd9654fad82ef519f4e2135d285c622a61137d35be116ee7a9c3c5bbbc0"
+    },
+    "frontend_release_footer": {
+      "path": "frontend/app/release-footer.tsx",
+      "sha256": "f5e5983c8d4e81daad90035c27df7abb67bea4635037dce10313f6c428a624e0"
+    },
+    "load_smoke_runner": {
+      "path": "scripts/run_load_smoke.py",
+      "sha256": "f6925445c211ad9ba2876c775ee71f00b435b39d5e9ecdea254830ad7a396638"
+    },
+    "model_release_manifest": {
+      "path": "models/release_manifest.json",
+      "sha256": "69caeb9dd9ba0d24a2e17eefff4b5bf942a8d75a74407f72464c4711f9036def"
+    },
+    "python_dependency_lock": {
+      "path": "requirements.lock",
+      "sha256": "ef12a9b005c13fe82430e516c05757c24a23d06f6040930aab8877e847cb8c1a"
+    },
+    "release_ci_workflow": {
+      "path": ".github/workflows/release-candidate.yml",
+      "sha256": "b3e34e85b85797bb40beb3a96c8fdb77bce7f87c1a0805a70cf88a310fc6b224"
+    },
+    "release_provenance_runtime": {
+      "path": "src/application_release.py",
+      "sha256": "e5a3ac9fb13708876dfb1cc0efd22d1f87386046e22a8ddc0b33cffb9999ef2f"
+    },
+    "standalone_assets_setup": {
+      "path": "frontend/scripts/prepare-standalone.mjs",
+      "sha256": "9da62041e98c3ee02a9e08a99eb9ebc0d9543ea9f2987b4db5d18a1c5575969a"
+    }
+  },
+  "intended_use": "Educational and research use only.",
+  "release_status": "educational/research release candidate",
+  "runtime_versions": {
+    "backend_python": "3.11.15",
+    "frontend_node": "20.19.0"
+  },
+  "schema_version": "1.0.0"
+}

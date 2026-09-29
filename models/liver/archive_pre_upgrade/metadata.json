@@ -1,0 +1,17 @@
+{
+  "dataset": "liver.csv",
+  "shape": [
+    583,
+    11
+  ],
+  "target_mapping": {
+    "1": 1,
+    "2": 0
+  },
+  "selected_algorithm": "random_forest",
+  "random_seed": 42,
+  "selected_model": "random_forest",
+  "training_timestamp": "2026-07-24",
+  "sklearn_version": "1.9.0",
+  "threshold": 0.5
+}

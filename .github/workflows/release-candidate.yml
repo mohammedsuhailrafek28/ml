@@ -1,0 +1,274 @@
+name: Release candidate verification
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  container-release:
+    name: Build, hardening, browser and supply-chain verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      CI: "true"
+      E2E_BASE_URL: http://127.0.0.1:3000
+      API_IMAGE: medical-ai-api:${{ github.sha }}
+      WEB_IMAGE: medical-ai-web:${{ github.sha }}
+      APP_SOURCE_REVISION: ${{ github.sha }}
+      DOCKER_BUILDKIT: "1"
+      # Gitleaks v8.30.1, pinned to this immutable GHCR image digest.
+      GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20.19.0
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11.15"
+          cache: pip
+          cache-dependency-path: requirements-dev.lock
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Set authoritative release and image creation metadata
+        run: |
+          version="$(python -c 'import json; print(json.load(open("release/application.json", encoding="utf-8"))["version"])')"
+          echo "APP_VERSION=$version" >> "$GITHUB_ENV"
+          echo "OCI_CREATED=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+      - name: Verify Python environment and release inputs
+        run: |
+          python -m pip install --require-hashes -r requirements-dev.lock
+          python -m pip check
+          python -m scripts.generate_frontend_contracts --check
+          python -m scripts.build_model_release_manifest --check
+          python scripts/evaluate_persisted_models.py --check > "$RUNNER_TEMP/evaluator.json"
+          python -m scripts.build_application_release_manifest --check
+      - name: Install browser suite
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Create ephemeral Compose secret without displaying it
+        shell: bash
+        run: |
+          service_api_key_file="$RUNNER_TEMP/medical-ai-service-key"
+          echo "SERVICE_API_KEY_FILE=$service_api_key_file" >> "$GITHUB_ENV"
+          export SERVICE_API_KEY_FILE="$service_api_key_file"
+          umask 077
+          python -c 'import secrets; print(secrets.token_urlsafe(48), end="")' > "$service_api_key_file"
+          test "$(wc -c < "$service_api_key_file")" -ge 32
+          # Local Compose file secrets are read-only bind mounts; the ephemeral
+          # single-tenant runner needs the non-root container uid to read it.
+          chmod 0444 "$service_api_key_file"
+          docker compose config --quiet
+      - name: Build hardened images locally with Buildx
+        run: docker compose build --pull
+      - name: Prepare Git-aware current-source scan snapshot
+        id: source_snapshot
+        run: python scripts/create_secret_scan_snapshot.py --output "$RUNNER_TEMP/gitleaks-worktree"
+      - name: Scan current candidate source tree with Gitleaks v8.30.1
+        id: gitleaks_worktree
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/medical-ai-scans"
+          set +e
+          docker run --rm --network none \
+            --mount "type=bind,source=$RUNNER_TEMP/gitleaks-worktree,target=/source,readonly" \
+            --mount "type=bind,source=$RUNNER_TEMP/medical-ai-scans,target=/reports" \
+            "$GITLEAKS_IMAGE" --no-banner --log-level info --redact \
+            --report-format json --report-path /reports/gitleaks-worktree.json \
+            --timeout 1200 dir /source
+          scan_status=$?
+          if [ ! -s "$RUNNER_TEMP/medical-ai-scans/gitleaks-worktree.json" ]; then
+            printf '{"report_status":"scanner_failed_without_report","secret_values_included":false}\n' \
+              > "$RUNNER_TEMP/medical-ai-scans/gitleaks-worktree.json"
+          fi
+          exit "$scan_status"
+      - name: Scan reachable Git history with Gitleaks v8.30.1
+        id: gitleaks_history
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/medical-ai-scans"
+          echo "Reachable commits to scan: $(git rev-list --all --count)"
+          set +e
+          docker run --rm --network none \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/repo,readonly" \
+            --mount "type=bind,source=$RUNNER_TEMP/medical-ai-scans,target=/reports" \
+            "$GITLEAKS_IMAGE" --no-banner --log-level info --redact \
+            --report-format json --report-path /reports/gitleaks-history.json \
+            --timeout 1200 git --log-opts="--all --full-history" /repo
+          scan_status=$?
+          if [ ! -s "$RUNNER_TEMP/medical-ai-scans/gitleaks-history.json" ]; then
+            printf '{"report_status":"scanner_failed_without_report","secret_values_included":false}\n' \
+              > "$RUNNER_TEMP/medical-ai-scans/gitleaks-history.json"
+          fi
+          exit "$scan_status"
+      - name: Ensure redacted source-scan report artifacts exist
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/medical-ai-scans"
+          for report in gitleaks-worktree.json gitleaks-history.json; do
+            if [ ! -s "$RUNNER_TEMP/medical-ai-scans/$report" ]; then
+              printf '{"report_status":"scanner_not_run_or_no_report","secret_values_included":false}\n' \
+                > "$RUNNER_TEMP/medical-ai-scans/$report"
+            fi
+          done
+      - name: Scan API image for Critical/High vulnerabilities and secrets
+        id: api_scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.API_IMAGE }}
+          scanners: vuln,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          format: json
+          output: trivy-api.json
+          exit-code: "1"
+      - name: Scan frontend image for Critical/High vulnerabilities and secrets
+        id: web_scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.WEB_IMAGE }}
+          scanners: vuln,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          format: json
+          output: trivy-web.json
+          exit-code: "1"
+      - name: Generate API CycloneDX SBOM
+        id: api_sbom
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.API_IMAGE }}
+          format: cyclonedx
+          output: sbom-api.cdx.json
+          exit-code: "0"
+      - name: Generate frontend CycloneDX SBOM
+        id: web_sbom
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.WEB_IMAGE }}
+          format: cyclonedx
+          output: sbom-web.cdx.json
+          exit-code: "0"
+      - name: Redact image-scan reports for safe artifacts
+        id: redact_trivy_reports
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          redact_report() {
+            report="$1"
+            if [ -s "$report" ]; then
+              python scripts/redact_trivy_report.py --input "$report" --output "$report"
+              return $?
+            fi
+            printf '{"report_status":"scanner_not_run_or_no_report","secret_values_included":false}\n' > "$report"
+            return 0
+          }
+          redact_report trivy-api.json
+          api_status=$?
+          redact_report trivy-web.json
+          web_status=$?
+          if [ "$api_status" -ne 0 ] || [ "$web_status" -ne 0 ]; then exit 1; fi
+      - name: Enforce scan gates
+        if: always()
+        run: |
+          test "${{ steps.gitleaks_worktree.outcome }}" = success
+          test "${{ steps.gitleaks_history.outcome }}" = success
+          test "${{ steps.source_snapshot.outcome }}" = success
+          test "${{ steps.api_scan.outcome }}" = success
+          test "${{ steps.web_scan.outcome }}" = success
+          test "${{ steps.api_sbom.outcome }}" = success
+          test "${{ steps.web_sbom.outcome }}" = success
+          test "${{ steps.redact_trivy_reports.outcome }}" = success
+          python -c 'import json,sys; reports=[json.load(open(p,encoding="utf-8")) for p in sys.argv[1:]]; assert all(isinstance(r,list) and not r for r in reports), "Gitleaks found secrets or emitted an invalid report"' \
+            "$RUNNER_TEMP/medical-ai-scans/gitleaks-worktree.json" \
+            "$RUNNER_TEMP/medical-ai-scans/gitleaks-history.json"
+      - name: Start hardened Compose topology
+        run: docker compose up --detach --wait --wait-timeout 120
+      - name: Verify runtime identity, filesystem, ports, secret auth and PDFs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/check_container_runtime.py
+          python scripts/check_container_browser_boundary.py
+          node scripts/container_smoke.mjs
+          docker compose exec -T api python -c 'import pathlib; p=pathlib.Path("/app/runtime-write-check");
+          try: p.write_text("x"); raise SystemExit("rootfs was writable")
+          except OSError: pass
+          pathlib.Path("/tmp/runtime-write-check").write_text("ok"); print("API read-only rootfs and tmpfs: PASS")'
+          docker compose exec -T web node -e 'const fs=require("node:fs"); try{fs.writeFileSync("/app/runtime-write-check","x");process.exit(1)}catch{} fs.writeFileSync("/tmp/runtime-write-check","ok"); console.log("Web read-only rootfs and tmpfs: PASS")'
+          docker compose exec -T api sh -c 'test -z "$(find /app /tmp /home /var/tmp -type f -name "*.pdf" -print -quit 2>/dev/null)"'
+          docker compose exec -T web sh -c 'test -z "$(find /app /tmp /home /var/tmp -type f -name "*.pdf" -print -quit 2>/dev/null)"'
+          python scripts/check_container_metrics_auth.py
+      - name: Run browser E2E against production container frontend
+        working-directory: frontend
+        run: npx playwright test e2e/container-release.spec.ts
+      - name: Restart and verify readiness recovery
+        run: |
+          docker compose restart api
+          docker compose up --detach --wait --wait-timeout 120
+          node scripts/container_smoke.mjs
+          docker compose exec -T api sh -c 'test -z "$(find /app /tmp /home /var/tmp -type f -name "*.pdf" -print -quit 2>/dev/null)"'
+          docker compose exec -T web sh -c 'test -z "$(find /app /tmp /home /var/tmp -type f -name "*.pdf" -print -quit 2>/dev/null)"'
+      - name: Save diagnostics (failure only; no request data or credentials)
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/medical-ai-diagnostics"
+          docker compose ps --all > "$RUNNER_TEMP/medical-ai-diagnostics/services.txt" 2>&1 || true
+          docker compose logs --no-color --timestamps > "$RUNNER_TEMP/medical-ai-diagnostics/services.log" 2>&1 || true
+          docker image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' > "$RUNNER_TEMP/medical-ai-diagnostics/images.txt"
+      - name: Upload SBOM and scan reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-candidate-supply-chain-${{ github.sha }}
+          path: |
+            sbom-api.cdx.json
+            sbom-web.cdx.json
+            trivy-api.json
+            trivy-web.json
+            ${{ runner.temp }}/medical-ai-scans/gitleaks-worktree.json
+            ${{ runner.temp }}/medical-ai-scans/gitleaks-history.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Upload diagnostics (failure only)
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-candidate-failure-diagnostics-${{ github.sha }}
+          path: ${{ runner.temp }}/medical-ai-diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Tear down Compose stack and remove ephemeral service credential
+        if: always()
+        shell: bash
+        run: |
+          docker compose down --volumes --remove-orphans || true
+          rm -f "$SERVICE_API_KEY_FILE"

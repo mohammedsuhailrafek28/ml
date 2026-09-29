@@ -1,13 +1,347 @@
 {
-  "selected_model": "random_forest",
-  "metrics": {
+  "selected_model": "logistic_regression",
+  "selection": {
+    "rule": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+    "cv_leader": "svm",
+    "cv_leader_roc_auc": 1.0,
+    "tie_band_members": [
+      "svm",
+      "logistic_regression",
+      "gaussian_nb",
+      "random_forest",
+      "gradient_boosting",
+      "knn"
+    ],
+    "selected": "logistic_regression",
+    "active_feature_set": "compact"
+  },
+  "feature_selection_experiment": {
+    "full_feature_count": 24,
+    "compact_feature_count": 14,
+    "compact_features": [
+      "hemo",
+      "sc",
+      "sg",
+      "al",
+      "pcv",
+      "rc",
+      "bgr",
+      "bu",
+      "age",
+      "bp",
+      "htn",
+      "dm",
+      "appet",
+      "ane"
+    ],
+    "probes": {
+      "logistic_regression": {
+        "full_cv_roc_auc_mean": 1.0,
+        "full_cv_roc_auc_std": 0.0,
+        "compact_cv_roc_auc_mean": 1.0,
+        "compact_cv_roc_auc_std": 0.0
+      },
+      "random_forest": {
+        "full_cv_roc_auc_mean": 0.9990625,
+        "full_cv_roc_auc_std": 0.0012500000000000178,
+        "compact_cv_roc_auc_mean": 0.9997916666666666,
+        "compact_cv_roc_auc_std": 0.0004166666666666319
+      }
+    },
+    "rule": "adopt the compact set only if mean DEV CV ROC-AUC drops by < 0.005 AND CV std does not increase",
+    "adopted": true,
+    "decision": "Compact 14-feature set ADOPTED: it did not hurt DEV CV ROC-AUC/stability."
+  },
+  "missingness_analysis": {
+    "count_missing_features_auc_vs_target": 0.82025,
+    "mean_missing_features_positive": 3.795,
+    "mean_missing_features_negative": 0.7833333333333333,
+    "per_feature_missing_indicator_auc": {
+      "sod": 0.6542,
+      "pot": 0.6567,
+      "pcv": 0.625,
+      "wc": 0.6833,
+      "rc": 0.7358,
+      "rbc": 0.7617
+    },
+    "note": "CKD rows in this file have many more skipped lab tests than non-CKD rows - a data-collection artefact. We deliberately do NOT add missing-indicator features; median/mode imputation inside the pipeline means the model sees imputed values, not raw missingness. A residual trace may remain and is listed as a limitation."
+  },
+  "multi_seed_stability_dev": {
+    "seeds": [
+      21,
+      42,
+      84,
+      123,
+      2026
+    ],
+    "scoring": "roc_auc",
+    "per_seed": {
+      "21": {
+        "mean": 0.9997916666666666,
+        "std": 0.000416666666666643
+      },
+      "42": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "84": {
+        "mean": 0.9997916666666666,
+        "std": 0.000416666666666643
+      },
+      "123": {
+        "mean": 0.9997916666666666,
+        "std": 0.000416666666666643
+      },
+      "2026": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    "mean": 0.999875,
+    "std": 0.00010206207261598171,
+    "min": 0.9997916666666666,
+    "max": 1.0
+  },
+  "simple_feature_baseline_holdout_auc": {
+    "hemo": 0.9306666666666666,
+    "sc": 0.942,
+    "hemo+sg+al": 0.9846666666666667
+  },
+  "perfect_score_investigation": {
+    "triggered_by": "holdout roc_auc >= 0.999 or accuracy == 1.0",
+    "repeat_stratified_cv_mean": 0.999875,
+    "cv_variance_across_seeds_std": 0.00010206207261598171,
+    "multi_seed_min_max": [
+      0.9997916666666666,
+      1.0
+    ],
+    "exact_duplicates_across_partitions": 0,
+    "duplicate_feature_vectors_conflicting_labels": 0,
+    "target_excluded_from_features": true,
+    "id_proxy_excluded": true,
+    "all_preprocessing_inside_pipeline": true,
+    "single_feature_baseline_holdout_auc": {
+      "hemo": 0.9306666666666666,
+      "sc": 0.942,
+      "hemo+sg+al": 0.9846666666666667
+    },
+    "missingness_count_auc": 0.82025,
+    "holdout_touched_before_final_config": false,
+    "verdict": "The UCI CKD dataset is close to linearly separable on legitimate clinical markers (haemoglobin, serum creatinine, specific gravity, albumin, PCV, RBC count) and every 'positive finding' categorical (htn/dm/pc=abnormal/appet=poor/...) occurs only in CKD rows. A depth-2 tree on haemoglobin alone already scores ~0.94 CV ROC-AUC. The high score is genuine separability of this small curated 1990s dataset, amplified by a missing-data collection artefact; it is NOT target leakage, duplicate leakage, or preprocessing leakage. It must not be read as perfect clinical CKD detection."
+  },
+  "operating_threshold": 0.5,
+  "threshold_rule": "Fixed at 0.5 (dev OOF sweep published; classes separate cleanly so 0.5 is stable).",
+  "cv_dev": {
+    "scoring": "roc_auc",
+    "roc_auc_mean": 1.0,
+    "roc_auc_std": 0.0,
+    "dev_oof_f1_at_0.5": 0.9974937343358395
+  },
+  "holdout": {
+    "threshold": 0.5,
+    "accuracy": 0.9875,
+    "precision": 1.0,
+    "recall": 0.98,
+    "specificity": 1.0,
+    "f1": 0.98989898989899,
+    "roc_auc": 0.9993333333333333,
+    "confusion_matrix": {
+      "tn": 30,
+      "fp": 0,
+      "fn": 1,
+      "tp": 49
+    }
+  },
+  "previous_model_original_holdout": {
+    "threshold": 0.5,
     "accuracy": 1.0,
     "precision": 1.0,
     "recall": 1.0,
+    "specificity": 1.0,
     "f1": 1.0,
     "roc_auc": 1.0,
-    "model": "random_forest",
-    "cv_mean": 0.992530864197531,
-    "cv_std": 0.009984746787948532
-  }
+    "confusion_matrix": {
+      "tn": 30,
+      "fp": 0,
+      "fn": 0,
+      "tp": 50
+    },
+    "note": "Old Random Forest on its own original stratified 80-row holdout; the model was also selected on this same split by (f1, recall) with no separate validation set, and several other families scored 1.00 there too - so the 1.00 is optimistic (tiny holdout + test-set selection)."
+  },
+  "threshold_grid_dev_oof": [
+    {
+      "threshold": 0.05,
+      "precision": 0.8810572687224669,
+      "recall": 1.0,
+      "specificity": 0.775,
+      "f1": 0.936768149882904,
+      "youden_j": 0.7749999999999999
+    },
+    {
+      "threshold": 0.1,
+      "precision": 0.9523809523809523,
+      "recall": 1.0,
+      "specificity": 0.9166666666666666,
+      "f1": 0.975609756097561,
+      "youden_j": 0.9166666666666665
+    },
+    {
+      "threshold": 0.15,
+      "precision": 0.9615384615384616,
+      "recall": 1.0,
+      "specificity": 0.9333333333333333,
+      "f1": 0.9803921568627451,
+      "youden_j": 0.9333333333333333
+    },
+    {
+      "threshold": 0.2,
+      "precision": 0.975609756097561,
+      "recall": 1.0,
+      "specificity": 0.9583333333333334,
+      "f1": 0.9876543209876543,
+      "youden_j": 0.9583333333333335
+    },
+    {
+      "threshold": 0.25,
+      "precision": 0.9802955665024631,
+      "recall": 0.995,
+      "specificity": 0.9666666666666667,
+      "f1": 0.9875930521091811,
+      "youden_j": 0.9616666666666667
+    },
+    {
+      "threshold": 0.3,
+      "precision": 0.9802955665024631,
+      "recall": 0.995,
+      "specificity": 0.9666666666666667,
+      "f1": 0.9875930521091811,
+      "youden_j": 0.9616666666666667
+    },
+    {
+      "threshold": 0.35,
+      "precision": 0.9851485148514851,
+      "recall": 0.995,
+      "specificity": 0.975,
+      "f1": 0.9900497512437811,
+      "youden_j": 0.97
+    },
+    {
+      "threshold": 0.4,
+      "precision": 0.9851485148514851,
+      "recall": 0.995,
+      "specificity": 0.975,
+      "f1": 0.9900497512437811,
+      "youden_j": 0.97
+    },
+    {
+      "threshold": 0.45,
+      "precision": 0.9900497512437811,
+      "recall": 0.995,
+      "specificity": 0.9833333333333333,
+      "f1": 0.9925187032418953,
+      "youden_j": 0.9783333333333333
+    },
+    {
+      "threshold": 0.5,
+      "precision": 1.0,
+      "recall": 0.995,
+      "specificity": 1.0,
+      "f1": 0.9974937343358395,
+      "youden_j": 0.9950000000000001
+    },
+    {
+      "threshold": 0.55,
+      "precision": 1.0,
+      "recall": 0.995,
+      "specificity": 1.0,
+      "f1": 0.9974937343358395,
+      "youden_j": 0.9950000000000001
+    },
+    {
+      "threshold": 0.6,
+      "precision": 1.0,
+      "recall": 0.99,
+      "specificity": 1.0,
+      "f1": 0.9949748743718593,
+      "youden_j": 0.99
+    },
+    {
+      "threshold": 0.65,
+      "precision": 1.0,
+      "recall": 0.985,
+      "specificity": 1.0,
+      "f1": 0.9924433249370277,
+      "youden_j": 0.9849999999999999
+    },
+    {
+      "threshold": 0.7,
+      "precision": 1.0,
+      "recall": 0.98,
+      "specificity": 1.0,
+      "f1": 0.98989898989899,
+      "youden_j": 0.98
+    },
+    {
+      "threshold": 0.75,
+      "precision": 1.0,
+      "recall": 0.975,
+      "specificity": 1.0,
+      "f1": 0.9873417721518988,
+      "youden_j": 0.9750000000000001
+    },
+    {
+      "threshold": 0.8,
+      "precision": 1.0,
+      "recall": 0.95,
+      "specificity": 1.0,
+      "f1": 0.9743589743589743,
+      "youden_j": 0.95
+    },
+    {
+      "threshold": 0.85,
+      "precision": 1.0,
+      "recall": 0.925,
+      "specificity": 1.0,
+      "f1": 0.961038961038961,
+      "youden_j": 0.925
+    },
+    {
+      "threshold": 0.9,
+      "precision": 1.0,
+      "recall": 0.915,
+      "specificity": 1.0,
+      "f1": 0.9556135770234987,
+      "youden_j": 0.915
+    },
+    {
+      "threshold": 0.95,
+      "precision": 1.0,
+      "recall": 0.87,
+      "specificity": 1.0,
+      "f1": 0.93048128342246,
+      "youden_j": 0.8700000000000001
+    }
+  ],
+  "metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.9875,
+    "precision": 1.0,
+    "recall": 0.98,
+    "specificity": 1.0,
+    "f1": 0.98989898989899,
+    "roc_auc": 0.9993333333333333,
+    "confusion_matrix": {
+      "tn": 30,
+      "fp": 0,
+      "fn": 1,
+      "tp": 49
+    },
+    "model": "logistic_regression",
+    "cv_mean": 1.0
+  },
+  "accuracy": 0.9875,
+  "precision": 1.0,
+  "recall": 0.98,
+  "f1": 0.98989898989899,
+  "roc_auc": 0.9993333333333333
 }

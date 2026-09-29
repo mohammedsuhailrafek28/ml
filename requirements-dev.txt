@@ -1,0 +1,22 @@
+# Development, test and training dependencies. Includes everything in
+# requirements.txt plus tooling.
+-r requirements.txt
+
+# --- tests ---
+pytest>=8,<9
+httpx>=0.27,<1
+
+# --- training-time figure output (trainers import matplotlib lazily) ---
+matplotlib>=3.8,<4
+
+# --- lint (config in ruff.toml; CI runs the pyflakes error subset only) ---
+ruff>=0.6,<1
+
+# --- legacy / notebooks (optional; not part of the API runtime) ---
+# The Streamlit app (app.py) is a legacy fallback demo; tests/test_streamlit_app.py
+# skips automatically when streamlit is absent.
+streamlit>=1.32,<2
+jupyter>=1,<2
+seaborn>=0.13,<1
+plotly>=5.20,<7
+shap>=0.45,<1

@@ -1,0 +1,171 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (lint + tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.lock
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements-dev.lock
+      - name: Verify dependency integrity
+        run: pip check
+      - name: Verify persisted-model release
+        run: |
+          python -m scripts.build_model_release_manifest --check
+          python scripts/evaluate_persisted_models.py --check > /tmp/model-release-verification.json
+      - name: Verify frontend contracts match API models and release feature order
+        run: python -m scripts.generate_frontend_contracts --check
+      - name: Ruff (pyflakes error subset)
+        run: ruff check --select E9,F63,F7,F82,F401,F811 src tests scripts
+      - name: Import / startup smoke
+        run: python -c "from src.api.main import app; from src.api.health import readiness; p,s=readiness(); print('readiness', s); assert s in (200,503)"
+      - name: Pytest
+        run: pytest -q
+
+  frontend:
+    name: Frontend (audit + typecheck + lint + build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit --audit-level=high
+      - run: npm run test:security
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+        env:
+          BACKEND_INTERNAL_URL: http://internal-api:8000
+          BACKEND_API_KEY: not-a-real-secret-ci-bundle-sentinel-1234567890
+      - name: Verify browser bundle excludes server configuration
+        run: |
+          ! grep -R -F 'not-a-real-secret-ci-bundle-sentinel-1234567890' .next/static
+          ! grep -R -F 'http://internal-api:8000' .next/static
+
+  browser-e2e:
+    name: Browser E2E (production Next.js + FastAPI)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      FORCE_COLOR: "0"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.lock
+      - name: Create isolated Python 3.11 E2E environment
+        run: |
+          e2e_python="$RUNNER_TEMP/e2e-venv/bin/python"
+          echo "E2E_PYTHON=$e2e_python" >> "$GITHUB_ENV"
+          python -m venv "$RUNNER_TEMP/e2e-venv"
+          "$e2e_python" -m pip install --require-hashes -r requirements-dev.lock
+          "$e2e_python" -m pip check
+      - name: Install locked frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Install the locked Playwright Chromium build and Linux dependencies
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: Build once, start isolated services, and run browser journeys
+        working-directory: frontend
+        run: npm run test:e2e
+      - name: Run authenticated API+BFF load smoke
+        run: |
+          "$E2E_PYTHON" -m scripts.run_load_smoke --requests 50 --concurrency 5
+      - name: Preserve browser traces only after failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-e2e-failure-artifacts
+          path: frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  smoke:
+    name: Integration smoke (API up + one prediction)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: backend
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - run: |
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements.lock
+          pip check
+      - name: Generate ephemeral service credential
+        run: |
+          key="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          echo "::add-mask::$key"
+          echo "API_KEY=$key" >> "$GITHUB_ENV"
+          echo "APP_ENV=production" >> "$GITHUB_ENV"
+      - name: Start API
+        run: |
+          python -m uvicorn src.api.main:app --host 127.0.0.1 --port 8000 --log-level warning &
+          echo $! > /tmp/api.pid
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/api/v1/health && break || sleep 1
+          done
+      - name: Health + readiness
+        run: |
+          curl -sf http://127.0.0.1:8000/api/v1/health | tee /dev/stderr | grep -q '"status": *"alive"'
+          curl -sf http://127.0.0.1:8000/api/v1/ready  | tee /dev/stderr | grep -q '"status": *"ready"'
+      - name: One prediction per disease
+        run: |
+          set -e
+          post() { curl -sf -X POST "http://127.0.0.1:8000/api/v1/predictions/$1" -H 'Content-Type: application/json' -H "X-API-Key: $API_KEY" -d "$2" | grep -q '"prediction"'; }
+          post liver   '{"measurements":{"Age":45,"Gender":"Male","TB":1.0,"DB":0.3,"Alkphos":190,"Sgpt":25,"Sgot":30,"TP":6.8,"ALB":3.3,"A/G Ratio":0.9}}'
+          post heart   '{"measurements":{"age":63,"sex":"1","cp":"1","trestbps":145,"chol":233,"fbs":"1","restecg":"2","thalach":150,"exang":"0","oldpeak":2.3,"slope":"3","ca":"0","thal":"6"}}'
+          post diabetes '{"measurements":{"pregnancies":6,"glucose":148,"blood_pressure":72,"skin_thickness":35,"insulin":0,"bmi":33.6,"diabetes_pedigree":0.627,"age":50}}'
+          post kidney  '{"measurements":{"age":48,"bp":80,"sg":1.02,"al":1,"bgr":121,"bu":36,"sc":1.2,"hemo":15.4,"pcv":44,"rc":5.2,"htn":"yes","dm":"yes","appet":"good","ane":"no"}}'
+          post parkinsons '{"measurements":{"MDVP:Fo(Hz)":119.99,"MDVP:Fhi(Hz)":157.30,"MDVP:Flo(Hz)":74.99,"MDVP:Jitter(%)":0.00784,"MDVP:Jitter(Abs)":0.00007,"MDVP:Shimmer(dB)":0.426,"MDVP:APQ":0.02971,"NHR":0.02211,"HNR":21.033,"RPDE":0.414783,"DFA":0.815285,"spread1":-4.813031,"spread2":0.266482,"D2":2.301442,"PPE":0.284654}}'
+      - name: One report
+        run: |
+          curl -sf -o /tmp/r.pdf -X POST http://127.0.0.1:8000/api/v1/reports/liver -H 'Content-Type: application/json' -H "X-API-Key: $API_KEY" -d '{"measurements":{"Age":45,"Gender":"Male","TB":1.0,"DB":0.3,"Alkphos":190,"Sgpt":25,"Sgot":30,"TP":6.8,"ALB":3.3,"A/G Ratio":0.9}}' && head -c4 /tmp/r.pdf | grep -q PDF
+      - name: Stop API
+        if: always()
+        run: kill "$(cat /tmp/api.pid)" || true

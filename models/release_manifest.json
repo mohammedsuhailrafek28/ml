@@ -1,0 +1,857 @@
+{
+  "release_schema_version": "1.0.0",
+  "release_id": "medical-ai-suite-model-release-2026-09-24",
+  "created_date": "2026-09-24",
+  "authoritative": true,
+  "release_environment": {
+    "python": "3.11",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.9.0",
+    "joblib": "1.5.3"
+  },
+  "releases": {
+    "liver": {
+      "release_schema_version": "1.0.0",
+      "disease_identifier": "liver",
+      "metadata_disease_label": "Liver disease",
+      "dataset": {
+        "path": "datasets/raw/liver.csv",
+        "sha256": "c2711ba61cfb3f9b7fb2251a4483fac1e2f0d6e256aebd3558a86b904f04784f"
+      },
+      "model": {
+        "path": "models/liver/liver_pipeline.joblib",
+        "sha256": "ab2eb1b92956119b8814a1ec4b462d8316edbf5543445bcfa340d62fad35a960",
+        "identifier": "liver:logistic_regression:ab2eb1b92956"
+      },
+      "metadata": {
+        "path": "models/liver/metadata.json",
+        "sha256": "626a531a5d9e157fa0d5387490a71e8d04acf238fc8416b286a36b48ec5c2079"
+      },
+      "feature_list": {
+        "path": "models/liver/feature_names.json",
+        "sha256": "ebb0c44c14af6861790e740752b58a50aa640cc8a88b80662c41986fa11e1e0f",
+        "transformed_features": [
+          "numeric__Age",
+          "numeric__TB",
+          "numeric__DB",
+          "numeric__Alkphos",
+          "numeric__Sgpt",
+          "numeric__Sgot",
+          "numeric__TP",
+          "numeric__ALB",
+          "numeric__A/G Ratio",
+          "categorical__Gender_Female",
+          "categorical__Gender_Male"
+        ]
+      },
+      "ordered_active_features": [
+        "Age",
+        "Gender",
+        "TB",
+        "DB",
+        "Alkphos",
+        "Sgpt",
+        "Sgot",
+        "TP",
+        "ALB",
+        "A/G Ratio"
+      ],
+      "feature_count": 10,
+      "pipeline_steps": [
+        {
+          "name": "preprocessor",
+          "type": "sklearn.compose._column_transformer.ColumnTransformer"
+        },
+        {
+          "name": "model",
+          "type": "sklearn.linear_model._logistic.LogisticRegression"
+        }
+      ],
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "classes": {
+        "positive": {
+          "value": 1,
+          "definition": "liver-disease pattern (ILPD Selector == 1)"
+        },
+        "negative": {
+          "value": 0,
+          "definition": "no liver-disease pattern (ILPD Selector == 2)"
+        }
+      },
+      "evaluation_method": {
+        "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+        "model_selection": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+        "cross_validation": "stratified CV on development partition",
+        "holdout_is_reused": false
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "roc_auc_mean": 0.7184264738110893,
+          "roc_auc_std": 0.03248398341929603,
+          "dev_oof_f1_at_0.5": 0.8207934336525308
+        },
+        "holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.7105263157894737,
+          "precision": 0.7448979591836735,
+          "recall": 0.9012345679012346,
+          "specificity": 0.24242424242424243,
+          "f1": 0.8156424581005587,
+          "roc_auc": 0.8035914702581369,
+          "confusion_matrix": {
+            "tn": 8,
+            "fp": 25,
+            "fn": 8,
+            "tp": 73
+          }
+        }
+      },
+      "training_versions": {
+        "scikit-learn": "1.9.0",
+        "numpy": "not recorded by trainer",
+        "pandas": "not recorded by trainer",
+        "scipy": "not recorded by trainer",
+        "joblib": "not recorded by trainer"
+      },
+      "runtime_versions": {
+        "python": "3.11",
+        "numpy": "2.4.6",
+        "pandas": "3.0.6",
+        "scipy": "1.17.1",
+        "scikit-learn": "1.9.0",
+        "joblib": "1.5.3"
+      },
+      "api_request_schema": {
+        "endpoint": "POST /api/v1/predictions/liver",
+        "body": {
+          "measurements": "object"
+        },
+        "ordered_measurement_fields": [
+          "Age",
+          "Gender",
+          "TB",
+          "DB",
+          "Alkphos",
+          "Sgpt",
+          "Sgot",
+          "TP",
+          "ALB",
+          "A/G Ratio"
+        ],
+        "required_fields": [
+          "Age",
+          "Gender",
+          "TB",
+          "DB",
+          "Alkphos",
+          "Sgpt",
+          "Sgot",
+          "TP",
+          "ALB"
+        ],
+        "optional_imputed_fields": [
+          "A/G Ratio"
+        ],
+        "additional_fields_allowed": false
+      },
+      "preprocessing": "ColumnTransformer: numeric -> SimpleImputer(median) + StandardScaler; categorical(Gender) -> SimpleImputer(most_frequent) + OneHotEncoder. Fitted inside the pipeline on training folds only.",
+      "intended_use": "Educational and research demonstration of persisted-model inference; not diagnosis, screening, triage, or treatment guidance.",
+      "known_limitations": [
+        "ILPD is a single-region (Andhra Pradesh, India) dataset of 583 records; it under-represents women and non-Indian populations.",
+        "Labels indicate prior clinical grouping, not a specific liver disease or severity.",
+        "Permutation importance describes model behaviour, not physiological causation."
+      ],
+      "release_status": "educational/research release"
+    },
+    "heart": {
+      "release_schema_version": "1.0.0",
+      "disease_identifier": "heart",
+      "metadata_disease_label": "Heart disease",
+      "dataset": {
+        "path": "datasets/raw/heart.csv",
+        "sha256": "f88a9e86e7925abdbe140ef1e5f31b31e13733f42d38d7177b2ae2f6ee996d19"
+      },
+      "model": {
+        "path": "models/heart/heart_pipeline.joblib",
+        "sha256": "5220edd64dcae73f30d611bc4ed90614c17576ae66f911fb4c5e23fe8281052f",
+        "identifier": "heart:logistic_regression:5220edd64dca"
+      },
+      "metadata": {
+        "path": "models/heart/metadata.json",
+        "sha256": "73c9b7853d92b8324675ebd16f8ec084fdb69c96c421e0596a02949b05ea865f"
+      },
+      "feature_list": {
+        "path": "models/heart/feature_names.json",
+        "sha256": "7e7c2779eaecd48013e03c266095e920d81044e6e69b95a497c9299991316ad5",
+        "transformed_features": [
+          "numeric__age",
+          "numeric__trestbps",
+          "numeric__chol",
+          "numeric__thalach",
+          "numeric__oldpeak",
+          "categorical__sex_0",
+          "categorical__sex_1",
+          "categorical__cp_1",
+          "categorical__cp_2",
+          "categorical__cp_3",
+          "categorical__cp_4",
+          "categorical__fbs_0",
+          "categorical__fbs_1",
+          "categorical__restecg_0",
+          "categorical__restecg_1",
+          "categorical__restecg_2",
+          "categorical__exang_0",
+          "categorical__exang_1",
+          "categorical__slope_1",
+          "categorical__slope_2",
+          "categorical__slope_3",
+          "categorical__ca_0",
+          "categorical__ca_1",
+          "categorical__ca_2",
+          "categorical__ca_3",
+          "categorical__thal_3",
+          "categorical__thal_6",
+          "categorical__thal_7"
+        ]
+      },
+      "ordered_active_features": [
+        "age",
+        "sex",
+        "cp",
+        "trestbps",
+        "chol",
+        "fbs",
+        "restecg",
+        "thalach",
+        "exang",
+        "oldpeak",
+        "slope",
+        "ca",
+        "thal"
+      ],
+      "feature_count": 13,
+      "pipeline_steps": [
+        {
+          "name": "preprocessor",
+          "type": "sklearn.compose._column_transformer.ColumnTransformer"
+        },
+        {
+          "name": "model",
+          "type": "sklearn.linear_model._logistic.LogisticRegression"
+        }
+      ],
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "classes": {
+        "positive": {
+          "value": 1,
+          "definition": "presence of heart disease (Cleveland num >= 1, >50% vessel narrowing)"
+        },
+        "negative": {
+          "value": 0,
+          "definition": "no angiographic heart-disease pattern (Cleveland num == 0)"
+        }
+      },
+      "evaluation_method": {
+        "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+        "model_selection": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+        "cross_validation": "stratified CV on development partition",
+        "holdout_is_reused": false
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "roc_auc_mean": 0.9027904462687071,
+          "roc_auc_std": 0.016869568101549073,
+          "dev_oof_f1_at_0.5": 0.8144796380090498
+        },
+        "holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.8852459016393442,
+          "precision": 0.8387096774193549,
+          "recall": 0.9285714285714286,
+          "specificity": 0.8484848484848485,
+          "f1": 0.8813559322033898,
+          "roc_auc": 0.9653679653679654,
+          "confusion_matrix": {
+            "tn": 28,
+            "fp": 5,
+            "fn": 2,
+            "tp": 26
+          }
+        }
+      },
+      "training_versions": {
+        "scikit-learn": "1.9.0",
+        "numpy": "not recorded by trainer",
+        "pandas": "not recorded by trainer",
+        "scipy": "not recorded by trainer",
+        "joblib": "not recorded by trainer"
+      },
+      "runtime_versions": {
+        "python": "3.11",
+        "numpy": "2.4.6",
+        "pandas": "3.0.6",
+        "scipy": "1.17.1",
+        "scikit-learn": "1.9.0",
+        "joblib": "1.5.3"
+      },
+      "api_request_schema": {
+        "endpoint": "POST /api/v1/predictions/heart",
+        "body": {
+          "measurements": "object"
+        },
+        "ordered_measurement_fields": [
+          "age",
+          "sex",
+          "cp",
+          "trestbps",
+          "chol",
+          "fbs",
+          "restecg",
+          "thalach",
+          "exang",
+          "oldpeak",
+          "slope",
+          "ca",
+          "thal"
+        ],
+        "required_fields": [
+          "age",
+          "sex",
+          "cp",
+          "trestbps",
+          "chol",
+          "fbs",
+          "restecg",
+          "thalach",
+          "exang",
+          "oldpeak",
+          "slope"
+        ],
+        "optional_imputed_fields": [
+          "ca",
+          "thal"
+        ],
+        "additional_fields_allowed": false
+      },
+      "preprocessing": "Categorical codes normalised to canonical string tokens, then ColumnTransformer: numeric -> SimpleImputer(median) + StandardScaler; categorical -> SimpleImputer(most_frequent) + OneHotEncoder(handle_unknown='ignore'). Fitted inside the pipeline on training folds only.",
+      "intended_use": "Educational and research demonstration of persisted-model inference; not diagnosis, screening, triage, or treatment guidance.",
+      "known_limitations": [
+        "The Cleveland database is 303 patients from one 1980s referral population; it under-represents women and is not a general-population screen.",
+        "The label marks >50% angiographic vessel narrowing, not a clinical diagnosis, symptom burden, or outcome.",
+        "Permutation importance describes model behaviour on this sample, not physiological causation."
+      ],
+      "release_status": "educational/research release"
+    },
+    "diabetes": {
+      "release_schema_version": "1.0.0",
+      "disease_identifier": "diabetes",
+      "metadata_disease_label": "Diabetes",
+      "dataset": {
+        "path": "datasets/raw/diabetes.csv",
+        "sha256": "d5d10555a9e99314dbf108e44738bb70555fcbb9234b89495bdb66da5265511a"
+      },
+      "model": {
+        "path": "models/diabetes/diabetes_pipeline.joblib",
+        "sha256": "07af879e4bb77d9bf3bc283bb0c4b40f9b4f7f006ef7aa9dee918d8cdb7f3b2f",
+        "identifier": "diabetes:logistic_regression:07af879e4bb7"
+      },
+      "metadata": {
+        "path": "models/diabetes/metadata.json",
+        "sha256": "042511475391faa0c8c0c53adf095f4a64702328aae5ee6f912ccae6a5ee89d1"
+      },
+      "feature_list": {
+        "path": "models/diabetes/feature_names.json",
+        "sha256": "5968a34005c480a39bc8ec7ae0e0736254da339b3e3842032ab0894e3214d610",
+        "transformed_features": [
+          "numeric__pregnancies",
+          "numeric__glucose",
+          "numeric__blood_pressure",
+          "numeric__skin_thickness",
+          "numeric__insulin",
+          "numeric__bmi",
+          "numeric__diabetes_pedigree",
+          "numeric__age"
+        ]
+      },
+      "ordered_active_features": [
+        "pregnancies",
+        "glucose",
+        "blood_pressure",
+        "skin_thickness",
+        "insulin",
+        "bmi",
+        "diabetes_pedigree",
+        "age"
+      ],
+      "feature_count": 8,
+      "pipeline_steps": [
+        {
+          "name": "zero_to_nan",
+          "type": "src.preprocessing.diabetes_schema.ZeroToNaN"
+        },
+        {
+          "name": "preprocessor",
+          "type": "sklearn.compose._column_transformer.ColumnTransformer"
+        },
+        {
+          "name": "model",
+          "type": "sklearn.linear_model._logistic.LogisticRegression"
+        }
+      ],
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "classes": {
+        "positive": {
+          "value": 1,
+          "definition": "diabetes onset within 5 years (Pima Outcome == 1)"
+        },
+        "negative": {
+          "value": 0,
+          "definition": "no diabetes onset within 5 years (Pima Outcome == 0)"
+        }
+      },
+      "evaluation_method": {
+        "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+        "model_selection": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+        "cross_validation": "stratified CV on development partition",
+        "holdout_is_reused": false
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "roc_auc_mean": 0.8449944629014396,
+          "roc_auc_std": 0.013034589339469911,
+          "dev_oof_f1_at_0.5": 0.6829268292682927
+        },
+        "holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.7077922077922078,
+          "precision": 0.5714285714285714,
+          "recall": 0.6666666666666666,
+          "specificity": 0.73,
+          "f1": 0.6153846153846154,
+          "roc_auc": 0.8103703703703704,
+          "confusion_matrix": {
+            "tn": 73,
+            "fp": 27,
+            "fn": 18,
+            "tp": 36
+          }
+        }
+      },
+      "training_versions": {
+        "scikit-learn": "1.9.0",
+        "numpy": "not recorded by trainer",
+        "pandas": "not recorded by trainer",
+        "scipy": "not recorded by trainer",
+        "joblib": "not recorded by trainer"
+      },
+      "runtime_versions": {
+        "python": "3.11",
+        "numpy": "2.4.6",
+        "pandas": "3.0.6",
+        "scipy": "1.17.1",
+        "scikit-learn": "1.9.0",
+        "joblib": "1.5.3"
+      },
+      "api_request_schema": {
+        "endpoint": "POST /api/v1/predictions/diabetes",
+        "body": {
+          "measurements": "object"
+        },
+        "ordered_measurement_fields": [
+          "pregnancies",
+          "glucose",
+          "blood_pressure",
+          "skin_thickness",
+          "insulin",
+          "bmi",
+          "diabetes_pedigree",
+          "age"
+        ],
+        "required_fields": [
+          "pregnancies",
+          "glucose",
+          "blood_pressure",
+          "skin_thickness",
+          "insulin",
+          "bmi",
+          "diabetes_pedigree",
+          "age"
+        ],
+        "optional_imputed_fields": [],
+        "additional_fields_allowed": false
+      },
+      "preprocessing": "Pipeline: ZeroToNaN(glucose, blood_pressure, skin_thickness, insulin, bmi) -> ColumnTransformer(numeric -> SimpleImputer(median) + StandardScaler) -> estimator. All learned statistics are fit on training folds only.",
+      "intended_use": "Educational and research demonstration of persisted-model inference; not diagnosis, screening, triage, or treatment guidance.",
+      "known_limitations": [
+        "All subjects are Pima women aged 21+ near Phoenix, Arizona; the model is not a general-population screen and will not transfer to men, children, or other ancestries.",
+        "Roughly half the insulin and a third of the skin-fold values were missing (encoded as 0) and are median-imputed; predictions for such records lean on the remaining features.",
+        "Permutation importance describes model behaviour on this sample, not physiological causation."
+      ],
+      "release_status": "educational/research release"
+    },
+    "kidney": {
+      "release_schema_version": "1.0.0",
+      "disease_identifier": "kidney",
+      "metadata_disease_label": "Chronic kidney disease",
+      "dataset": {
+        "path": "datasets/raw/kidney.csv",
+        "sha256": "b99c3bebb6a17955a6e3aaa86f52c26c5560026670adc842e66557a0a1d28359"
+      },
+      "model": {
+        "path": "models/kidney/kidney_pipeline.joblib",
+        "sha256": "8ef6da06f2f70cdb448ff73abd31e914a6b759fdda1bf063923f3cec6be4ad58",
+        "identifier": "kidney:logistic_regression:8ef6da06f2f7"
+      },
+      "metadata": {
+        "path": "models/kidney/metadata.json",
+        "sha256": "71b9c7564dc027aca6a8118d8b88c69b2243935bd92ce10299318f0bf1fa6632"
+      },
+      "feature_list": {
+        "path": "models/kidney/feature_names.json",
+        "sha256": "d0b283a95db3c832f1c17532a4a6061f1f5f20b37c023db6ef3411227999c065",
+        "transformed_features": [
+          "numeric__hemo",
+          "numeric__sc",
+          "numeric__sg",
+          "numeric__al",
+          "numeric__pcv",
+          "numeric__rc",
+          "numeric__bgr",
+          "numeric__bu",
+          "numeric__age",
+          "numeric__bp",
+          "categorical__htn_no",
+          "categorical__htn_yes",
+          "categorical__dm_no",
+          "categorical__dm_yes",
+          "categorical__appet_good",
+          "categorical__appet_poor",
+          "categorical__ane_no",
+          "categorical__ane_yes"
+        ]
+      },
+      "ordered_active_features": [
+        "hemo",
+        "sc",
+        "sg",
+        "al",
+        "pcv",
+        "rc",
+        "bgr",
+        "bu",
+        "age",
+        "bp",
+        "htn",
+        "dm",
+        "appet",
+        "ane"
+      ],
+      "feature_count": 14,
+      "pipeline_steps": [
+        {
+          "name": "preprocessor",
+          "type": "sklearn.compose._column_transformer.ColumnTransformer"
+        },
+        {
+          "name": "model",
+          "type": "sklearn.linear_model._logistic.LogisticRegression"
+        }
+      ],
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "classes": {
+        "positive": {
+          "value": 1,
+          "definition": "chronic kidney disease (UCI class == ckd)"
+        },
+        "negative": {
+          "value": 0,
+          "definition": "no chronic kidney disease (UCI class == notckd)"
+        }
+      },
+      "evaluation_method": {
+        "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
+        "model_selection": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+        "cross_validation": "stratified CV on development partition",
+        "holdout_is_reused": false
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "roc_auc_mean": 1.0,
+          "roc_auc_std": 0.0,
+          "dev_oof_f1_at_0.5": 0.9974937343358395
+        },
+        "holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.9875,
+          "precision": 1.0,
+          "recall": 0.98,
+          "specificity": 1.0,
+          "f1": 0.98989898989899,
+          "roc_auc": 0.9993333333333333,
+          "confusion_matrix": {
+            "tn": 30,
+            "fp": 0,
+            "fn": 1,
+            "tp": 49
+          }
+        }
+      },
+      "training_versions": {
+        "scikit-learn": "1.9.0",
+        "numpy": "not recorded by trainer",
+        "pandas": "not recorded by trainer",
+        "scipy": "not recorded by trainer",
+        "joblib": "not recorded by trainer"
+      },
+      "runtime_versions": {
+        "python": "3.11",
+        "numpy": "2.4.6",
+        "pandas": "3.0.6",
+        "scipy": "1.17.1",
+        "scikit-learn": "1.9.0",
+        "joblib": "1.5.3"
+      },
+      "api_request_schema": {
+        "endpoint": "POST /api/v1/predictions/kidney",
+        "body": {
+          "measurements": "object"
+        },
+        "ordered_measurement_fields": [
+          "hemo",
+          "sc",
+          "sg",
+          "al",
+          "pcv",
+          "rc",
+          "bgr",
+          "bu",
+          "age",
+          "bp",
+          "htn",
+          "dm",
+          "appet",
+          "ane"
+        ],
+        "required_fields": [],
+        "optional_imputed_fields": [
+          "hemo",
+          "sc",
+          "sg",
+          "al",
+          "pcv",
+          "rc",
+          "bgr",
+          "bu",
+          "age",
+          "bp",
+          "htn",
+          "dm",
+          "appet",
+          "ane"
+        ],
+        "additional_fields_allowed": false
+      },
+      "preprocessing": "id column dropped (target proxy). Categorical tokens cleaned (strip non a-z), numerics coerced, target normalised. ColumnTransformer: numeric -> SimpleImputer(median) + StandardScaler; categorical -> SimpleImputer(most_frequent) + OneHotEncoder(handle_unknown='ignore'). Fitted inside the pipeline on training folds only.",
+      "intended_use": "Educational and research demonstration of persisted-model inference; not diagnosis, screening, triage, or treatment guidance.",
+      "known_limitations": [
+        "UCI CKD is 400 records collected over ~2 months at one Indian hospital in 2015; it is a curated teaching dataset, not a screening cohort.",
+        "The dataset is close to separable on legitimate clinical markers, so held-out metrics near 1.0 reflect this small dataset, NOT clinical-grade CKD detection.",
+        "CKD rows have many more missing lab tests than non-CKD rows (a collection artefact); imputation reduces but may not fully remove that trace.",
+        "Permutation importance describes model behaviour on this sample, not physiological causation."
+      ],
+      "release_status": "educational/research release"
+    },
+    "parkinsons": {
+      "release_schema_version": "1.0.0",
+      "disease_identifier": "parkinsons",
+      "metadata_disease_label": "Parkinson's disease",
+      "dataset": {
+        "path": "datasets/raw/parkinsons.csv",
+        "sha256": "455009076cd278efb0b2fb9307c0682834c477fa582ca6c10367128dd7a1c6db"
+      },
+      "model": {
+        "path": "models/parkinsons/parkinsons_pipeline.joblib",
+        "sha256": "43bfa333fd5f3f13d9db5556d667408cefa7a4e6d795ba0036f16dcbe27d7585",
+        "identifier": "parkinsons:logistic_regression:43bfa333fd5f"
+      },
+      "metadata": {
+        "path": "models/parkinsons/metadata.json",
+        "sha256": "a7a92b5039e1acc5544a7a6fc8c3d60a9db3af558fe0fc34b436a2e3c2870d47"
+      },
+      "feature_list": {
+        "path": "models/parkinsons/feature_names.json",
+        "sha256": "859d0dc46605fa1720faf9e16ecf6b40072b0209946142965c605168ed68df71",
+        "transformed_features": [
+          "MDVP:Fo(Hz)",
+          "MDVP:Fhi(Hz)",
+          "MDVP:Flo(Hz)",
+          "MDVP:Jitter(%)",
+          "MDVP:Jitter(Abs)",
+          "MDVP:Shimmer(dB)",
+          "MDVP:APQ",
+          "NHR",
+          "HNR",
+          "RPDE",
+          "DFA",
+          "spread1",
+          "spread2",
+          "D2",
+          "PPE"
+        ]
+      },
+      "ordered_active_features": [
+        "MDVP:Fo(Hz)",
+        "MDVP:Fhi(Hz)",
+        "MDVP:Flo(Hz)",
+        "MDVP:Jitter(%)",
+        "MDVP:Jitter(Abs)",
+        "MDVP:Shimmer(dB)",
+        "MDVP:APQ",
+        "NHR",
+        "HNR",
+        "RPDE",
+        "DFA",
+        "spread1",
+        "spread2",
+        "D2",
+        "PPE"
+      ],
+      "feature_count": 15,
+      "pipeline_steps": [
+        {
+          "name": "imputer",
+          "type": "sklearn.impute._base.SimpleImputer"
+        },
+        {
+          "name": "scaler",
+          "type": "sklearn.preprocessing._data.StandardScaler"
+        },
+        {
+          "name": "model",
+          "type": "sklearn.linear_model._logistic.LogisticRegression"
+        }
+      ],
+      "estimator_type": "sklearn.linear_model._logistic.LogisticRegression",
+      "threshold": 0.5,
+      "classes": {
+        "positive": {
+          "value": 1,
+          "definition": "Parkinson's (status == 1)"
+        },
+        "negative": {
+          "value": 0,
+          "definition": "control subject (status == 0)"
+        }
+      },
+      "evaluation_method": {
+        "split_strategy": "GroupShuffleSplit(test_size=0.2) on subject -> subject-disjoint DEV/HOLDOUT; model chosen only on DEV via StratifiedGroupKFold(5) CV with groups=subject.",
+        "model_selection": "max DEV group-CV ROC-AUC, then simplest family within 0.02 ROC-AUC of the best",
+        "cross_validation": "StratifiedGroupKFold(5), groups=subject",
+        "holdout_is_reused": false,
+        "grouping_strategy": "StratifiedGroupKFold(5, shuffle, seed), groups=subject, passed to GridSearchCV and cross_val_predict."
+      },
+      "verified_metrics": {
+        "development_cv": {
+          "scoring": "roc_auc",
+          "cv": "StratifiedGroupKFold(5), groups=subject",
+          "roc_auc_mean": 0.8797777777777778,
+          "roc_auc_std": 0.12104016780483338,
+          "dev_oof_f1_at_0.5": 0.925
+        },
+        "subject_disjoint_holdout": {
+          "threshold": 0.5,
+          "accuracy": 0.6046511627906976,
+          "precision": 0.6842105263157895,
+          "recall": 0.8387096774193549,
+          "specificity": 0.0,
+          "f1": 0.7536231884057971,
+          "roc_auc": 0.5860215053763441,
+          "confusion_matrix": {
+            "tn": 0,
+            "fp": 12,
+            "fn": 5,
+            "tp": 26
+          },
+          "holdout_subjects": 7,
+          "holdout_rows": 43
+        }
+      },
+      "training_versions": {
+        "scikit-learn": "1.9.0",
+        "numpy": "not recorded by trainer",
+        "pandas": "not recorded by trainer",
+        "scipy": "not recorded by trainer",
+        "joblib": "not recorded by trainer"
+      },
+      "runtime_versions": {
+        "python": "3.11",
+        "numpy": "2.4.6",
+        "pandas": "3.0.6",
+        "scipy": "1.17.1",
+        "scikit-learn": "1.9.0",
+        "joblib": "1.5.3"
+      },
+      "api_request_schema": {
+        "endpoint": "POST /api/v1/predictions/parkinsons",
+        "body": {
+          "measurements": "object"
+        },
+        "ordered_measurement_fields": [
+          "MDVP:Fo(Hz)",
+          "MDVP:Fhi(Hz)",
+          "MDVP:Flo(Hz)",
+          "MDVP:Jitter(%)",
+          "MDVP:Jitter(Abs)",
+          "MDVP:Shimmer(dB)",
+          "MDVP:APQ",
+          "NHR",
+          "HNR",
+          "RPDE",
+          "DFA",
+          "spread1",
+          "spread2",
+          "D2",
+          "PPE"
+        ],
+        "required_fields": [
+          "MDVP:Fo(Hz)",
+          "MDVP:Fhi(Hz)",
+          "MDVP:Flo(Hz)",
+          "MDVP:Jitter(%)",
+          "MDVP:Jitter(Abs)",
+          "MDVP:Shimmer(dB)",
+          "MDVP:APQ",
+          "NHR",
+          "HNR",
+          "RPDE",
+          "DFA",
+          "spread1",
+          "spread2",
+          "D2",
+          "PPE"
+        ],
+        "optional_imputed_fields": [],
+        "additional_fields_allowed": false
+      },
+      "preprocessing": "Pipeline: SimpleImputer(median, defensive - dataset has no missing values) -> StandardScaler -> estimator. Fitted inside CV folds only.",
+      "intended_use": "Educational and research demonstration of persisted-model inference; not diagnosis, screening, triage, or treatment guidance.",
+      "known_limitations": [
+        "Only 32 subjects (24 Parkinson's / 8 control) from one 2008 Oxford study; a ~7-subject holdout gives wide confidence intervals.",
+        "Subject-aware performance is far below the naive recording-level figure - the naive number is leakage, not skill.",
+        "Inputs are pre-computed voice biomarkers from voice-analysis software; this module does NOT extract features from raw audio.",
+        "Permutation importance describes model behaviour on this sample, not a physiological cause of Parkinson's disease."
+      ],
+      "release_status": "experimental"
+    }
+  }
+}

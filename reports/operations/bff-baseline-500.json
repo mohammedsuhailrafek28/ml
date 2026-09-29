@@ -1,0 +1,185 @@
+{
+  "acceptance": {
+    "prediction_p95_under_2s": true,
+    "report_p95_under_5s": true,
+    "unexpected_error_rate_zero": true
+  },
+  "clinical_validity": "not assessed; this is local engineering evidence only",
+  "environment": {
+    "node": "v20.19.0",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "target": "isolated local production BFF (API+BFF services started)"
+  },
+  "generated_at": "2026-09-27T16:35:19.349663+00:00",
+  "memory_mb": {
+    "after": {
+      "process_1": 4.23,
+      "process_2": 116.09
+    },
+    "before": {
+      "process_1": 4.23,
+      "process_2": 74.18
+    },
+    "measurable": true,
+    "peak": {
+      "process_1": 4.23,
+      "process_2": 116.68
+    }
+  },
+  "metrics_verification": {
+    "all_diseases_observed": true,
+    "in_flight_zero_after_profile": true,
+    "protected_endpoint_verified": true
+  },
+  "profile": {
+    "concurrency": 10,
+    "duration_seconds": 13.003,
+    "mode": "bff",
+    "request_count": 500,
+    "timeout_seconds": 20.0
+  },
+  "recovery": {
+    "confirmed": true,
+    "readiness_after_load": "ready"
+  },
+  "results": {
+    "error_rate": 0.0,
+    "errors": 0,
+    "failure_categories": {},
+    "latency": {
+      "by_category": {
+        "catalog": {
+          "count": 25,
+          "p50_ms": 261.733,
+          "p95_ms": 344.636,
+          "p99_ms": 424.464
+        },
+        "health": {
+          "count": 25,
+          "p50_ms": 72.236,
+          "p95_ms": 105.651,
+          "p99_ms": 177.47
+        },
+        "metadata_diabetes": {
+          "count": 5,
+          "p50_ms": 109.21,
+          "p95_ms": 219.681,
+          "p99_ms": 219.681
+        },
+        "metadata_heart": {
+          "count": 5,
+          "p50_ms": 129.044,
+          "p95_ms": 185.829,
+          "p99_ms": 185.829
+        },
+        "metadata_kidney": {
+          "count": 5,
+          "p50_ms": 120.142,
+          "p95_ms": 154.879,
+          "p99_ms": 154.879
+        },
+        "metadata_liver": {
+          "count": 5,
+          "p50_ms": 136.385,
+          "p95_ms": 152.305,
+          "p99_ms": 152.305
+        },
+        "metadata_parkinsons": {
+          "count": 5,
+          "p50_ms": 104.92,
+          "p95_ms": 134.758,
+          "p99_ms": 134.758
+        },
+        "prediction_diabetes": {
+          "count": 70,
+          "p50_ms": 213.844,
+          "p95_ms": 358.346,
+          "p99_ms": 465.62
+        },
+        "prediction_heart": {
+          "count": 70,
+          "p50_ms": 267.74,
+          "p95_ms": 409.087,
+          "p99_ms": 572.461
+        },
+        "prediction_kidney": {
+          "count": 70,
+          "p50_ms": 271.95,
+          "p95_ms": 387.584,
+          "p99_ms": 467.826
+        },
+        "prediction_liver": {
+          "count": 70,
+          "p50_ms": 229.085,
+          "p95_ms": 327.458,
+          "p99_ms": 386.273
+        },
+        "prediction_parkinsons": {
+          "count": 70,
+          "p50_ms": 192.218,
+          "p95_ms": 259.121,
+          "p99_ms": 445.573
+        },
+        "readiness": {
+          "count": 25,
+          "p50_ms": 780.73,
+          "p95_ms": 989.48,
+          "p99_ms": 999.288
+        },
+        "report_diabetes": {
+          "count": 10,
+          "p50_ms": 203.946,
+          "p95_ms": 260.345,
+          "p99_ms": 260.345
+        },
+        "report_heart": {
+          "count": 10,
+          "p50_ms": 241.559,
+          "p95_ms": 344.727,
+          "p99_ms": 344.727
+        },
+        "report_kidney": {
+          "count": 10,
+          "p50_ms": 256.77,
+          "p95_ms": 411.291,
+          "p99_ms": 411.291
+        },
+        "report_liver": {
+          "count": 10,
+          "p50_ms": 249.249,
+          "p95_ms": 372.284,
+          "p99_ms": 372.284
+        },
+        "report_parkinsons": {
+          "count": 10,
+          "p50_ms": 220.642,
+          "p95_ms": 367.829,
+          "p99_ms": 367.829
+        }
+      },
+      "overall": {
+        "count": 500,
+        "p50_ms": 232.263,
+        "p95_ms": 467.826,
+        "p99_ms": 835.784
+      },
+      "predictions": {
+        "count": 350,
+        "p50_ms": 233.571,
+        "p95_ms": 369.489,
+        "p99_ms": 462.632
+      },
+      "reports": {
+        "count": 50,
+        "p50_ms": 238.607,
+        "p95_ms": 367.829,
+        "p99_ms": 411.291
+      }
+    },
+    "peak_in_flight": 10,
+    "successful_requests": 500,
+    "throughput_requests_per_second": 38.453
+  },
+  "schema_version": "1.0"
+}

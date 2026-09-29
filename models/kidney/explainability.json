@@ -1,0 +1,79 @@
+{
+  "method": "permutation_importance",
+  "scoring": "roc_auc",
+  "n_repeats": 10,
+  "evaluated_on": "untouched holdout test set",
+  "note": "Importance = mean drop in holdout ROC-AUC when the feature is shuffled. Not a causal claim.",
+  "features": [
+    {
+      "feature": "sg",
+      "importance_mean": 0.03713333333333331,
+      "importance_std": 0.011783415841295292
+    },
+    {
+      "feature": "al",
+      "importance_mean": 0.010733333333333317,
+      "importance_std": 0.0034826554364290776
+    },
+    {
+      "feature": "hemo",
+      "importance_mean": 0.010066666666666613,
+      "importance_std": 0.00634875315842936
+    },
+    {
+      "feature": "pcv",
+      "importance_mean": 0.004133333333333267,
+      "importance_std": 0.002856571371417113
+    },
+    {
+      "feature": "bgr",
+      "importance_mean": 0.0036666666666665846,
+      "importance_std": 0.0027848798098940434
+    },
+    {
+      "feature": "dm",
+      "importance_mean": 0.002666666666666595,
+      "importance_std": 0.001605545943838971
+    },
+    {
+      "feature": "sc",
+      "importance_mean": 0.0009333333333333193,
+      "importance_std": 0.001691810338726586
+    },
+    {
+      "feature": "htn",
+      "importance_mean": 0.0007333333333332859,
+      "importance_std": 0.0009637888196533734
+    },
+    {
+      "feature": "rc",
+      "importance_mean": 0.0006666666666666265,
+      "importance_std": 0.0009888264649460618
+    },
+    {
+      "feature": "appet",
+      "importance_mean": 0.0006666666666666265,
+      "importance_std": 0.0007888106377465755
+    },
+    {
+      "feature": "bu",
+      "importance_mean": 0.00019999999999997797,
+      "importance_std": 0.00030550504633035565
+    },
+    {
+      "feature": "ane",
+      "importance_mean": 6.666666666665932e-05,
+      "importance_std": 0.00019999999999997797
+    },
+    {
+      "feature": "age",
+      "importance_mean": 6.666666666664822e-05,
+      "importance_std": 0.0003590109871422834
+    },
+    {
+      "feature": "bp",
+      "importance_mean": -0.00046666666666670407,
+      "importance_std": 0.00042687494916218455
+    }
+  ]
+}

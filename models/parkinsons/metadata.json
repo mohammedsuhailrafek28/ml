@@ -1,21 +1,381 @@
 {
-  "dataset": "UCI Parkinsons",
-  "source": "https://archive.ics.uci.edu/dataset/174/parkinsons",
+  "model_id": "parkinsons",
+  "disease": "Parkinson's disease",
+  "dataset": "parkinsons.csv",
+  "dataset_source": "UCI Machine Learning Repository - Parkinsons (Oxford / Max Little, 2008)",
+  "dataset_url": "https://archive.ics.uci.edu/dataset/174/parkinsons",
+  "dataset_license": "CC BY 4.0 (Little, McSharry, Roberts, Costello, Moroz)",
+  "dataset_sha256": "a36116c2deac07895b79ce97a2f99a1b3720ac4892995ff5c3b9ccb397ed2bc5",
+  "rows_raw": 195,
+  "rows_used": 195,
   "shape": [
     195,
     24
   ],
-  "target_mapping": {
-    "0": 0,
-    "1": 1
+  "unique_subjects": 32,
+  "recordings_per_subject": {
+    "min": 6,
+    "median": 6.0,
+    "max": 7
   },
+  "target_distribution_by_row": {
+    "positive": 147,
+    "negative": 48
+  },
+  "target_distribution_by_subject": {
+    "positive": 24,
+    "negative": 8
+  },
+  "subject_id_rule": "regex ^(phon_R\\d+_S\\d+) on `name`; verified every S-number maps to one R and one status.",
   "identifier_excluded": [
-    "name"
+    "name",
+    "status"
   ],
-  "subject_grouping": "name prefixes inspected; no group split implemented in shared trainer",
-  "selected_model": "gradient_boosting",
+  "features": [
+    "MDVP:Fo(Hz)",
+    "MDVP:Fhi(Hz)",
+    "MDVP:Flo(Hz)",
+    "MDVP:Jitter(%)",
+    "MDVP:Jitter(Abs)",
+    "MDVP:RAP",
+    "MDVP:PPQ",
+    "Jitter:DDP",
+    "MDVP:Shimmer",
+    "MDVP:Shimmer(dB)",
+    "Shimmer:APQ3",
+    "Shimmer:APQ5",
+    "MDVP:APQ",
+    "Shimmer:DDA",
+    "NHR",
+    "HNR",
+    "RPDE",
+    "DFA",
+    "spread1",
+    "spread2",
+    "D2",
+    "PPE"
+  ],
+  "active_features": [
+    "MDVP:Fo(Hz)",
+    "MDVP:Fhi(Hz)",
+    "MDVP:Flo(Hz)",
+    "MDVP:Jitter(%)",
+    "MDVP:Jitter(Abs)",
+    "MDVP:Shimmer(dB)",
+    "MDVP:APQ",
+    "NHR",
+    "HNR",
+    "RPDE",
+    "DFA",
+    "spread1",
+    "spread2",
+    "D2",
+    "PPE"
+  ],
+  "numeric_features": [
+    "MDVP:Fo(Hz)",
+    "MDVP:Fhi(Hz)",
+    "MDVP:Flo(Hz)",
+    "MDVP:Jitter(%)",
+    "MDVP:Jitter(Abs)",
+    "MDVP:RAP",
+    "MDVP:PPQ",
+    "Jitter:DDP",
+    "MDVP:Shimmer",
+    "MDVP:Shimmer(dB)",
+    "Shimmer:APQ3",
+    "Shimmer:APQ5",
+    "MDVP:APQ",
+    "Shimmer:DDA",
+    "NHR",
+    "HNR",
+    "RPDE",
+    "DFA",
+    "spread1",
+    "spread2",
+    "D2",
+    "PPE"
+  ],
+  "categorical_features": [],
+  "target": "status",
+  "target_mapping": {
+    "1": "Parkinson's",
+    "0": "control"
+  },
+  "positive_class": "Parkinson's (status == 1)",
+  "input_type": "pre-computed acoustic voice biomarkers (no raw-audio extraction in this system)",
+  "split_strategy": "GroupShuffleSplit(test_size=0.2) on subject -> subject-disjoint DEV/HOLDOUT; model chosen only on DEV via StratifiedGroupKFold(5) CV with groups=subject.",
+  "dev_holdout_subjects": {
+    "dev_subjects": 25,
+    "holdout_subjects": 7,
+    "dev_rows": 152,
+    "holdout_rows": 43
+  },
+  "group_cv_strategy": "StratifiedGroupKFold(5, shuffle, seed), groups=subject, passed to GridSearchCV and cross_val_predict.",
   "random_seed": 42,
-  "training_timestamp": "2026-07-24",
+  "cleaning": {
+    "rows_raw": 195,
+    "exact_duplicate_rows_removed": 0,
+    "rows_used": 195,
+    "unique_subjects": 32,
+    "recordings_per_subject": {
+      "min": 6,
+      "median": 6.0,
+      "max": 7
+    },
+    "target_distribution_by_row": {
+      "positive": 147,
+      "negative": 48
+    },
+    "target_distribution_by_subject": {
+      "positive": 24,
+      "negative": 8
+    },
+    "subject_id_rule": "regex ^(phon_R\\d+_S\\d+) on `name`; verified every S-number maps to one R and one status.",
+    "missing_values": 0,
+    "duplicate_policy": "Exact duplicate feature rows removed before splitting (0 found).",
+    "identifier_excluded": [
+      "name",
+      "status"
+    ]
+  },
+  "preprocessing": "Pipeline: SimpleImputer(median, defensive - dataset has no missing values) -> StandardScaler -> estimator. Fitted inside CV folds only.",
+  "imbalance_handling": "Row classes 147/48 (~75% positive); subjects 24/8. class_weight (None vs 'balanced'/'balanced_subsample') is a tuned hyper-parameter chosen by group-aware CV. Threshold left at 0.5; a dev group-OOF sweep is published.",
+  "naive_vs_subject_aware": {
+    "probe_model": "logistic_regression (standardised)",
+    "naive_row_split_holdout_roc_auc": 0.9241379310344828,
+    "subject_aware_split_holdout_roc_auc": 0.5725806451612903,
+    "inflation": 0.3516,
+    "note": "Row-level train_test_split lets a subject's ~6 recordings appear in both train and test. The gap is the leakage this trainer avoids; only the subject-aware number is meaningful."
+  },
+  "feature_experiment": {
+    "full_feature_count": 22,
+    "reduced_feature_count": 15,
+    "reduced_features": [
+      "MDVP:Fo(Hz)",
+      "MDVP:Fhi(Hz)",
+      "MDVP:Flo(Hz)",
+      "MDVP:Jitter(%)",
+      "MDVP:Jitter(Abs)",
+      "MDVP:Shimmer(dB)",
+      "MDVP:APQ",
+      "NHR",
+      "HNR",
+      "RPDE",
+      "DFA",
+      "spread1",
+      "spread2",
+      "D2",
+      "PPE"
+    ],
+    "rationale": "jitter (RAP/PPQ/DDP) and shimmer (APQ3/APQ5/DDA/Shimmer) families have |r|>0.95; keep one representative each.",
+    "rule": "adopt the reduced set only if mean group-CV ROC-AUC drops by < 0.01 AND CV std does not increase",
+    "probes": {
+      "logistic_regression": {
+        "full_cv_roc_auc_mean": 0.8630555555555557,
+        "full_cv_roc_auc_std": 0.16412318469090958,
+        "reduced_cv_roc_auc_mean": 0.8630555555555557,
+        "reduced_cv_roc_auc_std": 0.16199375083206755
+      },
+      "random_forest": {
+        "full_cv_roc_auc_mean": 0.7975555555555556,
+        "full_cv_roc_auc_std": 0.24662502150951332,
+        "reduced_cv_roc_auc_mean": 0.8481388888888887,
+        "reduced_cv_roc_auc_std": 0.16611913767304046
+      }
+    },
+    "adopted": true,
+    "decision": "Reduced 15-feature set ADOPTED on group-aware DEV CV."
+  },
+  "multi_seed_group_stability_dev": {
+    "seeds": [
+      21,
+      42,
+      84,
+      123,
+      2026
+    ],
+    "valid_seeds": 5,
+    "scoring": "roc_auc",
+    "cv": "StratifiedGroupKFold(4), groups=subject",
+    "per_seed": {
+      "21": {
+        "mean": 0.702244623655914,
+        "std": 0.18021733282090494,
+        "valid_folds": 4,
+        "dev_subjects": 25
+      },
+      "42": {
+        "mean": 0.9380824372759857,
+        "std": 0.07272337618583408,
+        "valid_folds": 4,
+        "dev_subjects": 25
+      },
+      "84": {
+        "mean": 0.7930331541218638,
+        "std": 0.12318071344238272,
+        "valid_folds": 4,
+        "dev_subjects": 25
+      },
+      "123": {
+        "mean": 0.7159996017522899,
+        "std": 0.2183309419616346,
+        "valid_folds": 3,
+        "dev_subjects": 25
+      },
+      "2026": {
+        "mean": 0.7468279569892473,
+        "std": 0.21970509538870925,
+        "valid_folds": 4,
+        "dev_subjects": 25
+      }
+    },
+    "mean": 0.7792375547590602,
+    "std": 0.085322151205342,
+    "min": 0.702244623655914,
+    "max": 0.9380824372759857
+  },
+  "algorithms_evaluated": [
+    "logistic_regression",
+    "random_forest",
+    "gradient_boosting",
+    "svm",
+    "knn",
+    "decision_tree",
+    "gaussian_nb"
+  ],
+  "hyperparameter_search": "GridSearchCV over StratifiedGroupKFold(5) per family, scoring=roc_auc, groups=subject.",
+  "model_selection": {
+    "rule": "max DEV group-CV ROC-AUC, then simplest family within 0.02 ROC-AUC of the best",
+    "cv_leader": "logistic_regression",
+    "cv_leader_roc_auc": 0.8797777777777778,
+    "tie_band_members": [
+      "logistic_regression",
+      "random_forest",
+      "gradient_boosting",
+      "svm"
+    ],
+    "selected": "logistic_regression",
+    "active_feature_set": "reduced"
+  },
+  "selected_algorithm": "logistic_regression",
+  "selected_model": "logistic_regression",
+  "selected_params": {
+    "model__C": 0.05,
+    "model__class_weight": null
+  },
+  "operating_threshold": 0.5,
+  "cv_metrics": {
+    "scoring": "roc_auc",
+    "cv": "StratifiedGroupKFold(5), groups=subject",
+    "roc_auc_mean": 0.8797777777777778,
+    "roc_auc_std": 0.12104016780483338,
+    "dev_oof_f1_at_0.5": 0.925
+  },
+  "holdout_metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.6046511627906976,
+    "precision": 0.6842105263157895,
+    "recall": 0.8387096774193549,
+    "specificity": 0.0,
+    "f1": 0.7536231884057971,
+    "roc_auc": 0.5860215053763441,
+    "confusion_matrix": {
+      "tn": 0,
+      "fp": 12,
+      "fn": 5,
+      "tp": 26
+    },
+    "holdout_subjects": 7,
+    "holdout_rows": 43
+  },
+  "permutation_importance_holdout": [
+    {
+      "feature": "D2",
+      "importance_mean": 0.03790322580645168,
+      "importance_std": 0.01583285411035185
+    },
+    {
+      "feature": "MDVP:APQ",
+      "importance_mean": 0.028763440860215116,
+      "importance_std": 0.020614967279610562
+    },
+    {
+      "feature": "MDVP:Shimmer(dB)",
+      "importance_mean": 0.023655913978494682,
+      "importance_std": 0.013158320699484334
+    },
+    {
+      "feature": "spread1",
+      "importance_mean": 0.018548387096774234,
+      "importance_std": 0.028913786553104365
+    },
+    {
+      "feature": "PPE",
+      "importance_mean": 0.016397849462365666,
+      "importance_std": 0.034118611671472156
+    },
+    {
+      "feature": "MDVP:Fhi(Hz)",
+      "importance_mean": 0.00994623655913982,
+      "importance_std": 0.010483870967741945
+    },
+    {
+      "feature": "HNR",
+      "importance_mean": 0.007526881720430168,
+      "importance_std": 0.009602457580371877
+    },
+    {
+      "feature": "DFA",
+      "importance_mean": 0.004569892473118331,
+      "importance_std": 0.014227009271397022
+    },
+    {
+      "feature": "NHR",
+      "importance_mean": -0.001344086021505353,
+      "importance_std": 0.007531680497915014
+    },
+    {
+      "feature": "MDVP:Jitter(%)",
+      "importance_mean": -0.002419354838709664,
+      "importance_std": 0.005163809868897448
+    },
+    {
+      "feature": "MDVP:Jitter(Abs)",
+      "importance_mean": -0.0029569892473118144,
+      "importance_std": 0.008538914072187404
+    },
+    {
+      "feature": "MDVP:Flo(Hz)",
+      "importance_mean": -0.009677419354838623,
+      "importance_std": 0.0071325264308718436
+    },
+    {
+      "feature": "spread2",
+      "importance_mean": -0.03978494623655911,
+      "importance_std": 0.022484434049813404
+    },
+    {
+      "feature": "MDVP:Fo(Hz)",
+      "importance_mean": -0.0432795698924731,
+      "importance_std": 0.011496454182980188
+    },
+    {
+      "feature": "RPDE",
+      "importance_mean": -0.07553763440860209,
+      "importance_std": 0.01894922962212592
+    }
+  ],
+  "training_timestamp": "2026-08-27T12:01:38.582182+00:00",
+  "training_date": "2026-08-27",
+  "artifact_path": "models/parkinsons/parkinsons_pipeline.joblib",
   "sklearn_version": "1.9.0",
-  "threshold": 0.5
+  "threshold": 0.5,
+  "limitations": [
+    "Only 32 subjects (24 Parkinson's / 8 control) from one 2008 Oxford study; a ~7-subject holdout gives wide confidence intervals.",
+    "Subject-aware performance is far below the naive recording-level figure - the naive number is leakage, not skill.",
+    "Inputs are pre-computed voice biomarkers from voice-analysis software; this module does NOT extract features from raw audio.",
+    "Permutation importance describes model behaviour on this sample, not a physiological cause of Parkinson's disease."
+  ],
+  "disclaimer": "Educational and research use only. This estimates a voice-pattern association learned from a small public dataset and is not a medical diagnosis."
 }

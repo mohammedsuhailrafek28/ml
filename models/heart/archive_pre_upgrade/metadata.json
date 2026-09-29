@@ -1,0 +1,17 @@
+{
+  "dataset_source": "UCI Cleveland Heart Disease",
+  "dataset": "heart.csv",
+  "shape": [
+    303,
+    14
+  ],
+  "target_mapping": {
+    "0": 0,
+    "1-4": 1
+  },
+  "selected_model": "random_forest",
+  "random_seed": 42,
+  "training_timestamp": "2026-07-24",
+  "sklearn_version": "1.9.0",
+  "threshold": 0.5
+}

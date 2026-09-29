@@ -1,2 +1,0 @@
-export default async function Results({params}:{params:Promise<{disease:string}>}){const p=await params; return <main className="page"><p className="eyebrow">RESULTS</p><h1>{p.disease} model result</h1><div className="card"><p>Results are returned by the FastAPI prediction endpoint after a submitted assessment.</p><p>This is an educational model output, not a diagnosis.</p></div></main>}
-export function generateStaticParams(){return ['liver','heart','diabetes','kidney','parkinsons'].map(disease=>({disease}))}

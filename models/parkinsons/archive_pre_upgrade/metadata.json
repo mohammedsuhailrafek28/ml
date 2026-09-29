@@ -1,0 +1,21 @@
+{
+  "dataset": "UCI Parkinsons",
+  "source": "https://archive.ics.uci.edu/dataset/174/parkinsons",
+  "shape": [
+    195,
+    24
+  ],
+  "target_mapping": {
+    "0": 0,
+    "1": 1
+  },
+  "identifier_excluded": [
+    "name"
+  ],
+  "subject_grouping": "name prefixes inspected; no group split implemented in shared trainer",
+  "selected_model": "gradient_boosting",
+  "random_seed": 42,
+  "training_timestamp": "2026-07-24",
+  "sklearn_version": "1.9.0",
+  "threshold": 0.5
+}

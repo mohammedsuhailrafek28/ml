@@ -1,0 +1,93 @@
+name: medical-ai-suite
+services:
+  api:
+    build:
+      context: .
+      args:
+        APP_VERSION: ${APP_VERSION:?Set APP_VERSION from release/application.json}
+        APP_SOURCE_REVISION: ${APP_SOURCE_REVISION:-local}
+        OCI_CREATED: ${OCI_CREATED:-unknown}
+    image: ${API_IMAGE:-medical-ai-api:local}
+    user: "10001:10001"
+    environment:
+      APP_ENV: production
+      APP_SOURCE_REVISION: ${APP_SOURCE_REVISION:-local}
+      API_KEY_FILE: /run/secrets/service_api_key
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+      MAX_REQUEST_BYTES: ${MAX_REQUEST_BYTES:-65536}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    secrets: [service_api_key]
+    expose: ["8000"]
+    networks: [backend]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: ${API_MEMORY_LIMIT:-1g}
+    cpus: ${API_CPUS:-2.0}
+    pids_limit: 128
+    restart: unless-stopped
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health',timeout=3).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        APP_VERSION: ${APP_VERSION:?Set APP_VERSION from release/application.json}
+        APP_SOURCE_REVISION: ${APP_SOURCE_REVISION:-local}
+        OCI_CREATED: ${OCI_CREATED:-unknown}
+    image: ${WEB_IMAGE:-medical-ai-web:local}
+    user: "10001:10001"
+    environment:
+      NODE_ENV: production
+      APP_VERSION: ${APP_VERSION:?Set APP_VERSION from release/application.json}
+      APP_SOURCE_REVISION: ${APP_SOURCE_REVISION:-local}
+      BACKEND_INTERNAL_URL: http://api:8000
+      BACKEND_API_KEY_FILE: /run/secrets/service_api_key
+      BACKEND_TIMEOUT_MS: ${BACKEND_TIMEOUT_MS:-8000}
+      BFF_MAX_REQUEST_BYTES: ${BFF_MAX_REQUEST_BYTES:-16384}
+    secrets: [service_api_key]
+    ports:
+      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-3000}:3000"
+    networks: [frontend, backend]
+    depends_on:
+      api: {condition: service_healthy}
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+      - /app/.next/cache:rw,noexec,nosuid,size=32m,mode=0755
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: ${WEB_MEMORY_LIMIT:-512m}
+    cpus: ${WEB_CPUS:-1.0}
+    pids_limit: 128
+    restart: unless-stopped
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+networks:
+  frontend: {}
+  backend:
+    internal: true
+
+secrets:
+  service_api_key:
+    file: ${SERVICE_API_KEY_FILE:-.secrets/service_api_key}

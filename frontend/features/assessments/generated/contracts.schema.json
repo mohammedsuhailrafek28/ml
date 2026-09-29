@@ -1,0 +1,1722 @@
+{
+  "liver": {
+    "title": "LiverMeasurements",
+    "additionalProperties": false,
+    "properties": {
+      "Age": {
+        "description": "Age in years.",
+        "maximum": 120,
+        "minimum": 1,
+        "title": "Age",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 0,
+          "group": "Patient information",
+          "help": "Age in years.",
+          "kind": "integer",
+          "label": "Age",
+          "max": 120,
+          "min": 1,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "years"
+        }
+      },
+      "Gender": {
+        "description": "Select the category used in the source dataset.",
+        "enum": [
+          "Female",
+          "Male"
+        ],
+        "title": "Gender",
+        "type": "string",
+        "ui": {
+          "control": "select",
+          "display_order": 1,
+          "group": "Patient information",
+          "help": "Select the category used in the source dataset.",
+          "kind": "categorical",
+          "label": "Gender",
+          "max": null,
+          "min": null,
+          "nullable": false,
+          "options": [
+            {
+              "label": "Female",
+              "value": "Female"
+            },
+            {
+              "label": "Male",
+              "value": "Male"
+            }
+          ],
+          "required": true,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "TB": {
+        "description": "Total bilirubin measurement.",
+        "maximum": 100.0,
+        "minimum": 0.0,
+        "title": "Total bilirubin",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 2,
+          "group": "Bilirubin measurements",
+          "help": "Total bilirubin measurement.",
+          "kind": "number",
+          "label": "Total bilirubin",
+          "max": 100.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "mg/dL"
+        }
+      },
+      "DB": {
+        "description": "Direct bilirubin measurement.",
+        "maximum": 60.0,
+        "minimum": 0.0,
+        "title": "Direct bilirubin",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 3,
+          "group": "Bilirubin measurements",
+          "help": "Direct bilirubin measurement.",
+          "kind": "number",
+          "label": "Direct bilirubin",
+          "max": 60.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "mg/dL"
+        }
+      },
+      "Alkphos": {
+        "description": "Alkaline phosphatase measurement.",
+        "maximum": 3000,
+        "minimum": 10,
+        "title": "Alkaline phosphatase",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 4,
+          "group": "Liver enzymes",
+          "help": "Alkaline phosphatase measurement.",
+          "kind": "integer",
+          "label": "Alkaline phosphatase",
+          "max": 3000,
+          "min": 10,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "IU/L"
+        }
+      },
+      "Sgpt": {
+        "description": "ALT/SGPT enzyme measurement.",
+        "maximum": 3000,
+        "minimum": 1,
+        "title": "Alanine aminotransferase (ALT/SGPT)",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 5,
+          "group": "Liver enzymes",
+          "help": "ALT/SGPT enzyme measurement.",
+          "kind": "integer",
+          "label": "Alanine aminotransferase (ALT/SGPT)",
+          "max": 3000,
+          "min": 1,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "IU/L"
+        }
+      },
+      "Sgot": {
+        "description": "AST/SGOT enzyme measurement.",
+        "maximum": 6000,
+        "minimum": 1,
+        "title": "Aspartate aminotransferase (AST/SGOT)",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 6,
+          "group": "Liver enzymes",
+          "help": "AST/SGOT enzyme measurement.",
+          "kind": "integer",
+          "label": "Aspartate aminotransferase (AST/SGOT)",
+          "max": 6000,
+          "min": 1,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "IU/L"
+        }
+      },
+      "TP": {
+        "description": "Total serum protein measurement.",
+        "maximum": 12.0,
+        "minimum": 1.0,
+        "title": "Total proteins",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 7,
+          "group": "Protein measurements",
+          "help": "Total serum protein measurement.",
+          "kind": "number",
+          "label": "Total proteins",
+          "max": 12.0,
+          "min": 1.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "g/dL"
+        }
+      },
+      "ALB": {
+        "description": "Serum albumin measurement.",
+        "maximum": 7.0,
+        "minimum": 0.5,
+        "title": "Albumin",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 8,
+          "group": "Protein measurements",
+          "help": "Serum albumin measurement.",
+          "kind": "number",
+          "label": "Albumin",
+          "max": 7.0,
+          "min": 0.5,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "g/dL"
+        }
+      },
+      "A/G Ratio": {
+        "anyOf": [
+          {
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional; leave unavailable to use the persisted pipeline's imputation.",
+        "title": "Albumin / globulin ratio",
+        "ui": {
+          "control": "number",
+          "display_order": 9,
+          "group": "Protein measurements",
+          "help": "Optional; leave unavailable to use the persisted pipeline's imputation.",
+          "kind": "number",
+          "label": "Albumin / globulin ratio",
+          "max": 5.0,
+          "min": 0.0,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 0.01,
+          "unit": "ratio"
+        }
+      }
+    },
+    "required": [
+      "Age",
+      "Gender",
+      "TB",
+      "DB",
+      "Alkphos",
+      "Sgpt",
+      "Sgot",
+      "TP",
+      "ALB"
+    ],
+    "type": "object"
+  },
+  "heart": {
+    "title": "HeartMeasurements",
+    "additionalProperties": false,
+    "properties": {
+      "age": {
+        "description": "Age in years.",
+        "maximum": 100,
+        "minimum": 18,
+        "title": "Age",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 0,
+          "group": "Patient information",
+          "help": "Age in years.",
+          "kind": "integer",
+          "label": "Age",
+          "max": 100,
+          "min": 18,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "years"
+        }
+      },
+      "sex": {
+        "description": "Source dataset code: 0 female, 1 male.",
+        "enum": [
+          "0",
+          "1"
+        ],
+        "title": "Sex category",
+        "type": "string",
+        "ui": {
+          "control": "select",
+          "display_order": 1,
+          "group": "Patient information",
+          "help": "Source dataset code: 0 female, 1 male.",
+          "kind": "categorical",
+          "label": "Sex category",
+          "max": null,
+          "min": null,
+          "nullable": false,
+          "options": [
+            {
+              "label": "Female",
+              "value": "0"
+            },
+            {
+              "label": "Male",
+              "value": "1"
+            }
+          ],
+          "required": true,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "cp": {
+        "description": "Choose the source dataset category.",
+        "enum": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "title": "Chest pain type",
+        "type": "string",
+        "ui": {
+          "control": "select",
+          "display_order": 2,
+          "group": "Symptoms",
+          "help": "Choose the source dataset category.",
+          "kind": "categorical",
+          "label": "Chest pain type",
+          "max": null,
+          "min": null,
+          "nullable": false,
+          "options": [
+            {
+              "label": "Typical angina",
+              "value": "1"
+            },
+            {
+              "label": "Atypical angina",
+              "value": "2"
+            },
+            {
+              "label": "Non-anginal pain",
+              "value": "3"
+            },
+            {
+              "label": "Asymptomatic",
+              "value": "4"
+            }
+          ],
+          "required": true,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "trestbps": {
+        "description": "Resting blood pressure measurement.",
+        "maximum": 220,
+        "minimum": 80,
+        "title": "Resting blood pressure",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 3,
+          "group": "Vitals",
+          "help": "Resting blood pressure measurement.",
+          "kind": "integer",
+          "label": "Resting blood pressure",
+          "max": 220,
+          "min": 80,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "mm Hg"
+        }
+      },
+      "chol": {
+        "description": "Serum cholesterol measurement.",
+        "maximum": 600,
+        "minimum": 100,
+        "title": "Serum cholesterol",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 4,
+          "group": "Laboratory measurements",
+          "help": "Serum cholesterol measurement.",
+          "kind": "integer",
+          "label": "Serum cholesterol",
+          "max": 600,
+          "min": 100,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "mg/dL"
+        }
+      },
+      "fbs": {
+        "description": "Source dataset category.",
+        "enum": [
+          "0",
+          "1"
+        ],
+        "title": "Fasting blood sugar > 120 mg/dL",
+        "type": "string",
+        "ui": {
+          "control": "select",
+          "display_order": 5,
+          "group": "Laboratory measurements",
+          "help": "Source dataset category.",
+          "kind": "categorical",
+          "label": "Fasting blood sugar > 120 mg/dL",
+          "max": null,
+          "min": null,
+          "nullable": false,
+          "options": [
+            {
+              "label": "120 mg/dl or below",
+              "value": "0"
+            },
+            {
+              "label": "Above 120 mg/dl",
+              "value": "1"
+            }
+          ],
+          "required": true,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "restecg": {
+        "description": "Choose the source dataset category.",
+        "enum": [
+          "0",
+          "1",
+          "2"
+        ],
+        "title": "Resting ECG result",
+        "type": "string",
+        "ui": {
+          "control": "select",
+          "display_order": 6,
+          "group": "Cardiac tests",
+          "help": "Choose the source dataset category.",
+          "kind": "categorical",
+          "label": "Resting ECG result",
+          "max": null,
+          "min": null,
+          "nullable": false,
+          "options": [
+            {
+              "label": "Normal",
+              "value": "0"
+            },
+            {
+              "label": "ST-T wave abnormality",
+              "value": "1"
+            },
+            {
+              "label": "Probable/definite left ventricular hypertrophy",
+              "value": "2"
+            }
+          ],
+          "required": true,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "thalach": {
+        "description": "Maximum heart rate achieved.",
+        "maximum": 220,
+        "minimum": 60,
+        "title": "Maximum heart rate",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 7,
+          "group": "Vitals",
+          "help": "Maximum heart rate achieved.",
+          "kind": "integer",
+          "label": "Maximum heart rate",
+          "max": 220,
+          "min": 60,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "bpm"
+        }
+      },
+      "exang": {
+        "description": "Source dataset category.",
+        "enum": [
+          "0",
+          "1"
+        ],
+        "title": "Exercise-induced angina",
+        "type": "string",
+        "ui": {
+          "control": "select",
+          "display_order": 8,
+          "group": "Symptoms",
+          "help": "Source dataset category.",
+          "kind": "categorical",
+          "label": "Exercise-induced angina",
+          "max": null,
+          "min": null,
+          "nullable": false,
+          "options": [
+            {
+              "label": "No",
+              "value": "0"
+            },
+            {
+              "label": "Yes",
+              "value": "1"
+            }
+          ],
+          "required": true,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "oldpeak": {
+        "description": "ST depression induced by exercise relative to rest.",
+        "maximum": 8.0,
+        "minimum": 0.0,
+        "title": "ST depression",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 9,
+          "group": "Cardiac tests",
+          "help": "ST depression induced by exercise relative to rest.",
+          "kind": "number",
+          "label": "ST depression",
+          "max": 8.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "mm"
+        }
+      },
+      "slope": {
+        "description": "Choose the source dataset category.",
+        "enum": [
+          "1",
+          "2",
+          "3"
+        ],
+        "title": "Peak exercise ST slope",
+        "type": "string",
+        "ui": {
+          "control": "select",
+          "display_order": 10,
+          "group": "Cardiac tests",
+          "help": "Choose the source dataset category.",
+          "kind": "categorical",
+          "label": "Peak exercise ST slope",
+          "max": null,
+          "min": null,
+          "nullable": false,
+          "options": [
+            {
+              "label": "Upsloping",
+              "value": "1"
+            },
+            {
+              "label": "Flat",
+              "value": "2"
+            },
+            {
+              "label": "Downsloping",
+              "value": "3"
+            }
+          ],
+          "required": true,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "ca": {
+        "anyOf": [
+          {
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional; if unavailable, the persisted pipeline imputes it.",
+        "title": "Major vessels",
+        "ui": {
+          "control": "select",
+          "display_order": 11,
+          "group": "Cardiac tests",
+          "help": "Optional; if unavailable, the persisted pipeline imputes it.",
+          "kind": "categorical",
+          "label": "Major vessels",
+          "max": null,
+          "min": null,
+          "nullable": true,
+          "options": [
+            {
+              "label": "0 vessels",
+              "value": "0"
+            },
+            {
+              "label": "1 vessel",
+              "value": "1"
+            },
+            {
+              "label": "2 vessels",
+              "value": "2"
+            },
+            {
+              "label": "3 vessels",
+              "value": "3"
+            }
+          ],
+          "required": false,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "thal": {
+        "anyOf": [
+          {
+            "enum": [
+              "3",
+              "6",
+              "7"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional; if unavailable, the persisted pipeline imputes it.",
+        "title": "Thalassemia category",
+        "ui": {
+          "control": "select",
+          "display_order": 12,
+          "group": "Cardiac tests",
+          "help": "Optional; if unavailable, the persisted pipeline imputes it.",
+          "kind": "categorical",
+          "label": "Thalassemia category",
+          "max": null,
+          "min": null,
+          "nullable": true,
+          "options": [
+            {
+              "label": "Normal",
+              "value": "3"
+            },
+            {
+              "label": "Fixed defect",
+              "value": "6"
+            },
+            {
+              "label": "Reversible defect",
+              "value": "7"
+            }
+          ],
+          "required": false,
+          "step": 0.01,
+          "unit": null
+        }
+      }
+    },
+    "required": [
+      "age",
+      "sex",
+      "cp",
+      "trestbps",
+      "chol",
+      "fbs",
+      "restecg",
+      "thalach",
+      "exang",
+      "oldpeak",
+      "slope"
+    ],
+    "type": "object"
+  },
+  "diabetes": {
+    "title": "DiabetesMeasurements",
+    "additionalProperties": false,
+    "properties": {
+      "pregnancies": {
+        "description": "Enter the count; zero is a valid value.",
+        "maximum": 20,
+        "minimum": 0,
+        "title": "Number of pregnancies",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 0,
+          "group": "Patient information",
+          "help": "Enter the count; zero is a valid value.",
+          "kind": "integer",
+          "label": "Number of pregnancies",
+          "max": 20,
+          "min": 0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "count"
+        }
+      },
+      "glucose": {
+        "description": "Zero represents a source dataset missing-value code.",
+        "maximum": 400,
+        "minimum": 0,
+        "title": "Plasma glucose (2-hour OGTT)",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 1,
+          "group": "Glucose and blood pressure",
+          "help": "Zero represents a source dataset missing-value code.",
+          "kind": "number",
+          "label": "Plasma glucose (2-hour OGTT)",
+          "max": 400,
+          "min": 0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "mg/dL"
+        }
+      },
+      "blood_pressure": {
+        "description": "Zero represents a source dataset missing-value code.",
+        "maximum": 200,
+        "minimum": 0,
+        "title": "Diastolic blood pressure",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 2,
+          "group": "Glucose and blood pressure",
+          "help": "Zero represents a source dataset missing-value code.",
+          "kind": "number",
+          "label": "Diastolic blood pressure",
+          "max": 200,
+          "min": 0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "mm Hg"
+        }
+      },
+      "skin_thickness": {
+        "description": "Zero represents a source dataset missing-value code.",
+        "maximum": 110,
+        "minimum": 0,
+        "title": "Triceps skinfold thickness",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 3,
+          "group": "Body measurements",
+          "help": "Zero represents a source dataset missing-value code.",
+          "kind": "number",
+          "label": "Triceps skinfold thickness",
+          "max": 110,
+          "min": 0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "mm"
+        }
+      },
+      "insulin": {
+        "description": "Zero represents a source dataset missing-value code.",
+        "maximum": 1200,
+        "minimum": 0,
+        "title": "Two-hour serum insulin",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 4,
+          "group": "Body measurements",
+          "help": "Zero represents a source dataset missing-value code.",
+          "kind": "number",
+          "label": "Two-hour serum insulin",
+          "max": 1200,
+          "min": 0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "mu U/ml"
+        }
+      },
+      "bmi": {
+        "description": "Zero represents a source dataset missing-value code.",
+        "maximum": 100,
+        "minimum": 0,
+        "title": "Body mass index",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 5,
+          "group": "Body measurements",
+          "help": "Zero represents a source dataset missing-value code.",
+          "kind": "number",
+          "label": "Body mass index",
+          "max": 100,
+          "min": 0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "kg/m²"
+        }
+      },
+      "diabetes_pedigree": {
+        "description": "Source-dataset pedigree score.",
+        "maximum": 3.0,
+        "minimum": 0.0,
+        "title": "Diabetes pedigree function",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 6,
+          "group": "Risk history",
+          "help": "Source-dataset pedigree score.",
+          "kind": "number",
+          "label": "Diabetes pedigree function",
+          "max": 3.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 0.01,
+          "unit": "score"
+        }
+      },
+      "age": {
+        "description": "Age in years.",
+        "maximum": 120,
+        "minimum": 18,
+        "title": "Age",
+        "type": "integer",
+        "ui": {
+          "control": "number",
+          "display_order": 7,
+          "group": "Patient information",
+          "help": "Age in years.",
+          "kind": "integer",
+          "label": "Age",
+          "max": 120,
+          "min": 18,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1,
+          "unit": "years"
+        }
+      }
+    },
+    "required": [
+      "pregnancies",
+      "glucose",
+      "blood_pressure",
+      "skin_thickness",
+      "insulin",
+      "bmi",
+      "diabetes_pedigree",
+      "age"
+    ],
+    "type": "object"
+  },
+  "kidney": {
+    "title": "KidneyMeasurements",
+    "additionalProperties": false,
+    "properties": {
+      "hemo": {
+        "anyOf": [
+          {
+            "maximum": 20,
+            "minimum": 3,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Haemoglobin measurement.",
+        "title": "Haemoglobin",
+        "ui": {
+          "control": "number",
+          "display_order": 0,
+          "group": "Blood measurements",
+          "help": "Haemoglobin measurement.",
+          "kind": "number",
+          "label": "Haemoglobin",
+          "max": 20,
+          "min": 3,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 0.01,
+          "unit": "g/dL"
+        }
+      },
+      "sc": {
+        "anyOf": [
+          {
+            "maximum": 90,
+            "minimum": 0.1,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Serum creatinine measurement.",
+        "title": "Serum creatinine",
+        "ui": {
+          "control": "number",
+          "display_order": 1,
+          "group": "Blood measurements",
+          "help": "Serum creatinine measurement.",
+          "kind": "number",
+          "label": "Serum creatinine",
+          "max": 90,
+          "min": 0.1,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 0.01,
+          "unit": "mg/dL"
+        }
+      },
+      "sg": {
+        "anyOf": [
+          {
+            "maximum": 1.05,
+            "minimum": 1.0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Urine specific gravity.",
+        "title": "Urine specific gravity",
+        "ui": {
+          "control": "number",
+          "display_order": 2,
+          "group": "Urine measurements",
+          "help": "Urine specific gravity.",
+          "kind": "number",
+          "label": "Urine specific gravity",
+          "max": 1.05,
+          "min": 1.0,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 0.01,
+          "unit": "ratio"
+        }
+      },
+      "al": {
+        "anyOf": [
+          {
+            "maximum": 5,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Dataset scale from 0 to 5.",
+        "title": "Urine albumin",
+        "ui": {
+          "control": "number",
+          "display_order": 3,
+          "group": "Urine measurements",
+          "help": "Dataset scale from 0 to 5.",
+          "kind": "integer",
+          "label": "Urine albumin",
+          "max": 5,
+          "min": 0,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 1,
+          "unit": "0-5 scale"
+        }
+      },
+      "pcv": {
+        "anyOf": [
+          {
+            "maximum": 60,
+            "minimum": 9,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Packed cell volume percentage.",
+        "title": "Packed cell volume",
+        "ui": {
+          "control": "number",
+          "display_order": 4,
+          "group": "Blood measurements",
+          "help": "Packed cell volume percentage.",
+          "kind": "integer",
+          "label": "Packed cell volume",
+          "max": 60,
+          "min": 9,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 1,
+          "unit": "%"
+        }
+      },
+      "rc": {
+        "anyOf": [
+          {
+            "maximum": 8,
+            "minimum": 2,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Red blood cell count.",
+        "title": "Red blood cell count",
+        "ui": {
+          "control": "number",
+          "display_order": 5,
+          "group": "Blood measurements",
+          "help": "Red blood cell count.",
+          "kind": "number",
+          "label": "Red blood cell count",
+          "max": 8,
+          "min": 2,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 0.01,
+          "unit": "millions/cmm"
+        }
+      },
+      "bgr": {
+        "anyOf": [
+          {
+            "maximum": 600,
+            "minimum": 20,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Blood glucose measurement.",
+        "title": "Random blood glucose",
+        "ui": {
+          "control": "number",
+          "display_order": 6,
+          "group": "Blood measurements",
+          "help": "Blood glucose measurement.",
+          "kind": "number",
+          "label": "Random blood glucose",
+          "max": 600,
+          "min": 20,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 0.01,
+          "unit": "mg/dL"
+        }
+      },
+      "bu": {
+        "anyOf": [
+          {
+            "maximum": 450,
+            "minimum": 1,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Blood urea measurement.",
+        "title": "Blood urea",
+        "ui": {
+          "control": "number",
+          "display_order": 7,
+          "group": "Blood measurements",
+          "help": "Blood urea measurement.",
+          "kind": "number",
+          "label": "Blood urea",
+          "max": 450,
+          "min": 1,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 0.01,
+          "unit": "mg/dL"
+        }
+      },
+      "age": {
+        "anyOf": [
+          {
+            "maximum": 110,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Age in years.",
+        "title": "Age",
+        "ui": {
+          "control": "number",
+          "display_order": 8,
+          "group": "Patient information",
+          "help": "Age in years.",
+          "kind": "integer",
+          "label": "Age",
+          "max": 110,
+          "min": 1,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 1,
+          "unit": "years"
+        }
+      },
+      "bp": {
+        "anyOf": [
+          {
+            "maximum": 200,
+            "minimum": 30,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Blood pressure measurement.",
+        "title": "Diastolic blood pressure",
+        "ui": {
+          "control": "number",
+          "display_order": 9,
+          "group": "Vitals",
+          "help": "Blood pressure measurement.",
+          "kind": "integer",
+          "label": "Diastolic blood pressure",
+          "max": 200,
+          "min": 30,
+          "nullable": true,
+          "options": null,
+          "required": false,
+          "step": 1,
+          "unit": "mm Hg"
+        }
+      },
+      "htn": {
+        "anyOf": [
+          {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Choose yes or no.",
+        "title": "Hypertension",
+        "ui": {
+          "control": "select",
+          "display_order": 10,
+          "group": "Medical history",
+          "help": "Choose yes or no.",
+          "kind": "categorical",
+          "label": "Hypertension",
+          "max": null,
+          "min": null,
+          "nullable": true,
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ],
+          "required": false,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "dm": {
+        "anyOf": [
+          {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Choose yes or no.",
+        "title": "Diabetes mellitus",
+        "ui": {
+          "control": "select",
+          "display_order": 11,
+          "group": "Medical history",
+          "help": "Choose yes or no.",
+          "kind": "categorical",
+          "label": "Diabetes mellitus",
+          "max": null,
+          "min": null,
+          "nullable": true,
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ],
+          "required": false,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "appet": {
+        "anyOf": [
+          {
+            "enum": [
+              "good",
+              "poor"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Choose good or poor.",
+        "title": "Appetite",
+        "ui": {
+          "control": "select",
+          "display_order": 12,
+          "group": "Symptoms",
+          "help": "Choose good or poor.",
+          "kind": "categorical",
+          "label": "Appetite",
+          "max": null,
+          "min": null,
+          "nullable": true,
+          "options": [
+            {
+              "label": "Good",
+              "value": "good"
+            },
+            {
+              "label": "Poor",
+              "value": "poor"
+            }
+          ],
+          "required": false,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "ane": {
+        "anyOf": [
+          {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Choose yes or no.",
+        "title": "Anaemia",
+        "ui": {
+          "control": "select",
+          "display_order": 13,
+          "group": "Medical history",
+          "help": "Choose yes or no.",
+          "kind": "categorical",
+          "label": "Anaemia",
+          "max": null,
+          "min": null,
+          "nullable": true,
+          "options": [
+            {
+              "label": "Yes",
+              "value": "yes"
+            },
+            {
+              "label": "No",
+              "value": "no"
+            }
+          ],
+          "required": false,
+          "step": 0.01,
+          "unit": null
+        }
+      }
+    },
+    "type": "object"
+  },
+  "parkinsons": {
+    "title": "ParkinsonsMeasurements",
+    "additionalProperties": false,
+    "properties": {
+      "MDVP:Fo(Hz)": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 300,
+        "minimum": 50,
+        "title": "Average vocal fundamental frequency",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 0,
+          "group": "Fundamental frequency",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Average vocal fundamental frequency",
+          "max": 300,
+          "min": 50,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": "Hz"
+        }
+      },
+      "MDVP:Fhi(Hz)": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 650,
+        "minimum": 60,
+        "title": "Maximum vocal fundamental frequency",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 1,
+          "group": "Fundamental frequency",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Maximum vocal fundamental frequency",
+          "max": 650,
+          "min": 60,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": "Hz"
+        }
+      },
+      "MDVP:Flo(Hz)": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 300,
+        "minimum": 40,
+        "title": "Minimum vocal fundamental frequency",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 2,
+          "group": "Fundamental frequency",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Minimum vocal fundamental frequency",
+          "max": 300,
+          "min": 40,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": "Hz"
+        }
+      },
+      "MDVP:Jitter(%)": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 0.1,
+        "minimum": 0.0,
+        "title": "Frequency variation (jitter, %)",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 3,
+          "group": "Jitter (frequency variation)",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Frequency variation (jitter, %)",
+          "max": 0.1,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": "%"
+        }
+      },
+      "MDVP:Jitter(Abs)": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 0.001,
+        "minimum": 0.0,
+        "title": "Absolute frequency variation (jitter)",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 4,
+          "group": "Jitter (frequency variation)",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Absolute frequency variation (jitter)",
+          "max": 0.001,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": "s"
+        }
+      },
+      "MDVP:Shimmer(dB)": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 3.0,
+        "minimum": 0.0,
+        "title": "Amplitude variation (shimmer, dB)",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 5,
+          "group": "Shimmer (amplitude variation)",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Amplitude variation (shimmer, dB)",
+          "max": 3.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": "dB"
+        }
+      },
+      "MDVP:APQ": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 0.3,
+        "minimum": 0.0,
+        "title": "Eleven-point amplitude perturbation quotient (shimmer)",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 6,
+          "group": "Shimmer (amplitude variation)",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Eleven-point amplitude perturbation quotient (shimmer)",
+          "max": 0.3,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": null
+        }
+      },
+      "NHR": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "title": "Noise-to-harmonics ratio",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 7,
+          "group": "Noise / harmonic measures",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Noise-to-harmonics ratio",
+          "max": 1.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": null
+        }
+      },
+      "HNR": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 45.0,
+        "minimum": 0.0,
+        "title": "Harmonics-to-noise ratio",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 8,
+          "group": "Noise / harmonic measures",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Harmonics-to-noise ratio",
+          "max": 45.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": "dB"
+        }
+      },
+      "RPDE": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "title": "Recurrence period density entropy (nonlinear dynamics)",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 9,
+          "group": "Nonlinear voice measures",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Recurrence period density entropy (nonlinear dynamics)",
+          "max": 1.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": null
+        }
+      },
+      "DFA": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 1.0,
+        "minimum": 0.4,
+        "title": "Detrended fluctuation analysis (signal fractal scaling)",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 10,
+          "group": "Nonlinear voice measures",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Detrended fluctuation analysis (signal fractal scaling)",
+          "max": 1.0,
+          "min": 0.4,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": null
+        }
+      },
+      "spread1": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 0.0,
+        "minimum": -10.0,
+        "title": "Nonlinear fundamental-frequency variation measure 1",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 11,
+          "group": "Nonlinear voice measures",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Nonlinear fundamental-frequency variation measure 1",
+          "max": 0.0,
+          "min": -10.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": null
+        }
+      },
+      "spread2": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "title": "Nonlinear fundamental-frequency variation measure 2",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 12,
+          "group": "Nonlinear voice measures",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Nonlinear fundamental-frequency variation measure 2",
+          "max": 1.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": null
+        }
+      },
+      "D2": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 5.0,
+        "minimum": 0.5,
+        "title": "Correlation dimension (nonlinear dynamics)",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 13,
+          "group": "Nonlinear voice measures",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Correlation dimension (nonlinear dynamics)",
+          "max": 5.0,
+          "min": 0.5,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": null
+        }
+      },
+      "PPE": {
+        "description": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "title": "Pitch period entropy",
+        "type": "number",
+        "ui": {
+          "control": "number",
+          "display_order": 14,
+          "group": "Nonlinear voice measures",
+          "help": "Pre-computed voice-analysis biomarker. Medical AI Suite does not record or process audio.",
+          "kind": "number",
+          "label": "Pitch period entropy",
+          "max": 1.0,
+          "min": 0.0,
+          "nullable": false,
+          "options": null,
+          "required": true,
+          "step": 1e-06,
+          "unit": null
+        }
+      }
+    },
+    "required": [
+      "MDVP:Fo(Hz)",
+      "MDVP:Fhi(Hz)",
+      "MDVP:Flo(Hz)",
+      "MDVP:Jitter(%)",
+      "MDVP:Jitter(Abs)",
+      "MDVP:Shimmer(dB)",
+      "MDVP:APQ",
+      "NHR",
+      "HNR",
+      "RPDE",
+      "DFA",
+      "spread1",
+      "spread2",
+      "D2",
+      "PPE"
+    ],
+    "type": "object"
+  }
+}

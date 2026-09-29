@@ -16,12 +16,16 @@ def test_missing_dataset_error(tmp_path):
     with pytest.raises(FileNotFoundError): load_dataset(tmp_path/'missing.csv')
 def test_pipelines_load_and_predict():
     for k,c in DISEASES.items():
-        d=pd.read_csv(c.raw_path); row=d.iloc[0].to_dict(); row.pop(c.target,None); row.pop('name',None); r=predict(k,row); assert r['prediction'] in (0,1); assert 0<=r['risk_probability']<=1
+        d=pd.read_csv(c.raw_path); row=d.iloc[0].to_dict()
+        row.pop(c.target,None); row.pop('name',None); row.pop('id',None)
+        row={field:(None if pd.isna(value) else value) for field,value in row.items()}
+        r=predict(k,row); assert r['prediction'] in (0,1); assert 0<=r['model_score']<=1
 def test_metadata_required():
     required={'selected_model','random_seed'}
     for k in DISEASES: assert required <= set(json.loads((ROOT/'models'/k/'metadata.json').read_text()))
-def test_pdf_signatures():
-    for k in DISEASES: assert (ROOT/'reports/generated_reports'/f'{k}_sample_report.pdf').read_bytes()[:4]==b'%PDF'
+def test_active_report_directory_contains_no_unprovenanced_pdfs():
+    assert not list((ROOT/'reports/generated_reports').glob('*.pdf'))
+    assert (ROOT/'reports/generated_reports/README.md').is_file()
 def test_manifest_hashes_present():
     m=json.loads((ROOT/'reports/dataset_manifest.json').read_text()); assert len(m)==5 and all(x['sha256'] for x in m)
 def test_parkinsons_identifier_excluded(): assert 'name' not in DISEASES['parkinsons'].features

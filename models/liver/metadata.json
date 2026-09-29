@@ -1,17 +1,174 @@
 {
+  "model_id": "liver",
+  "disease": "Liver disease",
   "dataset": "liver.csv",
+  "dataset_source": "UCI Machine Learning Repository - Indian Liver Patient Dataset (ILPD)",
+  "dataset_url": "https://archive.ics.uci.edu/dataset/225/ilpd+indian+liver+patient+dataset",
+  "dataset_sha256": "dbb065e6bf2b226b6d9c04f066ddc0b45173861dfb3a4df83f3710d3927ef5de",
+  "rows_raw": 583,
+  "rows_used": 570,
   "shape": [
-    583,
+    570,
     11
   ],
+  "features": [
+    "Age",
+    "Gender",
+    "TB",
+    "DB",
+    "Alkphos",
+    "Sgpt",
+    "Sgot",
+    "TP",
+    "ALB",
+    "A/G Ratio"
+  ],
+  "categorical_features": [
+    "Gender"
+  ],
+  "numeric_features": [
+    "Age",
+    "TB",
+    "DB",
+    "Alkphos",
+    "Sgpt",
+    "Sgot",
+    "TP",
+    "ALB",
+    "A/G Ratio"
+  ],
+  "target": "Selector",
   "target_mapping": {
     "1": 1,
     "2": 0
   },
-  "selected_algorithm": "random_forest",
+  "positive_class": "liver-disease pattern (ILPD Selector == 1)",
+  "class_balance_used": {
+    "positive": 406,
+    "negative": 164
+  },
+  "split_strategy": "Stratified 80/20 hold-out; model chosen only on the 80% dev partition via CV.",
   "random_seed": 42,
-  "selected_model": "random_forest",
-  "training_timestamp": "2026-07-24",
+  "cleaning": {
+    "rows_raw": 583,
+    "rows_dropped_missing_target": 0,
+    "exact_duplicate_rows_removed": 13,
+    "rows_used": 570,
+    "missing_value_handling": "A/G Ratio missing values imputed with the training-fold median inside the pipeline; Gender missing values imputed with the training-fold mode.",
+    "duplicate_policy": "Exact duplicate rows removed before splitting so identical records cannot appear in both train and test (ILPD has no patient id)."
+  },
+  "preprocessing": "ColumnTransformer: numeric -> SimpleImputer(median) + StandardScaler; categorical(Gender) -> SimpleImputer(most_frequent) + OneHotEncoder. Fitted inside the pipeline on training folds only.",
+  "imbalance_handling": "class_weight (None vs 'balanced') is a tuned hyper-parameter chosen by CV per family. The operating threshold is left at 0.5; a dev-only precision/recall/Youden sweep is published but not used for tuning because it is unstable on 583 rows. No synthetic oversampling (SMOTE).",
+  "algorithms_evaluated": [
+    "random_forest",
+    "logistic_regression",
+    "gaussian_nb",
+    "svm",
+    "gradient_boosting",
+    "knn",
+    "decision_tree"
+  ],
+  "hyperparameter_search": "GridSearchCV over StratifiedKFold(5, shuffle, seed) per family, scoring=roc_auc.",
+  "model_selection": {
+    "rule": "max DEV CV ROC-AUC, then simplest family within 0.01 ROC-AUC of the best",
+    "cv_leader": "random_forest",
+    "cv_leader_roc_auc": 0.7260727591496823,
+    "tie_band_members": [
+      "random_forest",
+      "logistic_regression",
+      "gaussian_nb"
+    ],
+    "selected": "logistic_regression"
+  },
+  "selected_algorithm": "logistic_regression",
+  "selected_model": "logistic_regression",
+  "selected_params": {
+    "model__C": 1.0,
+    "model__class_weight": null
+  },
+  "operating_threshold": 0.5,
+  "cv_metrics": {
+    "scoring": "roc_auc",
+    "roc_auc_mean": 0.7184264738110893,
+    "roc_auc_std": 0.03248398341929603,
+    "dev_oof_f1_at_0.5": 0.8207934336525308
+  },
+  "holdout_metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.7105263157894737,
+    "precision": 0.7448979591836735,
+    "recall": 0.9012345679012346,
+    "specificity": 0.24242424242424243,
+    "f1": 0.8156424581005587,
+    "roc_auc": 0.8035914702581369,
+    "confusion_matrix": {
+      "tn": 8,
+      "fp": 25,
+      "fn": 8,
+      "tp": 73
+    }
+  },
+  "permutation_importance_holdout": [
+    {
+      "feature": "ALB",
+      "importance_mean": 0.11642349420127203,
+      "importance_std": 0.03947463001783363
+    },
+    {
+      "feature": "DB",
+      "importance_mean": 0.06584362139917697,
+      "importance_std": 0.04483254389252228
+    },
+    {
+      "feature": "Sgpt",
+      "importance_mean": 0.03228582117471009,
+      "importance_std": 0.03947046377288872
+    },
+    {
+      "feature": "Age",
+      "importance_mean": 0.02012719790497569,
+      "importance_std": 0.022549831617277652
+    },
+    {
+      "feature": "Alkphos",
+      "importance_mean": 0.0164983164983165,
+      "importance_std": 0.017693100291804452
+    },
+    {
+      "feature": "TB",
+      "importance_mean": 0.014627759072203516,
+      "importance_std": 0.020682952323666227
+    },
+    {
+      "feature": "Sgot",
+      "importance_mean": 0.010774410774410803,
+      "importance_std": 0.021195190364287988
+    },
+    {
+      "feature": "TP",
+      "importance_mean": 0.0050879161990273316,
+      "importance_std": 0.03608894321571066
+    },
+    {
+      "feature": "A/G Ratio",
+      "importance_mean": 0.0021324354657688005,
+      "importance_std": 0.008418838486594502
+    },
+    {
+      "feature": "Gender",
+      "importance_mean": -0.010475121586232705,
+      "importance_std": 0.007020947362631044
+    }
+  ],
+  "training_timestamp": "2026-08-27T05:26:24.679169+00:00",
+  "training_date": "2026-08-27",
+  "artifact_path": "models/liver/liver_pipeline.joblib",
   "sklearn_version": "1.9.0",
-  "threshold": 0.5
+  "threshold": 0.5,
+  "limitations": [
+    "ILPD is a single-region (Andhra Pradesh, India) dataset of 583 records; it under-represents women and non-Indian populations.",
+    "Labels indicate prior clinical grouping, not a specific liver disease or severity.",
+    "Permutation importance describes model behaviour, not physiological causation."
+  ],
+  "disclaimer": "Educational and research use only. This estimates a risk pattern learned from a public dataset and is not a medical diagnosis."
 }

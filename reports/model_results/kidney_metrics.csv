@@ -1,8 +1,8 @@
-accuracy,precision,recall,f1,roc_auc,model,cv_mean,cv_std
-0.975,1.0,0.96,0.9795918367346939,1.0,logistic_regression,0.9923401493021746,0.010240374647573214
-0.9625,1.0,0.94,0.9690721649484536,0.989,decision_tree,0.9849335232668566,0.009511048004544217
-1.0,1.0,1.0,1.0,1.0,random_forest,0.992530864197531,0.009984746787948532
-1.0,1.0,1.0,1.0,1.0,gradient_boosting,0.9924675730582904,0.006151259653498601
-0.9875,1.0,0.98,0.98989898989899,1.0,svm,0.9948717948717949,0.010256410256410265
-0.975,1.0,0.96,0.9795918367346939,1.0,knn,0.9632199379567801,0.022917624136324907
-0.975,1.0,0.96,0.9795918367346939,1.0,gaussian_nb,0.9742915312535565,0.008318089330067979
+model,cv_roc_auc_mean,cv_roc_auc_std,dev_oof_f1_at_0.5,dev_oof_recall_at_0.5,best_params
+svm,1.0,0.0,1.0,1.0,"{'model__C': 1.0, 'model__class_weight': None, 'model__gamma': 'scale'}"
+logistic_regression,1.0,0.0,0.9974937343358395,0.995,"{'model__C': 1.0, 'model__class_weight': None}"
+gaussian_nb,1.0,0.0,0.961038961038961,0.925,{}
+random_forest,0.9997916666666666,0.0004166666666666763,0.9950248756218906,1.0,"{'model__class_weight': None, 'model__max_depth': None, 'model__min_samples_leaf': 1, 'model__n_estimators': 300}"
+gradient_boosting,0.9995833333333334,0.0008333333333333747,0.9875311720698254,0.99,"{'model__learning_rate': 0.05, 'model__max_depth': 2, 'model__n_estimators': 300}"
+knn,0.9974999999999999,0.004999999999999982,0.9769820971867008,0.955,"{'model__n_neighbors': 5, 'model__weights': 'uniform'}"
+decision_tree,0.9819791666666665,0.0195617123554605,0.9748743718592965,0.97,"{'model__class_weight': 'balanced', 'model__max_depth': 3, 'model__min_samples_leaf': 5}"
