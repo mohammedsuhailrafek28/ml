@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
+
+from src.model_release import file_sha256
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "release" / "application-release-manifest.json"
@@ -43,10 +44,6 @@ INPUTS = {
 }
 
 
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def build_manifest() -> dict:
     identity = json.loads((ROOT / INPUTS["application_identity"]).read_text(encoding="utf-8"))
     sample_version = next(
@@ -64,7 +61,7 @@ def build_manifest() -> dict:
         "clinical_status": identity["clinical_status"],
         "runtime_versions": identity["runtime_versions"],
         "inputs": {
-            name: {"path": relative, "sha256": sha256(ROOT / relative)}
+            name: {"path": relative, "sha256": file_sha256(ROOT / relative)}
             for name, relative in INPUTS.items()
         },
     }

@@ -7,12 +7,12 @@ deterministic JSON release contract for human review.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 
 from joblib import load
 
+from src.model_release import file_sha256
 from src.utils.config import DISEASES
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,10 +47,6 @@ OPTIONAL_FIELDS = {
     "kidney": None,  # every active feature is optional and imputed
     "parkinsons": [],
 }
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def relative(path: Path) -> str:
@@ -89,22 +85,22 @@ def build_manifest() -> dict:
         required = [feature for feature in active_features if feature not in optional]
         holdout = metadata["holdout_metrics"]
         cv_metrics = metadata["cv_metrics"]
-        model_hash = sha256(model_path)
+        model_hash = file_sha256(model_path)
 
         releases[disease] = {
             "release_schema_version": "1.0.0",
             "disease_identifier": disease,
             "metadata_disease_label": metadata["disease"],
-            "dataset": {"path": relative(dataset_path), "sha256": sha256(dataset_path)},
+            "dataset": {"path": relative(dataset_path), "sha256": file_sha256(dataset_path)},
             "model": {
                 "path": relative(model_path),
                 "sha256": model_hash,
                 "identifier": f"{disease}:{metadata['selected_model']}:{model_hash[:12]}",
             },
-            "metadata": {"path": relative(metadata_path), "sha256": sha256(metadata_path)},
+            "metadata": {"path": relative(metadata_path), "sha256": file_sha256(metadata_path)},
             "feature_list": {
                 "path": relative(feature_path),
-                "sha256": sha256(feature_path),
+                "sha256": file_sha256(feature_path),
                 "transformed_features": transformed_features,
             },
             "ordered_active_features": active_features,

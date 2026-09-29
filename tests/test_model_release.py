@@ -18,6 +18,7 @@ from src.model_release import (
     runtime_compatibility_issues,
 )
 from src.utils.config import DISEASES
+from src.model_release import file_sha256
 
 ROOT = Path(__file__).resolve().parents[1]
 GOLDEN = json.loads((ROOT / "tests/fixtures/model_release_golden.json").read_text(encoding="utf-8"))
@@ -35,6 +36,17 @@ def test_manifest_is_current_and_complete():
         check=False,
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
+
+
+def test_release_hashes_text_independently_of_checkout_line_endings(tmp_path):
+    text_file = tmp_path / "dataset.csv"
+    text_file.write_bytes(b"feature,target\r\n1,0\r\n")
+    windows_checkout_hash = file_sha256(text_file)
+
+    text_file.write_bytes(b"feature,target\n1,0\n")
+    linux_checkout_hash = file_sha256(text_file)
+
+    assert windows_checkout_hash == linux_checkout_hash
 
 
 def test_release_hashes_and_runtime_are_compatible():

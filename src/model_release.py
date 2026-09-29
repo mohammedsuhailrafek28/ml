@@ -17,6 +17,10 @@ PACKAGE_NAMES = {
     "scikit-learn": "scikit-learn",
     "joblib": "joblib",
 }
+TEXT_SUFFIXES = {
+    ".csv", ".css", ".example", ".json", ".lock", ".md", ".mjs", ".py",
+    ".toml", ".ts", ".tsx", ".yaml", ".yml",
+}
 
 
 def load_release_manifest(path: Path = MANIFEST_PATH) -> dict:
@@ -24,7 +28,12 @@ def load_release_manifest(path: Path = MANIFEST_PATH) -> dict:
 
 
 def file_sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    content = path.read_bytes()
+    # Git may check text files out with platform-native line endings. Hash the
+    # canonical LF representation so release manifests verify across OSes.
+    if path.suffix.lower() in TEXT_SUFFIXES or path.name in {"Dockerfile", ".dockerignore"}:
+        content = content.replace(b"\r\n", b"\n")
+    return hashlib.sha256(content).hexdigest()
 
 
 def active_features(disease: str, manifest: dict | None = None) -> list[str]:

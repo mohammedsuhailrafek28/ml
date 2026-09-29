@@ -232,6 +232,7 @@ def main() -> int:
     if report is None:
         print(f"LOAD_SMOKE FAIL category={profile_error or 'startup'} cleanup_ok={cleanup_ok}")
         return 1
+    recovery_confirmed = bool(report.get("recovery", {}).get("confirmed", False))
     print(
         "LOAD_SMOKE " + ("PASS" if profile_error is None and cleanup_ok else "FAIL")
         + f" node={node_version} python={sys.version_info.major}.{sys.version_info.minor}"
@@ -239,7 +240,7 @@ def main() -> int:
         + f" throughput_rps={report['results']['throughput_requests_per_second']}"
         + f" peak_in_flight={report['results']['peak_in_flight']}"
         + f" metrics_verified={report['metrics_verification']['all_diseases_observed']}"
-        + f" readiness_recovered={report['recovery']['confirmed']}"
+        + f" readiness_recovered={recovery_confirmed}"
         + f" cleanup_ok={cleanup_ok}"
     )
     return 0 if profile_error is None and cleanup_ok else 1

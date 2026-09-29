@@ -92,7 +92,7 @@
     },
     "frontend_package_lock": {
       "path": "frontend/package-lock.json",
-      "sha256": "645abe53972fc22e8991a2350001fb60958bbff1200cd6fa4e36a63f250dc469"
+      "sha256": "78f6eca2f5da1f05f0dbdfd84c2974a597a3e834f1e83c45f853779e0872697e"
     },
     "frontend_package_manifest": {
       "path": "frontend/package.json",
@@ -104,11 +104,11 @@
     },
     "load_smoke_runner": {
       "path": "scripts/run_load_smoke.py",
-      "sha256": "3fdb8546b0dad7f64c46a8a2cc1f2e687a161febb21bea632699c955607003cc"
+      "sha256": "f6925445c211ad9ba2876c775ee71f00b435b39d5e9ecdea254830ad7a396638"
     },
     "model_release_manifest": {
       "path": "models/release_manifest.json",
-      "sha256": "ee73e4527419bd7a739eb9dbcd0c2d46fff1d8cd610d0bded9f7d0eed953aeaf"
+      "sha256": "69caeb9dd9ba0d24a2e17eefff4b5bf942a8d75a74407f72464c4711f9036def"
     },
     "python_dependency_lock": {
       "path": "requirements.lock",
@@ -116,7 +116,7 @@
     },
     "release_ci_workflow": {
       "path": ".github/workflows/release-candidate.yml",
-      "sha256": "59ec3754755cf60ba88d1ac5915b7f0f042d4c09f0dc8af1a96c6a206623a26f"
+      "sha256": "b3e34e85b85797bb40beb3a96c8fdb77bce7f87c1a0805a70cf88a310fc6b224"
     },
     "release_provenance_runtime": {
       "path": "src/application_release.py",

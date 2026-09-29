@@ -181,9 +181,18 @@ jobs:
         shell: bash
         run: |
           set +e
-          python scripts/redact_trivy_report.py --input trivy-api.json --output trivy-api.json
+          redact_report() {
+            report="$1"
+            if [ -s "$report" ]; then
+              python scripts/redact_trivy_report.py --input "$report" --output "$report"
+              return $?
+            fi
+            printf '{"report_status":"scanner_not_run_or_no_report","secret_values_included":false}\n' > "$report"
+            return 0
+          }
+          redact_report trivy-api.json
           api_status=$?
-          python scripts/redact_trivy_report.py --input trivy-web.json --output trivy-web.json
+          redact_report trivy-web.json
           web_status=$?
           if [ "$api_status" -ne 0 ] || [ "$web_status" -ne 0 ]; then exit 1; fi
       - name: Enforce scan gates
