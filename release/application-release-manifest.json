@@ -84,7 +84,7 @@
     },
     "frontend_global_styles": {
       "path": "frontend/app/globals.css",
-      "sha256": "c4c5fa57ddaaf0040a0887480e92316014f9c7406b73eaebb9468131ad886254"
+      "sha256": "69eb6fd5e2d6defa3f6eeeba9459c89a1c2c597b90f63cfc7f14d92b39895674"
     },
     "frontend_next_config": {
       "path": "frontend/next.config.mjs",
