@@ -130,7 +130,7 @@ export default function AssessmentWizard({disease}: {disease: Disease}) {
   if (stage === 'processing') return <main className="page assessment-page" aria-busy="true" aria-live="polite">
     <ReleaseBadge status={experimental ? 'experimental' : 'educational/research release'}/>
     <h1 tabIndex={-1} ref={heading}>Preparing your result</h1>
-    <div className="assessment-panel"><p>Validating your entries and running the persisted {prettyName[disease]} model…</p><div className="loading-track" aria-hidden="true"><span/></div></div>
+    <div className="assessment-panel loading-panel"><p>Validating your entries and running the persisted {prettyName[disease]} model…</p><div className="loading-track" aria-hidden="true"><span/></div></div>
   </main>;
 
   if (stage === 'results' && result) return <main className="page assessment-page">
